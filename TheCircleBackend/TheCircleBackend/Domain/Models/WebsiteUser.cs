@@ -1,4 +1,4 @@
-﻿namespace TheCircleBackend.Domain
+﻿namespace TheCircleBackend.Domain.Models
 {
     public class WebsiteUser
     {

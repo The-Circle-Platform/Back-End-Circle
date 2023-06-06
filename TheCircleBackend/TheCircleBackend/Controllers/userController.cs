@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using TheCircleBackend.Domain;
+using TheCircleBackend.Domain.Models;
 
 namespace TheCircleBackend.Controllers
 {
