@@ -15,10 +15,6 @@ builder.Services.AddDbContext<DomainContext>(options =>
     options.UseSqlServer(@"Data Source=.;Initial Catalog=TheCircleDomainDB;Integrated Security=True");
 });
 
-builder.Services.AddCors(options =>
-{
-
-});
 
 
 
@@ -34,6 +30,13 @@ if (app.Environment.IsDevelopment())
 
 
 app.UseHttpsRedirection();
+
+app.UseCors(builder =>
+{
+    builder.AllowAnyOrigin()
+        .AllowAnyHeader()
+        .AllowAnyHeader();
+});
 
 app.UseAuthorization();
 
