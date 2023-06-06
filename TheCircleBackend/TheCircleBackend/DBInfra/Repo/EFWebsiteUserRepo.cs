@@ -3,20 +3,20 @@ using TheCircleBackend.DomainServices.IRepo;
 
 namespace TheCircleBackend.DBInfra.Repo
 {
-    public class EWWebsiteUserRepo : IWebsiteUserRepo
+    public class EFWebsiteUserRepo : IWebsiteUserRepo
     {
-
         private readonly DomainContext context;
-        private readonly IWebsiteUserRepo _websiteUserRepo;
+        //private readonly IWebsiteUserRepo _websiteUserRepo;
 
-        public EWWebsiteUserRepo(IWebsiteUserRepo _websiteUserRepo, DomainContext context)
+        public EFWebsiteUserRepo(DomainContext context)
         {
-            this._websiteUserRepo = _websiteUserRepo;
+            //this._websiteUserRepo = _websiteUserRepo;
             this.context = context;
         }
         public void Add(WebsiteUser user)
         {
-            throw new NotImplementedException();
+            context.WebsiteUser.Add(user);
+            context.SaveChanges();
         }
 
         public IEnumerable<WebsiteUser> GetAllWebsiteUsers()
@@ -28,10 +28,17 @@ namespace TheCircleBackend.DBInfra.Repo
         {
             return context.WebsiteUser.Where(u => u.Id == id).FirstOrDefault();
         }
-
         public void Update(WebsiteUser user)
         {
-            throw new NotImplementedException();
+            var result = context.WebsiteUser.Where(u => u.Id == user.Id).FirstOrDefault();
+
+            if (result != null)
+            {
+                result.IsOnline = user.IsOnline;
+                result.UserName = user.UserName;
+                context.SaveChanges();
+            }
         }
+
     }
 }
