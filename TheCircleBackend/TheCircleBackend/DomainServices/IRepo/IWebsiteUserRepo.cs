@@ -7,6 +7,6 @@ namespace TheCircleBackend.DomainServices.IRepo
         public void Add(WebsiteUser user);
         public IEnumerable<WebsiteUser> GetAllWebsiteUsers();
         public WebsiteUser GetById(int id);
-        public void Update(WebsiteUser user);
+        public void Update(WebsiteUser user, int userId);
     }
 }

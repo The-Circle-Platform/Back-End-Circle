@@ -12,6 +12,8 @@ namespace TheCircleBackend.DBInfra
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<WebsiteUser>().HasKey(wu => wu.Id);
+            //modelBuilder.Entity<WebsiteUser>().HasAlternateKey(wu => wu.UserName);
+            modelBuilder.Entity<WebsiteUser>().HasIndex(u => u.UserName).IsUnique();
         }
     }
 }

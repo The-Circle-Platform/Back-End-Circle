@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Net;
 using TheCircleBackend.Domain.Models;
 using TheCircleBackend.DomainServices.IRepo;
 
@@ -20,32 +20,56 @@ namespace TheCircleBackend.Controllers
         [HttpGet]
         public IEnumerable<WebsiteUser> Get()
         {
-            //List<WebsiteUser> users = new List<WebsiteUser>();
-
-            //WebsiteUser user1 = new WebsiteUser();
-            //user1.Id = 0;
-            //user1.IsOnline = true;
-            //user1.UserName = "Henk";
-
-            //WebsiteUser user2 = new WebsiteUser();
-            //user2.Id = 1;
-            //user2.IsOnline = false;
-            //user2.UserName = "Ingrid";
-
-            //WebsiteUser user3 = new WebsiteUser();
-            //user3.Id = 2;
-            //user3.IsOnline = true;
-            //user3.UserName = "@realDonaldTrump";
-
-            //users.Add(user1);
-            //users.Add(user2);
-            //users.Add(user3);
-            //return users;
 
             return websiteUserRepo.GetAllWebsiteUsers();
 
+        }
 
+        [HttpGet("{id}")]
+        public IActionResult get(int id)
+        {
+            Console.Write("fuck this shit");
+            Console.WriteLine(id);
+            var user = websiteUserRepo.GetById(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
 
+            return Ok(user);
+
+        }
+
+        [HttpPost]
+        public IActionResult post(WebsiteUser user)
+        {
+            Console.WriteLine(user);
+            try
+            {
+                this.websiteUserRepo.Add(user);
+                return Ok("user added");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return BadRequest(e);
+            }
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult put(WebsiteUser user, int id)
+        {
+            Console.WriteLine(id);
+            try
+            {
+                websiteUserRepo.Update(user, id);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return BadRequest(e);
+            }
         }
     }
 }
