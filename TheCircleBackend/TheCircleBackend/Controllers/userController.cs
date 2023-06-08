@@ -2,6 +2,8 @@
 using System.Net;
 using TheCircleBackend.Domain.Models;
 using TheCircleBackend.DomainServices.IRepo;
+using Microsoft.Extensions.Logging;
+using TheCircleBackend.Helper;
 
 namespace TheCircleBackend.Controllers
 {
@@ -11,16 +13,20 @@ namespace TheCircleBackend.Controllers
     {
 
         private readonly IWebsiteUserRepo websiteUserRepo;
+        private readonly ILogItemRepo logItemRepo;
+        private readonly LogHelper logHelper;
 
-        public userController(IWebsiteUserRepo websiteUserRepo)
+        public userController(IWebsiteUserRepo websiteUserRepo, ILogItemRepo logItemRepo, ILogger<userController> logger)
         {
             this.websiteUserRepo = websiteUserRepo;
+            this.logItemRepo = logItemRepo;
+            this.logHelper = new LogHelper(logItemRepo, logger, "UserController");
+
         }
 
         [HttpGet]
         public IEnumerable<WebsiteUser> Get()
         {
-
             return websiteUserRepo.GetAllWebsiteUsers();
 
         }
@@ -43,6 +49,7 @@ namespace TheCircleBackend.Controllers
         [HttpPost]
         public IActionResult post(WebsiteUser user)
         {
+            logHelper.UserLog(Request.HttpContext.Connection.RemoteIpAddress.ToString(), "User " + 1 + " POST WebsiteUser with ID: " + user.Id + ", Name: " + user.UserName);
             Console.WriteLine(user);
             try
             {
@@ -59,6 +66,7 @@ namespace TheCircleBackend.Controllers
         [HttpPut("{id}")]
         public IActionResult put(WebsiteUser user, int id)
         {
+            logHelper.UserLog(Request.HttpContext.Connection.RemoteIpAddress.ToString(), "User " + 1 + " PUT WebsiteUser with ID: " + user.Id + ", Name: " + user.UserName);
             Console.WriteLine(id);
             try
             {
