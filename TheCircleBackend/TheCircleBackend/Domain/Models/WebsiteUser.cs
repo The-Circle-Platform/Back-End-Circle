@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace TheCircleBackend.Domain.Models
 {
@@ -8,5 +9,8 @@ namespace TheCircleBackend.Domain.Models
         [Required]
         public string UserName { get; set; }
         public bool IsOnline { get; set; } = false;
+
+        [JsonIgnore]
+        public List<ChatMessage> UserChatMessages { get; set; }
     }
 }
