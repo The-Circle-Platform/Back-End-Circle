@@ -13,13 +13,16 @@ builder.Services.AddDbContext<DomainContext>(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddScoped<IWebsiteUserRepo, EFWebsiteUserRepo>();
+builder.Services.AddScoped<ILogItemRepo, EFLogItemRepo>();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
+builder.Services.AddLogging(loggingBuilder => {
+    loggingBuilder.AddFile("thecircle.log", append: true);
+});
 
 
 

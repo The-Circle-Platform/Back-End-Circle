@@ -6,12 +6,15 @@ namespace TheCircleBackend.DBInfra.Repo
     public class EFWebsiteUserRepo : IWebsiteUserRepo
     {
         private readonly DomainContext context;
+        private readonly ILogger<EFWebsiteUserRepo> logger;
+
         //private readonly IWebsiteUserRepo _websiteUserRepo;
 
-        public EFWebsiteUserRepo(DomainContext context)
+        public EFWebsiteUserRepo(DomainContext context, ILogger<EFWebsiteUserRepo> logger)
         {
             //this._websiteUserRepo = _websiteUserRepo;
             this.context = context;
+            this.logger = logger;
         }
         public void Add(WebsiteUser user)
         {
@@ -26,6 +29,7 @@ namespace TheCircleBackend.DBInfra.Repo
 
         public WebsiteUser GetById(int id)
         {
+            this.logger.LogInformation("Get user with id {0}", id);
             return context.WebsiteUser.Where(u => u.Id == id).FirstOrDefault();
         }
         public void Update(WebsiteUser user, int userId)
