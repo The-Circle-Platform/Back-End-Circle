@@ -1,26 +1,27 @@
 {
   "format": 1,
   "restore": {
-    "C:\\dev\\Jaar2\\Periode4\\TheCircle\\Back-End-Circle\\TheCircleBackend\\TheCircleBackend\\TheCircleBackend.csproj": {}
+    "C:\\Users\\Junhao\\Desktop\\Project The Circle\\The Circle Project\\Back-End-Circle\\TheCircleBackend\\TheCircleBackend\\TheCircleBackend.csproj": {}
   },
   "projects": {
-    "C:\\dev\\Jaar2\\Periode4\\TheCircle\\Back-End-Circle\\TheCircleBackend\\TheCircleBackend\\TheCircleBackend.csproj": {
+    "C:\\Users\\Junhao\\Desktop\\Project The Circle\\The Circle Project\\Back-End-Circle\\TheCircleBackend\\TheCircleBackend\\TheCircleBackend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\dev\\Jaar2\\Periode4\\TheCircle\\Back-End-Circle\\TheCircleBackend\\TheCircleBackend\\TheCircleBackend.csproj",
+        "projectUniqueName": "C:\\Users\\Junhao\\Desktop\\Project The Circle\\The Circle Project\\Back-End-Circle\\TheCircleBackend\\TheCircleBackend\\TheCircleBackend.csproj",
         "projectName": "TheCircleBackend",
-        "projectPath": "C:\\dev\\Jaar2\\Periode4\\TheCircle\\Back-End-Circle\\TheCircleBackend\\TheCircleBackend\\TheCircleBackend.csproj",
-        "packagesPath": "C:\\Users\\bende\\.nuget\\packages\\",
-        "outputPath": "C:\\dev\\Jaar2\\Periode4\\TheCircle\\Back-End-Circle\\TheCircleBackend\\TheCircleBackend\\obj\\",
+        "projectPath": "C:\\Users\\Junhao\\Desktop\\Project The Circle\\The Circle Project\\Back-End-Circle\\TheCircleBackend\\TheCircleBackend\\TheCircleBackend.csproj",
+        "packagesPath": "C:\\Users\\Junhao\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Junhao\\Desktop\\Project The Circle\\The Circle Project\\Back-End-Circle\\TheCircleBackend\\TheCircleBackend\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\bende\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Junhao\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net6.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -83,7 +84,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.203\\RuntimeIdentifierGraph.json"
         }
       }
     }
