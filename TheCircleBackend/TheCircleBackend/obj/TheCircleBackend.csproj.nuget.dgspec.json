@@ -1,6 +1,7 @@
 {
   "format": 1,
   "restore": {
+<<<<<<< HEAD
     "C:\\Users\\Junhao\\Desktop\\Project The Circle\\The Circle Project\\Back-End-Circle\\TheCircleBackend\\TheCircleBackend\\TheCircleBackend.csproj": {}
   },
   "projects": {
@@ -12,10 +13,34 @@
         "projectPath": "C:\\Users\\Junhao\\Desktop\\Project The Circle\\The Circle Project\\Back-End-Circle\\TheCircleBackend\\TheCircleBackend\\TheCircleBackend.csproj",
         "packagesPath": "C:\\Users\\Junhao\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\Junhao\\Desktop\\Project The Circle\\The Circle Project\\Back-End-Circle\\TheCircleBackend\\TheCircleBackend\\obj\\",
+=======
+    "D:\\School\\Avans\\Jaar 2.4\\Blok 4\\Project The Circle\\Code\\Back-End\\TheCircleBackend\\TheCircleBackend\\TheCircleBackend.csproj": {}
+  },
+  "projects": {
+    "D:\\School\\Avans\\Jaar 2.4\\Blok 4\\Project The Circle\\Code\\Back-End\\TheCircleBackend\\TheCircleBackend\\TheCircleBackend.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\School\\Avans\\Jaar 2.4\\Blok 4\\Project The Circle\\Code\\Back-End\\TheCircleBackend\\TheCircleBackend\\TheCircleBackend.csproj",
+        "projectName": "TheCircleBackend",
+        "projectPath": "D:\\School\\Avans\\Jaar 2.4\\Blok 4\\Project The Circle\\Code\\Back-End\\TheCircleBackend\\TheCircleBackend\\TheCircleBackend.csproj",
+        "packagesPath": "C:\\Users\\jayso\\.nuget\\packages\\",
+        "outputPath": "D:\\School\\Avans\\Jaar 2.4\\Blok 4\\Project The Circle\\Code\\Back-End\\TheCircleBackend\\TheCircleBackend\\obj\\",
+>>>>>>> logging
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "D:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
+          "C:\\Program Files (x86)\\Microsoft\\Xamarin\\NuGet\\"
+        ],
         "configFilePaths": [
+<<<<<<< HEAD
           "C:\\Users\\Junhao\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+=======
+          "C:\\Users\\jayso\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+>>>>>>> logging
         ],
         "originalTargetFrameworks": [
           "net6.0"
@@ -59,6 +84,10 @@
               "suppressParent": "All",
               "target": "Package",
               "version": "[7.0.5, )"
+            },
+            "NReco.Logging.File": {
+              "target": "Package",
+              "version": "[1.1.6, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
