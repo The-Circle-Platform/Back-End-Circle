@@ -15,13 +15,13 @@ namespace TheCircleBackend.Hubs
         }
 
 
-        public async Task RetrieveCurrentChat(int streamId)
+        public async Task RetrieveCurrentChat(int receiverUserId)
         {
             //Retrieve current chat list
-            List<ChatMessage> list = messageRepository.GetStreamChat(streamId);
+            List<ChatMessage> list = messageRepository.GetStreamChat(receiverUserId);
 
             //Send back to client.
-            await Clients.All.SendAsync("ReceiveChat", list);
+            await Clients.All.SendAsync($"ReceiveChat-{receiverUserId}", list);
         }
 
         public async Task SendMessage(ChatMessage incomingChatMessage)
@@ -39,7 +39,7 @@ namespace TheCircleBackend.Hubs
             
             Console.WriteLine("Nieuwe lijst");
             // Send new data to client. HIER MOET NOG EEN METHODE KOMEN.
-            await Clients.All.SendAsync("ReceiveChat", updatedList);
+            await Clients.All.SendAsync($"ReceiveChat-{incomingChatMessage.ReceiverId}", updatedList);
         }
 
         public override Task OnConnectedAsync()
