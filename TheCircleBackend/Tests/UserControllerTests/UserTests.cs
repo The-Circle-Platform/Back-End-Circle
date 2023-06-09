@@ -148,9 +148,15 @@ namespace Tests.UserControllerTests
             };
             domainContext.Add(testUser);
             domainContext.SaveChanges();
-            testUser.UserName = "ingrid";
+
+            var updatedUser = new WebsiteUser()
+            {
+                Id = 1,
+                IsOnline = true,
+                UserName = "ingrid"
+            };
             //act
-            sut.Update(testUser, 1);
+            sut.Update(updatedUser, 1);
 
             //assert
             var assertResult = domainContext.WebsiteUser.Where(u => u.Id == 1).First();
