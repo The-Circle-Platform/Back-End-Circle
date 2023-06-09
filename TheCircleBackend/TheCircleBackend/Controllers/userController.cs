@@ -34,7 +34,6 @@ namespace TheCircleBackend.Controllers
         [HttpGet("{id}")]
         public IActionResult get(int id)
         {
-            Console.Write("fuck this shit");
             Console.WriteLine(id);
             var user = websiteUserRepo.GetById(id);
             if (user == null)
