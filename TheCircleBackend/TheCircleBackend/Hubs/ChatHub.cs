@@ -26,13 +26,14 @@ namespace TheCircleBackend.Hubs
 
         public async Task SendMessage(ChatMessage incomingChatMessage)
         {
-  
+
+            Console.WriteLine(Context.ConnectionId);
             // Decrypt message, HIER MOET NOG EEN METHODE KOMEN.
 
             // Persisteer in database. Tabel chats (StreamId, UserId, DatumTijd en Content)
             messageRepository.Create(incomingChatMessage);
             // Lees geupdate versie
-            var updatedList = messageRepository.GetStreamChat(incomingChatMessage.StreamId);
+            var updatedList = messageRepository.GetStreamChat(incomingChatMessage.ReceiverId);
             
             // Encrypt the message
             
@@ -41,5 +42,18 @@ namespace TheCircleBackend.Hubs
             await Clients.All.SendAsync("ReceiveChat", updatedList);
         }
 
+        public override Task OnConnectedAsync()
+        {
+            string connectionId = Context.ConnectionId;
+            Console.WriteLine(connectionId);
+            return base.OnConnectedAsync();
+        }
+
+        public override Task OnDisconnectedAsync(Exception? exception)
+        {
+            Console.WriteLine("Connectie verbroken!");
+            Console.WriteLine(Context.ConnectionId);
+            return base.OnDisconnectedAsync(exception);
+        }
     }
 }

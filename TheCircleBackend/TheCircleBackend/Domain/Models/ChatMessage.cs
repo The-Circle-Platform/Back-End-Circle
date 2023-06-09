@@ -1,10 +1,11 @@
-﻿using TheCircleBackend.Domain.Interfaces;
+﻿using System.Text.Json.Serialization;
+using TheCircleBackend.Domain.Interfaces;
 
 namespace TheCircleBackend.Domain.Models
 {
     public class ChatMessage: IDomain
     {
-        public String Message { get; set; }
+        public string? Message { get; set; }
         public DateTime? Date 
         { 
             get { 
@@ -25,10 +26,11 @@ namespace TheCircleBackend.Domain.Models
         
         //Foreign key relations
         public int WebUserId { get; set; }
-        public int StreamId { get; set; }
+        public int ReceiverId { get; set; }
+        
+        public WebsiteUser? Writer { get; set; }
 
-        public WebsiteUser Writer { get; set; }
-        public Stream LiveStream { get; set; }
+        public WebsiteUser? ReceiverUser { get; set; }
 
         //Private properties, Date cannot be removed
         private DateTime? _Date { get; set; }

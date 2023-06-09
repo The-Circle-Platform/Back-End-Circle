@@ -34,10 +34,9 @@ namespace TheCircleBackend.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Message")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("StreamId")
+                    b.Property<int>("ReceiverId")
                         .HasColumnType("int");
 
                     b.Property<int>("WebUserId")
@@ -45,26 +44,11 @@ namespace TheCircleBackend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StreamId");
+                    b.HasIndex("ReceiverId");
+
+                    b.HasIndex("WebUserId");
 
                     b.ToTable("ChatMessage");
-                });
-
-            modelBuilder.Entity("TheCircleBackend.Domain.Models.Stream", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Stream");
                 });
 
             modelBuilder.Entity("TheCircleBackend.Domain.Models.LogItem", b =>
@@ -95,6 +79,43 @@ namespace TheCircleBackend.Migrations
                     b.ToTable("LogItem");
                 });
 
+            modelBuilder.Entity("TheCircleBackend.Domain.Models.Stream", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Stream");
+                });
+
+            modelBuilder.Entity("TheCircleBackend.Domain.Models.Viewer", b =>
+                {
+                    b.Property<string>("ConnectionId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("StreamId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ConnectionId");
+
+                    b.HasIndex("StreamId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Viewer");
+                });
+
             modelBuilder.Entity("TheCircleBackend.Domain.Models.WebsiteUser", b =>
                 {
                     b.Property<int>("Id")
@@ -120,30 +141,53 @@ namespace TheCircleBackend.Migrations
 
             modelBuilder.Entity("TheCircleBackend.Domain.Models.ChatMessage", b =>
                 {
-                    b.HasOne("TheCircleBackend.Domain.Models.Stream", "LiveStream")
+                    b.HasOne("TheCircleBackend.Domain.Models.WebsiteUser", "ReceiverUser")
                         .WithMany("StreamChatMessages")
-                        .HasForeignKey("StreamId")
+                        .HasForeignKey("ReceiverId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("TheCircleBackend.Domain.Models.WebsiteUser", "Writer")
                         .WithMany("UserChatMessages")
-                        .HasForeignKey("StreamId")
+                        .HasForeignKey("WebUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("LiveStream");
+                    b.Navigation("ReceiverUser");
 
                     b.Navigation("Writer");
                 });
 
+            modelBuilder.Entity("TheCircleBackend.Domain.Models.Viewer", b =>
+                {
+                    b.HasOne("TheCircleBackend.Domain.Models.Stream", "Stream")
+                        .WithMany("ViewList")
+                        .HasForeignKey("StreamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TheCircleBackend.Domain.Models.WebsiteUser", "WebsiteUser")
+                        .WithMany("CurrentWatchList")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Stream");
+
+                    b.Navigation("WebsiteUser");
+                });
+
             modelBuilder.Entity("TheCircleBackend.Domain.Models.Stream", b =>
                 {
-                    b.Navigation("StreamChatMessages");
+                    b.Navigation("ViewList");
                 });
 
             modelBuilder.Entity("TheCircleBackend.Domain.Models.WebsiteUser", b =>
                 {
+                    b.Navigation("CurrentWatchList");
+
+                    b.Navigation("StreamChatMessages");
+
                     b.Navigation("UserChatMessages");
                 });
 #pragma warning restore 612, 618
