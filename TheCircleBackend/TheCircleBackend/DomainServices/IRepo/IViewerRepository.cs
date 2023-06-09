@@ -7,6 +7,7 @@ namespace TheCircleBackend.DomainServices.IRepo
     {
 
         public int GetCurrentViewerCount(int userId);
+        public Viewer? GetStreamOfViewers(string connectionId);
         public int RemoveViewer(string connectionId);
         public int GetViewershipCount(int streamId);
     }

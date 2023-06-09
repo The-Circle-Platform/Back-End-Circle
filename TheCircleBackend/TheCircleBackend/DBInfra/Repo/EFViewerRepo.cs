@@ -48,6 +48,17 @@ namespace TheCircleBackend.DBInfra.Repo
             throw new NotImplementedException();
         }
 
+        public Viewer? GetStreamOfViewers(string connectionId)
+        {
+            try
+            {
+                return domainContext.Viewer.FirstOrDefault(v => v.ConnectionId.Equals(connectionId));
+            } catch
+            {
+                return null;
+            }
+        }
+
         public int GetViewershipCount(int streamId)
         {
             return domainContext.Viewer.Where(s => s.StreamId.Equals(streamId)).Count();

@@ -77,5 +77,7 @@ app.UseCors(builder =>
 app.UseAuthorization();
 
 app.MapControllers();
+
 app.MapHub<ChatHub>("/hubs/ChatHub");
+app.MapHub<ViewerHub>("/hubs/ViewHub");
 app.Run();
