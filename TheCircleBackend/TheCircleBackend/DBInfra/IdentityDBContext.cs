@@ -6,11 +6,16 @@ using TheCircleBackend.Domain.AuthModels;
 
 namespace TheCircleBackend.DBInfra
 {
-    public class IdentityDBContext : IdentityDbContext<AuthUser>
+    public class IdentityDBContext : IdentityDbContext<IdentityUser>
     {
         public IdentityDBContext(DbContextOptions<IdentityDBContext> options) : base(options)
         {
 
+        }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
         }
     }
 }
