@@ -56,13 +56,13 @@ namespace TheCircleBackend.DBInfra.Repo
             }
         }
 
-        public List<ChatMessage> GetStreamChat(int streamId)
+        public List<ChatMessage> GetStreamChat(int transId)
         {
             try
             {
                 return context.ChatMessage
-                    .Include(wu => wu.Writer.UserName)
-                    .Where(stream => stream.StreamId == streamId)
+                    .Include(wu => wu.Writer)
+                    .Where(transUser => transUser.ReceiverId == transId)
                     .OrderBy(ch => ch.Date)
                     .ToList();
             }

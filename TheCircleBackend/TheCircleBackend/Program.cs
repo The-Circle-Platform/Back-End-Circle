@@ -63,17 +63,22 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddScoped<IWebsiteUserRepo, EFWebsiteUserRepo>();
-builder.Services.AddScoped<ILogItemRepo, EFLogItemRepo>();
 builder.Services.AddScoped<IChatMessageRepository, EFChatMessageRepo>();
+builder.Services.AddScoped<ILogItemRepo, EFLogItemRepo>();
+builder.Services.AddScoped<IViewerRepository, EFViewerRepo>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 
+
 builder.Services.AddLogging(loggingBuilder => {
     loggingBuilder.AddFile("thecircle.log", append: true);
 });
+
+
+
 
 var app = builder.Build();
 
@@ -121,5 +126,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
 app.MapHub<ChatHub>("/hubs/ChatHub");
+app.MapHub<ViewerHub>("/hubs/ViewHub");
 app.Run();

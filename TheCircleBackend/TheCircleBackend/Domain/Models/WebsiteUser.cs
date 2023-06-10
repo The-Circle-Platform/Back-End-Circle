@@ -12,6 +12,12 @@ namespace TheCircleBackend.Domain.Models
 
         [JsonIgnore]
         public List<ChatMessage>? UserChatMessages { get; set; }
+        
+        [JsonIgnore]
+        public List<ChatMessage>? StreamChatMessages { get; set; }
+
+        [JsonIgnore]
+        public List<Viewer>? CurrentWatchList { get; set; }
 
         
     }
