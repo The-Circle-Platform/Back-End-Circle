@@ -11,6 +11,8 @@ namespace TheCircleBackend.Domain.Models
         public bool IsOnline { get; set; } = false;
 
         [JsonIgnore]
-        public List<ChatMessage> UserChatMessages { get; set; }
+        public List<ChatMessage>? UserChatMessages { get; set; }
+
+        
     }
 }

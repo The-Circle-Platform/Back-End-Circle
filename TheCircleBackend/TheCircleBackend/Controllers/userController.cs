@@ -48,7 +48,8 @@ namespace TheCircleBackend.Controllers
         [HttpPost]
         public IActionResult post(WebsiteUser user)
         {
-            logHelper.UserLog(Request.HttpContext.Connection.RemoteIpAddress.ToString(), "User " + 1 + " POST WebsiteUser with ID: " + user.Id + ", Name: " + user.UserName);
+            Console.WriteLine(this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString());
+            logHelper.UserLog(this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString(), "User " + 1 + " POST WebsiteUser with ID: " + user.Id + ", Name: " + user.UserName);
             Console.WriteLine(user);
             try
             {
