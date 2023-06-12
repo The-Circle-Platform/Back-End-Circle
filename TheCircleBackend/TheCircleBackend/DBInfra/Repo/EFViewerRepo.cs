@@ -45,7 +45,8 @@ namespace TheCircleBackend.DBInfra.Repo
 
         public int GetCurrentViewerCount(int userId)
         {
-            throw new NotImplementedException();
+            //TODO: IMPLEMENT METHOD
+            return 1;
         }
 
         public Viewer? GetStreamOfViewers(string connectionId)
