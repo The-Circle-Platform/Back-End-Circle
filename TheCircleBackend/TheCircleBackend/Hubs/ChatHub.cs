@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using TheCircleBackend.Domain.Models;
 using TheCircleBackend.DomainServices.IRepo;
+using TheCircleBackend.Helper;
 
 namespace TheCircleBackend.Hubs
 {
@@ -8,10 +9,13 @@ namespace TheCircleBackend.Hubs
     {
         
         private readonly IChatMessageRepository messageRepository;
+        private readonly ILogItemRepo logItemRepo;
+        private readonly LogHelper logHelper;
 
-        public ChatHub(IChatMessageRepository messageRepository)
+        public ChatHub(IChatMessageRepository messageRepository, ILogItemRepo logItemRepo, ILogger<ChatHub> logger)
         {
             this.messageRepository = messageRepository;
+            this.logHelper = new LogHelper(logItemRepo, logger, "ChatHub");
         }
 
 
@@ -46,6 +50,7 @@ namespace TheCircleBackend.Hubs
         {
             string connectionId = Context.ConnectionId;
             Console.WriteLine(connectionId);
+            //Console.WriteLine(Context.);
             return base.OnConnectedAsync();
         }
 
