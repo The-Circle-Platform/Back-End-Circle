@@ -8,12 +8,6 @@ namespace TheCircleBackend.Helper
 {
     public class SecurityHelper : ISecurityHelper
     {
-        private RSACryptoServiceProvider rsaService { get; set; }
-
-        public SecurityHelper()
-        {
-            this.rsaService = new RSACryptoServiceProvider();
-        }
 
         public object ConvertFromByteArray(byte[] byteArray, Type targetType)
         {
@@ -39,9 +33,60 @@ namespace TheCircleBackend.Helper
 
         public (RSAParameters privateKey, RSAParameters publicKey) GenerateKeyPairs()
         {
+            var rsaService = new RSACryptoServiceProvider();
+
             return (rsaService.ExportParameters(true), rsaService.ExportParameters(false));
         }
 
+        // Generates keypair.
+        public (string privateKeyString, string publicKeyString) GetKeyString()
+        {
+            // Generates key pair in RSAParameter form.
+            var GeneratedKeys = GenerateKeyPairs();
+
+            // Returns keys.
+            return GetKeyString(GeneratedKeys.privateKey, GeneratedKeys.publicKey);
+        }
+
+        
+        public byte[]? SignData(byte[] DataToSign, RSAParameters Key)
+        {
+            try
+            {
+                RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+
+                rsa.ImportParameters(Key);
+
+                // Internally creates a hash of the original message and creates signature based on it, encrypted with private key.
+                return rsa.SignData(DataToSign, SHA256.Create());
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public bool VerifySignedData(byte[] DataToVerify, RSAParameters Key, byte[] SignedData)
+        {
+            try
+            {
+                // Create a new instance of RSACryptoServiceProvider using the
+                // key from RSAParameters.
+                RSACryptoServiceProvider RSAalg = new RSACryptoServiceProvider();
+
+                RSAalg.ImportParameters(Key);
+
+                // Verify the data using the signature.  Pass a new instance of SHA256
+                // to specify the hashing algorithm.
+                return RSAalg.VerifyData(DataToVerify, SHA256.Create(), SignedData);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        // OVerloaded-method: Keys are already in RSAParameter format.
         public (string privateKeyString, string publicKeyString) GetKeyString(RSAParameters ExternalPrivateKey, RSAParameters ExternalPublicKey)
         {
             var sw = new StringWriter();
@@ -60,22 +105,7 @@ namespace TheCircleBackend.Helper
             return (privateKey, publicKey);
         }
 
-        public byte[]? SignData(byte[] DataToSign, RSAParameters Key)
-        {
-            try
-            {
-                RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
-
-                rsa.ImportParameters(Key);
-
-                return rsa.SignData(DataToSign, SHA256.Create());
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
+        /*
         public byte[]? SignHash(byte[] encrypted, RSAParameters Key)
         {
             RSACryptoServiceProvider rsaCSP = new RSACryptoServiceProvider();
@@ -100,25 +130,6 @@ namespace TheCircleBackend.Helper
             hashedData = hash.ComputeHash(signedData);
             return rsaCSP.VerifyHash(hashedData, CryptoConfig.MapNameToOID("SHA1"), signature);
         }
-
-        public bool VerifySignedData(byte[] DataToVerify, RSAParameters Key, byte[] SignedData)
-        {
-            try
-            {
-                // Create a new instance of RSACryptoServiceProvider using the
-                // key from RSAParameters.
-                RSACryptoServiceProvider RSAalg = new RSACryptoServiceProvider();
-
-                RSAalg.ImportParameters(Key);
-
-                // Verify the data using the signature.  Pass a new instance of SHA256
-                // to specify the hashing algorithm.
-                return RSAalg.VerifyData(DataToVerify, SHA256.Create(), SignedData);
-            }
-            catch
-            {
-                return false;
-            }
-        }
+        */
     }
 }

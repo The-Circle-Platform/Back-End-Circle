@@ -68,7 +68,7 @@ builder.Services.AddScoped<IChatMessageRepository, EFChatMessageRepo>();
 builder.Services.AddScoped<ILogItemRepo, EFLogItemRepo>();
 builder.Services.AddScoped<IViewerRepository, EFViewerRepo>();
 builder.Services.AddScoped<ISecurityHelper, SecurityHelper>();
-builder.Services.AddScoped<ISecurity, Security>();
+builder.Services.AddScoped<ISecurityService, SecurityService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

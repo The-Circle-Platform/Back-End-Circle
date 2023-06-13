@@ -1,21 +1,24 @@
-﻿using TheCircleBackend.Domain.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using TheCircleBackend.Domain.Interfaces;
+using TheCircleBackend.Domain.Models;
 
 namespace TheCircleBackend.Domain.DTO
 {
     public abstract class IChatDTO {
         public int UserId { get; set; }
         public int ReceiverId { get; set; }
-        public byte[] Signature { get; set; }
     }
 
-    public class ChatMessageDTOIncomming: IChatDTO
+    public class ChatMessageDTOIncoming: IChatDTO
     {
-        public ChatMessage Messages { get; set; }
+        public ChatMessage? Message { get; set; }
     }
 
     public class ChatMessageDTOOutcoming : IChatDTO
     {
-        public ChatMessage[] Messages { get; set; }
-        public string? ServerPublicKey { get; set; }
+        public List<ChatMessage>? Messages { get; set; }
     }
+
+
+    
 }

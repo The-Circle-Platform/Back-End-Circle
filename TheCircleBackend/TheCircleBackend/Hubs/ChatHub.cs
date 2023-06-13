@@ -10,9 +10,9 @@ namespace TheCircleBackend.Hubs
     {
         
         private readonly IChatMessageRepository messageRepository;
-        private readonly ISecurity security;
+        private readonly ISecurityService security;
 
-        public ChatHub(IChatMessageRepository messageRepository, ISecurity security)
+        public ChatHub(IChatMessageRepository messageRepository, ISecurityService security)
         {
             this.messageRepository = messageRepository;
             this.security = security;
@@ -24,16 +24,34 @@ namespace TheCircleBackend.Hubs
             //Retrieve current chat list
             List<ChatMessage> list = messageRepository.GetStreamChat(receiverUserId);
 
+            // Generate server keypair
+            var ServerKeyPair = security.GenerateKeys();
+
+            // Creates hash and creates signature, based on this hash.
+            var signedData = security.EncryptData(list, ServerKeyPair.privKey);
+
+            // Creates DTO to send to client.
+            var ChatMessageDTO = new OutComingChatContent()
+            {
+                OriginalContent = new ChatMessageDTOOutcoming()
+                {
+                    ReceiverId = receiverUserId,
+                    Messages = list
+                },
+                ServerPublicKey = ServerKeyPair.pubKey,
+                Signature = signedData
+            };
+
             //Send back to client.
-            await Clients.All.SendAsync($"ReceiveChat-{receiverUserId}", list);
+            await Clients.All.SendAsync($"ReceiveChat-{receiverUserId}", ChatMessageDTO);
         }
 
-        public async Task SendMessage(ChatMessageDTOIncomming incomingChatMessage)
+        public async Task SendMessage(IncomingChatContent incomingChatMessage)
         {
+            // RetrieveUserKeys
+            var publicKeyUser = security.GetUserKeys(incomingChatMessage.SenderUserId).pubKey;
 
-            Console.WriteLine(Context.ConnectionId);
-            // Decrypt message, HIER MOET NOG EEN METHODE KOMEN.
-            string publicKeyUser = "";
+            // Checks if integrity is held.
             bool HeldIntegrity = security.HoldsIntegrity(incomingChatMessage, incomingChatMessage.Signature, publicKeyUser);
 
             if (HeldIntegrity)
@@ -43,35 +61,39 @@ namespace TheCircleBackend.Hubs
             else
             {
                 // Persisteer in database. Tabel chats (StreamId, UserId, DatumTijd en Content)
-                ChatMessage chatMessage = incomingChatMessage.Messages;
+
+                ChatMessage chatMessage = incomingChatMessage.OriginalContent.Message;
+
+                //Inserts chat message
                 messageRepository.Create(chatMessage);
+
                 // Lees geupdate versie
-                var updatedList = messageRepository.GetStreamChat(incomingChatMessage.ReceiverId);
+                var updatedList = messageRepository.GetStreamChat(incomingChatMessage.OriginalContent.ReceiverId);
 
-                // Encrypt the message
+                // Generate server keypair
+                var ServerKeyPair = security.GenerateKeys();
 
-                // New signature
-                var newSignature = security.CreateSignature();
+                // Creates hash and creates signature, based on this hash.
+                var signedData = security.EncryptData(updatedList, ServerKeyPair.privKey);
 
-                Console.WriteLine("Nieuwe lijst");
-                // Send new data to client. HIER MOET NOG EEN METHODE KOMEN.
-                await Clients.All.SendAsync($"ReceiveChat-{incomingChatMessage.ReceiverId}", updatedList);
+                // Creates DTO to send to client.
+                var OutcomingMessage = new OutComingChatContent()
+                {
+                    ServerPublicKey = ServerKeyPair.pubKey,
+                    Signature = signedData,
+                    OriginalContent = new ChatMessageDTOOutcoming()
+                    {
+                        ReceiverId = incomingChatMessage.OriginalContent.ReceiverId,
+                        UserId = incomingChatMessage.OriginalContent.UserId,
+                        Messages = updatedList,
+                    },
+                    SenderUserId = incomingChatMessage.SenderUserId
+                };
+
+                // Send new data to client.
+                await Clients.All.SendAsync($"ReceiveChat-{incomingChatMessage.OriginalContent.ReceiverId}", OutcomingMessage);
             }
             
-        }
-
-        public override Task OnConnectedAsync()
-        {
-            string connectionId = Context.ConnectionId;
-            Console.WriteLine(connectionId);
-            return base.OnConnectedAsync();
-        }
-
-        public override Task OnDisconnectedAsync(Exception? exception)
-        {
-            Console.WriteLine("Connectie verbroken!");
-            Console.WriteLine(Context.ConnectionId);
-            return base.OnDisconnectedAsync(exception);
         }
     }
 }
