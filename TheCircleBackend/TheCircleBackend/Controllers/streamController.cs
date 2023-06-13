@@ -11,13 +11,13 @@ namespace TheCircleBackend.Controllers
     [ApiController]
     public class streamController : ControllerBase
     {
-        private readonly IWebsiteUserRepo websiteUserRepo;
+        private readonly IStreamRepository streamRepository;
         private readonly ILogItemRepo logItemRepo;
         private readonly LogHelper logHelper;
 
-        public streamController(IWebsiteUserRepo websiteUserRepo, ILogItemRepo logItemRepo, ILogger<streamController> logger)
+        public streamController(IStreamRepository streamRepository, ILogItemRepo logItemRepo, ILogger<streamController> logger)
         {
-            this.websiteUserRepo = websiteUserRepo;
+            this.streamRepository = streamRepository;
             this.logItemRepo = logItemRepo;
             this.logHelper = new LogHelper(logItemRepo, logger, "streamController");
 

@@ -7,6 +7,5 @@ namespace TheCircleBackend.DomainServices.IRepo
     public interface IStreamRepository: IRepository<Stream>
     {
         
-
     }
 }

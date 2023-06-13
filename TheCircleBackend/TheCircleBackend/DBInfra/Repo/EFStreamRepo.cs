@@ -30,12 +30,12 @@ namespace TheCircleBackend.DBInfra.Repo
         }
 
 
-            public Domain.Models.Stream Delete(int id)
+            public Stream Delete(int id)
         {
             throw new NotImplementedException();
         }
 
-        public List<Domain.Models.Stream> GetAll(int? id)
+        public List<Stream> GetAll(int? id)
         {
             throw new NotImplementedException();
         }
@@ -46,7 +46,19 @@ namespace TheCircleBackend.DBInfra.Repo
             return domainContext.Stream.Where(u => u.Id == id).FirstOrDefault();
         }
 
-        public Domain.Models.Stream Update(Domain.Models.Stream entity)
+        public void Update(Stream stream, int streamId)
+        {
+            var result = domainContext.Stream.Where(u => u.Id == streamId).FirstOrDefault();
+            Console.WriteLine(result.Title);
+            if (result != null)
+            {
+                result.Title = stream.Title;
+                result.StreamVid = stream.StreamVid;
+                domainContext.SaveChanges();
+            }
+        }
+
+        public Stream Update(Stream entity)
         {
             throw new NotImplementedException();
         }
