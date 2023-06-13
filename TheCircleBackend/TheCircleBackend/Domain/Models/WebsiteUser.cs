@@ -18,7 +18,5 @@ namespace TheCircleBackend.Domain.Models
 
         [JsonIgnore]
         public List<Viewer>? CurrentWatchList { get; set; }
-
-        
     }
 }
