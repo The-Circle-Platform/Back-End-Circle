@@ -50,7 +50,7 @@ namespace TheCircleBackend.Hubs
         {
             string connectionId = Context.ConnectionId;
             Console.WriteLine(connectionId);
-            //Console.WriteLine(Context.);
+            Console.WriteLine(Context.UserIdentifier);
             return base.OnConnectedAsync();
         }
 
