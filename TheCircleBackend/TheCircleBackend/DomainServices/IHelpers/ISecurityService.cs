@@ -1,20 +1,18 @@
-﻿namespace TheCircleBackend.DomainServices.IHelpers
+﻿using System.Security.Cryptography;
+
+namespace TheCircleBackend.DomainServices.IHelpers
 {
-    public interface ISecurityService
+    public interface ISecurityHelper
     {
-        object ConvertBackToObject(byte[] formerObject);
-        byte[] ConvertToBytes(object input);
+        RSAParameters DeserialiseKey(string key);
+        (string privateKeyString, string publicKeyString) GetKeyString(RSAParameters ExternalPrivateKey, RSAParameters ExternalPublicKey);
+        (RSAParameters privateKey, RSAParameters publicKey) GenerateKeyPairs();
+        byte[] ConvertItem(object input);
+        object ConvertFromByteArray(byte[] byteArray, Type targetType);
 
-        (string privateKey, string publicKey) GenerateKeys(string userName);
-        byte[] GenerateHash(string input);
-        string HashBytesToString(byte[] data);
-        byte[] GenerateHash(byte[] input);
-
-        byte[] SignData(int userId, byte[] input);
-        Stream SignStream(int userId, Stream inStream);
-        bool VerifyStream(int UserId, Stream inStream);
-        bool VerifyBytes(int UserId, byte[] inBytes);
-        
-
+        bool VerifySignedData(byte[] DataToVerify, RSAParameters Key, byte[] SignedData);
+        bool VerifyHash(RSAParameters rsaParams, byte[] signedData, byte[] signature);
+        byte[]? SignData(byte[] DataToSign, RSAParameters Key);
+        byte[]? SignHash(byte[] encrypted, RSAParameters Key);
     }
 }

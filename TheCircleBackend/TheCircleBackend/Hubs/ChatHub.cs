@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using TheCircleBackend.Domain.DTO;
 using TheCircleBackend.Domain.Models;
+using TheCircleBackend.DomainServices.IHelpers;
 using TheCircleBackend.DomainServices.IRepo;
 
 namespace TheCircleBackend.Hubs
@@ -8,10 +10,12 @@ namespace TheCircleBackend.Hubs
     {
         
         private readonly IChatMessageRepository messageRepository;
+        private readonly ISecurity security;
 
-        public ChatHub(IChatMessageRepository messageRepository)
+        public ChatHub(IChatMessageRepository messageRepository, ISecurity security)
         {
             this.messageRepository = messageRepository;
+            this.security = security;
         }
 
 
@@ -24,22 +28,36 @@ namespace TheCircleBackend.Hubs
             await Clients.All.SendAsync($"ReceiveChat-{receiverUserId}", list);
         }
 
-        public async Task SendMessage(ChatMessage incomingChatMessage)
+        public async Task SendMessage(ChatMessageDTOIncomming incomingChatMessage)
         {
 
             Console.WriteLine(Context.ConnectionId);
             // Decrypt message, HIER MOET NOG EEN METHODE KOMEN.
+            string publicKeyUser = "";
+            bool HeldIntegrity = security.HoldsIntegrity(incomingChatMessage, incomingChatMessage.Signature, publicKeyUser);
 
-            // Persisteer in database. Tabel chats (StreamId, UserId, DatumTijd en Content)
-            messageRepository.Create(incomingChatMessage);
-            // Lees geupdate versie
-            var updatedList = messageRepository.GetStreamChat(incomingChatMessage.ReceiverId);
+            if (HeldIntegrity)
+            {
+                throw new ArgumentException("Message has been tampered. Try later");
+            } 
+            else
+            {
+                // Persisteer in database. Tabel chats (StreamId, UserId, DatumTijd en Content)
+                ChatMessage chatMessage = incomingChatMessage.Messages;
+                messageRepository.Create(chatMessage);
+                // Lees geupdate versie
+                var updatedList = messageRepository.GetStreamChat(incomingChatMessage.ReceiverId);
+
+                // Encrypt the message
+
+                // New signature
+                var newSignature = security.CreateSignature();
+
+                Console.WriteLine("Nieuwe lijst");
+                // Send new data to client. HIER MOET NOG EEN METHODE KOMEN.
+                await Clients.All.SendAsync($"ReceiveChat-{incomingChatMessage.ReceiverId}", updatedList);
+            }
             
-            // Encrypt the message
-            
-            Console.WriteLine("Nieuwe lijst");
-            // Send new data to client. HIER MOET NOG EEN METHODE KOMEN.
-            await Clients.All.SendAsync($"ReceiveChat-{incomingChatMessage.ReceiverId}", updatedList);
         }
 
         public override Task OnConnectedAsync()
