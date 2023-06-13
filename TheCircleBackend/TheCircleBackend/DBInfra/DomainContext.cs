@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TheCircleBackend.Domain.Models;
+using Stream = TheCircleBackend.Domain.Models.Stream;
 
 namespace TheCircleBackend.DBInfra
 {
@@ -9,6 +10,7 @@ namespace TheCircleBackend.DBInfra
         public DbSet<LogItem> LogItem { get; set; } = null!;
         public DbSet<ChatMessage> ChatMessage { get; set; } = null!;
         public DbSet<Viewer> Viewer { get; set; } = null!;
+        public DbSet<Stream> Stream { get; set; } = null!;
 
         public  DomainContext(DbContextOptions<DomainContext> options) : base(options) { }
 
