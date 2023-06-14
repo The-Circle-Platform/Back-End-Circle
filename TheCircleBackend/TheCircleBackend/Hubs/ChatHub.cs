@@ -34,7 +34,7 @@ namespace TheCircleBackend.Hubs
             var ServerKeyPair = security.GenerateKeys();
 
             // Creates hash and creates signature, based on this hash.
-            var signedData = security.EncryptData(list, ServerKeyPair.privKey);
+            var signedData = security.SignData(list, ServerKeyPair.privKey);
 
             // Creates DTO to send to client.
             var ChatMessageDTO = new OutComingChatContent()
@@ -88,7 +88,7 @@ namespace TheCircleBackend.Hubs
                     Messages = updatedList
                 };
 
-                var signedData = security.EncryptData(ChatMessageDTO, ServerKeyPair.privKey);
+                var signedData = security.SignData(ChatMessageDTO, ServerKeyPair.privKey);
 
                 // Creates DTO to send to client.
                 var OutcomingMessage = new OutComingChatContent()

@@ -93,7 +93,7 @@ namespace TheCircleBackend.Hubs
             // Generate keypair
             var keyPair = securityService.GenerateKeys();
             //Signature
-            var ServerSignature = securityService.EncryptData(streamId, keyPair.privKey);
+            var ServerSignature = securityService.SignData(streamId, keyPair.privKey);
 
             var ViewerContentOut = new ViewerOutcomingContentDTO()
             {
@@ -109,7 +109,7 @@ namespace TheCircleBackend.Hubs
             // Generate server keypair
             var keyPair = securityService.GenerateKeys();
             //Signature
-            var ServerSignature = securityService.EncryptData(isAllowed, keyPair.privKey);
+            var ServerSignature = securityService.SignData(isAllowed, keyPair.privKey);
 
             var ViewerContentOut = new ViewerOutcomingContentDTO()
             {

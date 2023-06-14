@@ -51,7 +51,7 @@ namespace TheCircleBackend.Controllers
             var users = websiteUserRepo.GetAllWebsiteUsers().ToList();
 
             //Create signature
-            var Signature = securityService.EncryptData(users, UserKeys.privKey);
+            var Signature = securityService.SignData(users, UserKeys.privKey);
             
             // Packs in dto to client.
             var DTO = new UserContentDTO()
@@ -90,7 +90,7 @@ namespace TheCircleBackend.Controllers
             }
             //Stores 
             //Create signature
-            var Signature = securityService.EncryptData(user, UserKeys.privKey);
+            var Signature = securityService.SignData(user, UserKeys.privKey);
 
             var DTO = new UserContentDTO()
             {

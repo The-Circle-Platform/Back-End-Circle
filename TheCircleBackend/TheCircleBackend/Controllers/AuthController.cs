@@ -76,7 +76,7 @@ public class AuthController : ControllerBase
             };
 
             //Signs signature
-            var Signature = securityService.EncryptData(PayLoad, KeyPair.privKey);
+            var Signature = securityService.SignData(PayLoad, KeyPair.privKey);
 
             AuthOutRegisterDTO authOut = new() 
             { 
@@ -156,7 +156,7 @@ public class AuthController : ControllerBase
         var Response = new Response { Status = "Success", Message = "User created successfully!" };
 
         //Creates signature
-        var Signature = securityService.EncryptData(Response, keyPair.privKey);
+        var Signature = securityService.SignData(Response, keyPair.privKey);
         
         AuthOutRegisterDTO authOut = new AuthOutRegisterDTO() { OriginalLoad = Response, Signature = Signature, PublicKey = keyPair.pubKey};
         return Ok(authOut);
