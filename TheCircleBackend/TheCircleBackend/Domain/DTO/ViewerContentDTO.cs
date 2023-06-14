@@ -11,6 +11,7 @@ namespace TheCircleBackend.Domain.DTO
     public class ViewerOutcomingContentDTO : IContent
     {
         public int OriginalCount { get; set; }
+        public bool? OriginalAllowWatch { get; set; }
         public string ServerPublicKey { get; set; }
     }
 }

@@ -20,7 +20,6 @@ namespace TheCircleBackend.Hubs
             this.securityService = securityService;
         }
 
-        // TODO Methods need to be tested. Perhaps a seperate stream.
         public override Task OnDisconnectedAsync(Exception? exception)
         {
             Console.WriteLine("Disconnection made");
@@ -51,6 +50,7 @@ namespace TheCircleBackend.Hubs
             Console.WriteLine("Connection made");
             // Retrieves public key of user.
             var publicKeyUser = securityService.GetKeys(content.OriginalViewer.UserId).pubKey;
+
             // Checks original data with signature, in order to control the data on data-integrity;
             bool HoldsIntegrity = securityService.HoldsIntegrity(content.OriginalViewer, content.Signature, publicKeyUser);
             
@@ -70,7 +70,7 @@ namespace TheCircleBackend.Hubs
             if (!IsAllowed)
             {
                 //It will send back false and user is not allowed to watch the stream.
-                AllowUserNotToWatch(IsAllowed, Viewer.ConnectionId);
+                AllowUserNotToWatch(IsAllowed, Viewer.ConnectionId, Viewer.StreamId);
             }
             else
             {
@@ -101,9 +101,21 @@ namespace TheCircleBackend.Hubs
             await Clients.All.SendAsync($"UpdateViewerCount{streamId}", ViewerContentOut);
         }
 
-        private async Task AllowUserNotToWatch(bool isAllowed, string ConnectId)
+        private async Task AllowUserNotToWatch(bool isAllowed, string ConnectId, int streamId)
         {
-            await Clients.Client(ConnectId).SendAsync("IsNotAllowed", isAllowed);
+            // Generate server keypair
+            var keyPair = securityService.GenerateKeys();
+            //Signature
+            var ServerSignature = securityService.EncryptData(isAllowed, keyPair.privKey);
+
+            var ViewerContentOut = new ViewerOutcomingContentDTO()
+            {
+                Signature = ServerSignature,
+                ServerPublicKey = keyPair.pubKey,
+                OriginalAllowWatch = isAllowed
+            };
+
+            await Clients.Client(ConnectId).SendAsync($"IsNotAllowed-{streamId}", ViewerContentOut);
         }
 
         private bool CheckMaxViews(int watcherId)
