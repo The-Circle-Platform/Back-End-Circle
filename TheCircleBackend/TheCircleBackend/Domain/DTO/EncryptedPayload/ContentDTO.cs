@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using TheCircleBackend.Domain.Interfaces;
 
-namespace TheCircleBackend.Domain.DTO
+namespace TheCircleBackend.Domain.DTO.EncryptedPayload
 {
     public class IncomingChatContent : IContent
     {

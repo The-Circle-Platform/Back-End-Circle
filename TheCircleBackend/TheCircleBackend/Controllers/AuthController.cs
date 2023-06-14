@@ -12,6 +12,7 @@ using TheCircleBackend.Domain.Models;
 using TheCircleBackend.DomainServices;
 using TheCircleBackend.DomainServices.IRepo;
 using TheCircleBackend.DomainServices.IHelpers;
+using TheCircleBackend.Domain.DTO.EncryptedPayload;
 
 [Route("api/auth")]
 [ApiController]

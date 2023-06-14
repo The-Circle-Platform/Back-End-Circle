@@ -5,7 +5,7 @@ using TheCircleBackend.DomainServices.IRepo;
 using Microsoft.Extensions.Logging;
 using TheCircleBackend.Helper;
 using TheCircleBackend.DomainServices.IHelpers;
-using TheCircleBackend.Domain.DTO;
+using TheCircleBackend.Domain.DTO.EncryptedPayload;
 
 namespace TheCircleBackend.Controllers
 {

@@ -1,9 +1,9 @@
 ﻿using TheCircleBackend.Domain.Interfaces;
 using TheCircleBackend.Domain.Models;
 
-namespace TheCircleBackend.Domain.DTO
+namespace TheCircleBackend.Domain.DTO.EncryptedPayload
 {
-    public class UserIncomingDTO: IContent
+    public class UserIncomingDTO : IContent
     {
         //One of these elements are being used in the signature.
         public LoginBody OriginalUserRequest { get; set; }
@@ -22,7 +22,8 @@ namespace TheCircleBackend.Domain.DTO
         public string ServerPublicKey { get; set; }
     }
 
-    public class LoginBody {
+    public class LoginBody
+    {
         public string UserName { get; set; }
         public string Password { get; set; }
     }

@@ -1,9 +1,9 @@
 ﻿using TheCircleBackend.Domain.Interfaces;
 using TheCircleBackend.Domain.Models;
 
-namespace TheCircleBackend.Domain.DTO
+namespace TheCircleBackend.Domain.DTO.EncryptedPayload
 {
-    public class ViewerIncomingContentDTO: IContent
+    public class ViewerIncomingContentDTO : IContent
     {
         public Viewer OriginalViewer { get; set; }
     }
