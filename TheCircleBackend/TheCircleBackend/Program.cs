@@ -69,6 +69,7 @@ builder.Services.AddScoped<ILogItemRepo, EFLogItemRepo>();
 builder.Services.AddScoped<IViewerRepository, EFViewerRepo>();
 builder.Services.AddScoped<ISecurityHelper, SecurityHelper>();
 builder.Services.AddScoped<ISecurityService, SecurityService>();
+builder.Services.AddScoped<IKeyRepo, EFKeyRepo>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

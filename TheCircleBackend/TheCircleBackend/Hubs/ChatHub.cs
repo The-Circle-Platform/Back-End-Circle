@@ -49,10 +49,10 @@ namespace TheCircleBackend.Hubs
         public async Task SendMessage(IncomingChatContent incomingChatMessage)
         {
             // RetrieveUserKeys
-            var publicKeyUser = security.GetUserKeys(incomingChatMessage.SenderUserId).pubKey;
+            var publicKeyUser = security.GetKeys(incomingChatMessage.SenderUserId).pubKey;
 
             // Checks if integrity is held.
-            bool HeldIntegrity = security.HoldsIntegrity(incomingChatMessage, incomingChatMessage.Signature, publicKeyUser);
+            bool HeldIntegrity = security.HoldsIntegrity(incomingChatMessage.OriginalContent, incomingChatMessage.Signature, publicKeyUser);
 
             if (HeldIntegrity)
             {
@@ -74,19 +74,21 @@ namespace TheCircleBackend.Hubs
                 var ServerKeyPair = security.GenerateKeys();
 
                 // Creates hash and creates signature, based on this hash.
-                var signedData = security.EncryptData(updatedList, ServerKeyPair.privKey);
+                // CreateDTO
+                var ChatMessageDTO = new ChatMessageDTOOutcoming()
+                {
+                    ReceiverId = incomingChatMessage.OriginalContent.ReceiverId,
+                    Messages = updatedList
+                };
+
+                var signedData = security.EncryptData(ChatMessageDTO, ServerKeyPair.privKey);
 
                 // Creates DTO to send to client.
                 var OutcomingMessage = new OutComingChatContent()
                 {
                     ServerPublicKey = ServerKeyPair.pubKey,
                     Signature = signedData,
-                    OriginalContent = new ChatMessageDTOOutcoming()
-                    {
-                        ReceiverId = incomingChatMessage.OriginalContent.ReceiverId,
-                        UserId = incomingChatMessage.OriginalContent.UserId,
-                        Messages = updatedList,
-                    },
+                    OriginalContent = ChatMessageDTO,
                     SenderUserId = incomingChatMessage.SenderUserId
                 };
 
