@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TheCircleBackend.Migrations
 {
     /// <inheritdoc />
-    public partial class Newdatabase : Migration
+    public partial class UpdatedKey : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -38,6 +38,22 @@ namespace TheCircleBackend.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Stream", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserKeys",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PublicKey = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PrivateKey = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserKeys", x => x.Id);
+                    table.UniqueConstraint("AK_UserKeys_UserId", x => x.UserId);
                 });
 
             migrationBuilder.CreateTable(
@@ -79,7 +95,7 @@ namespace TheCircleBackend.Migrations
                         column: x => x.WebUserId,
                         principalTable: "WebsiteUser",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateTable(
@@ -98,13 +114,13 @@ namespace TheCircleBackend.Migrations
                         column: x => x.StreamId,
                         principalTable: "Stream",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
                         name: "FK_Viewer_WebsiteUser_UserId",
                         column: x => x.UserId,
                         principalTable: "WebsiteUser",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateIndex(
@@ -142,6 +158,9 @@ namespace TheCircleBackend.Migrations
 
             migrationBuilder.DropTable(
                 name: "LogItem");
+
+            migrationBuilder.DropTable(
+                name: "UserKeys");
 
             migrationBuilder.DropTable(
                 name: "Viewer");

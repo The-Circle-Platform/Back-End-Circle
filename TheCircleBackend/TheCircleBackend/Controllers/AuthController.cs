@@ -4,8 +4,13 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.Identity.Client;
+using PasswordGenerator;
 using TheCircleBackend.Domain.AuthModels;
 using TheCircleBackend.Domain.DTO;
+using TheCircleBackend.Domain.Models;
+using TheCircleBackend.DomainServices;
+using TheCircleBackend.DomainServices.IRepo;
 
 [Route("api/auth")]
 [ApiController]
@@ -14,15 +19,18 @@ public class AuthController : ControllerBase
     private readonly UserManager<IdentityUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IConfiguration _configuration;
+    private readonly IWebsiteUserRepo _websiteUserRepo;
 
     public AuthController(
         UserManager<IdentityUser> userManager,
         RoleManager<IdentityRole> roleManager,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IWebsiteUserRepo _websiteUserRepo)
     {
         _userManager = userManager;
         _roleManager = roleManager;
         _configuration = configuration;
+        this._websiteUserRepo = _websiteUserRepo;
     }
 
     [HttpPost]
@@ -70,28 +78,58 @@ public class AuthController : ControllerBase
             SecurityStamp = Guid.NewGuid().ToString(),
             UserName = dto.Username
         };
-        var result = await _userManager.CreateAsync(user, dto.Password);
+        var pwd = new Password();
+        var password = pwd.Next();
+        Console.WriteLine(password);
+        var result = await _userManager.CreateAsync(user, password);
+        Console.WriteLine(result);
+
+        if (!await _roleManager.RoleExistsAsync(UserRoles.User))
+            await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
+
+
         if (!result.Succeeded)
             return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
+
+        if (await _roleManager.RoleExistsAsync(UserRoles.User))
+        {
+            await _userManager.AddToRoleAsync(user, UserRoles.User);
+        }
+
+        WebsiteUser newUser = new WebsiteUser();
+        newUser.UserName = dto.Username;
+        newUser.IsOnline = false;
+
+        _websiteUserRepo.Add(newUser);
+
+        Mailer mailer = new Mailer(_configuration);
+
+        string emailbody =
+            $"Hello {dto.Username} An account has been created by a TheCircle admin using: \n email: {dto.Email} \n Username: {dto.Username} \n Your generated password is: {password}";
+        mailer.SendMail(dto.Email, "The Circle Account Creation", emailbody, "The Circle Team");
+        return Ok(new Response { Status = "Success", Message = "User created successfully!" });
 
         return Ok(new Response { Status = "Success", Message = "User created successfully!" });
     }
 
     [HttpPost]
     [Route("register-admin")]
-    public async Task<IActionResult> RegisterAdmin(RegisterDTO model)
+    public async Task<IActionResult> RegisterAdmin(RegisterDTO dto)
     {
-        var userExists = await _userManager.FindByNameAsync(model.Username);
+        var pwd = new Password();
+        var password = pwd.Next();
+        Console.WriteLine(password);
+        var userExists = await _userManager.FindByNameAsync(dto.Username);
         if (userExists != null)
             return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
 
         IdentityUser user = new()
         {
-            Email = model.Email,
+            Email = dto.Email,
             SecurityStamp = Guid.NewGuid().ToString(),
-            UserName = model.Username
+            UserName = dto.Username
         };
-        var result = await _userManager.CreateAsync(user, model.Password);
+        var result = await _userManager.CreateAsync(user, password);
         if (!result.Succeeded)
             return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
 
@@ -104,10 +142,16 @@ public class AuthController : ControllerBase
         {
             await _userManager.AddToRoleAsync(user, UserRoles.Admin);
         }
-        if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
+        if (await _roleManager.RoleExistsAsync(UserRoles.User))
         {
             await _userManager.AddToRoleAsync(user, UserRoles.User);
         }
+
+        Mailer mailer = new Mailer(_configuration);
+
+        string emailbody =
+            $"Hello {dto.Username} An account has been created by a TheCircle admin using: \n email: {dto.Email} \n Username: {dto.Username} \n Your generated password is: {password}";
+        mailer.SendMail(dto.Email, "The Circle Account Creation", emailbody, "The Circle Team");
         return Ok(new Response { Status = "Success", Message = "User created successfully!" });
     }
 

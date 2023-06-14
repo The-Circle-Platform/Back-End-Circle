@@ -3,6 +3,7 @@ using TheCircleBackend.Domain.DTO;
 using TheCircleBackend.Domain.Models;
 using TheCircleBackend.DomainServices.IHelpers;
 using TheCircleBackend.DomainServices.IRepo;
+using TheCircleBackend.Helper;
 
 namespace TheCircleBackend.Hubs
 {
@@ -11,11 +12,15 @@ namespace TheCircleBackend.Hubs
         
         private readonly IChatMessageRepository messageRepository;
         private readonly ISecurityService security;
+        private readonly ILogItemRepo logItemRepo;
+        private readonly LogHelper logHelper;
 
-        public ChatHub(IChatMessageRepository messageRepository, ISecurityService security)
+
+        public ChatHub(IChatMessageRepository messageRepository, ILogItemRepo logItemRepo, ILogger<ChatHub> logger, ISecurityService security)
         {
             this.messageRepository = messageRepository;
             this.security = security;
+            this.logHelper = new LogHelper(logItemRepo, logger, "ChatHub");
         }
 
 
@@ -57,7 +62,7 @@ namespace TheCircleBackend.Hubs
             if (HeldIntegrity)
             {
                 throw new ArgumentException("Message has been tampered. Try later");
-            } 
+            }
             else
             {
                 // Persisteer in database. Tabel chats (StreamId, UserId, DatumTijd en Content)
@@ -93,9 +98,24 @@ namespace TheCircleBackend.Hubs
                 };
 
                 // Send new data to client.
-                await Clients.All.SendAsync($"ReceiveChat-{incomingChatMessage.OriginalContent.ReceiverId}", OutcomingMessage);
+                await Clients.All.SendAsync($"ReceiveChat-{incomingChatMessage.OriginalContent.ReceiverId}",
+                    OutcomingMessage);
             }
-            
+        }
+
+        public override Task OnConnectedAsync()
+        {
+            string connectionId = Context.ConnectionId;
+            Console.WriteLine(connectionId);
+            Console.WriteLine(Context.UserIdentifier);
+            return base.OnConnectedAsync();
+        }
+
+        public override Task OnDisconnectedAsync(Exception? exception)
+        {
+            Console.WriteLine("Connectie verbroken!");
+            Console.WriteLine(Context.ConnectionId);
+            return base.OnDisconnectedAsync(exception);
         }
     }
 }

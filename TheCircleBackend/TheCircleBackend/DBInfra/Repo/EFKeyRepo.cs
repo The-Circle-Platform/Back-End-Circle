@@ -16,7 +16,7 @@ namespace TheCircleBackend.DBInfra.Repo
         {
             try
             {
-                var result = domainContext.Key.First(K => K.UserId == UserId);
+                var result = domainContext.UserKeys.First(K => K.UserId == UserId);
                 return (result.PrivateKey, result.PublicKey);
             } catch(Exception ex)
             {
@@ -28,7 +28,7 @@ namespace TheCircleBackend.DBInfra.Repo
         {
             try
             {
-                domainContext.Key.Add(new KeyStore() { PrivateKey = privKey, PublicKey = pubKey, UserId = UserId });
+                domainContext.UserKeys.Add(new KeyStore() { PrivateKey = privKey, PublicKey = pubKey, UserId = UserId });
                 domainContext.SaveChanges();
                 return true;
             }

@@ -74,7 +74,7 @@ namespace TheCircleBackend.Migrations
 
                     b.HasAlternateKey("UserId");
 
-                    b.ToTable("Key");
+                    b.ToTable("UserKeys");
                 });
 
             modelBuilder.Entity("TheCircleBackend.Domain.Models.LogItem", b =>
