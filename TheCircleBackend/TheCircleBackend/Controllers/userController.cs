@@ -33,75 +33,81 @@ namespace TheCircleBackend.Controllers
         }
 
         [HttpGet]
-        public UserContentDTO Get()
+        public IActionResult Get([FromBody] UserIncomingDTO userIncomingDTO)
         {
-            // Get all website users.
-            var users = websiteUserRepo.GetAllWebsiteUsers();
+            // Access the Request object
+            var UserKeys = securityService.GetKeys(userIncomingDTO.SenderUserId);
 
-            // Generate server keypair.
-            var generatedKey = securityService.GenerateKeys();
+            // Checks on integrity
+            bool HoldsIntegrity = securityService.HoldsIntegrity(userIncomingDTO.OwnUserId, userIncomingDTO.Signature, UserKeys.pubKey);
+
+            if (!HoldsIntegrity)
+            {
+                //Sends 400 code back to user.
+                return BadRequest();
+            }
+
+            // Get all website users.
+            var users = websiteUserRepo.GetAllWebsiteUsers().ToList();
 
             //Create signature
-            var Signature = securityService.EncryptData(users, generatedKey.privKey);
+            var Signature = securityService.EncryptData(users, UserKeys.privKey);
             
             // Packs in dto to client.
             var DTO = new UserContentDTO()
             {
-                OriginalData = users.ToList(),
-                ServerPublicKey = generatedKey.pubKey,
+                OriginalData = new()
+                {
+                    OriginalUserList = users
+                },
+                ServerPublicKey = UserKeys.pubKey,
                 Signature = Signature
             };
 
-            return DTO;
+            return Ok(DTO);
         }
 
         [HttpGet("{id}")]
-        public IActionResult get(int id)
+        public IActionResult get([FromBody] UserIncomingDTO userIncomingDTO, int id)
         {
+            // Access the Request object
+            var UserKeys = securityService.GetKeys(userIncomingDTO.SenderUserId);
+
+            // Checks on integrity
+            // Note: This userIncomingDTO contains the userId it wants to request and senderId.
+            // If a user searches on Id 6 for example, the DTO contains RequestId = 6. 
+            // Those two variabels will be stored in a object and signed by RSA.
+            bool HoldsIntegrity = securityService.HoldsIntegrity(userIncomingDTO.OriginalUserRequest, userIncomingDTO.Signature, UserKeys.pubKey);
+
+            if (!HoldsIntegrity)
+            {
+                //Sends 400 code back to user.
+                return BadRequest();
+            }
+
             Console.WriteLine(id);
             var user = websiteUserRepo.GetById(id);
             if (user == null)
             {
                 return NotFound();
             }
+            //Stores 
+            //Create signature
+            var Signature = securityService.EncryptData(user, UserKeys.privKey);
 
-            return Ok(user);
+            var DTO = new UserContentDTO()
+            {
+                OriginalData = new()
+                {
+                    OriginalUser = user,
+                    OwnUserId = userIncomingDTO.SenderUserId
+                },
+                ServerPublicKey = UserKeys.pubKey,
+                Signature = Signature
+            };
 
-        }
+            return Ok(DTO);
 
-        [HttpPost]
-        public IActionResult post(WebsiteUser user)
-        {
-            Console.WriteLine(this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString());
-            logHelper.UserLog(this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString(), "User " + 1 + " POST WebsiteUser with ID: " + user.Id + ", Name: " + user.UserName);
-            Console.WriteLine(user);
-            try
-            {
-                this.websiteUserRepo.Add(user);
-                return Ok("user added");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return BadRequest(e);
-            }
-        }
-
-        [HttpPut("{id}")]
-        public IActionResult put(WebsiteUser user, int id)
-        {
-            logHelper.UserLog(Request.HttpContext.Connection.RemoteIpAddress.ToString(), "User " + 1 + " PUT WebsiteUser with ID: " + user.Id + ", Name: " + user.UserName);
-            Console.WriteLine(id);
-            try
-            {
-                websiteUserRepo.Update(user, id);
-                return Ok();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return BadRequest(e);
-            }
         }
     }
 }
