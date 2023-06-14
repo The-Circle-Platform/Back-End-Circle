@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TheCircleBackend.Domain.DTO;
+using TheCircleBackend.Domain.DTO.EncryptedPayload;
 using TheCircleBackend.Domain.Models;
+using TheCircleBackend.DomainServices.IHelpers;
 using TheCircleBackend.DomainServices.IRepo;
 using TheCircleBackend.Helper;
 
@@ -13,18 +15,42 @@ namespace TheCircleBackend.Controllers
     {
 
         private readonly ILogItemRepo logItemRepo;
+        private readonly ISecurityService securityService;
         private readonly LogHelper logHelper;
 
-        public LoggingController(ILogItemRepo logItemRepo, ILogger<LoggingController> logger)
+        public LoggingController(
+            ILogItemRepo logItemRepo, 
+            ILogger<LoggingController> logger,
+            ISecurityService securityService)
         {
             this.logItemRepo = logItemRepo;
-            this.logHelper = logHelper;
+            this.securityService = securityService;
             this.logHelper = new LogHelper(logItemRepo, logger, "LoggingController");
         }
 
         [HttpPost]
-        public IActionResult AddLog(LogDTO dto)
+        public IActionResult AddLog(LoggingPayloadDTO payload)
         {
+            //Get keypair
+            var KeyPair = securityService.GetKeys(payload.SenderUserId);
+
+            //Check signature
+            var IsValid = securityService.HoldsIntegrity(payload.OriginalData, payload.Signature, KeyPair.pubKey);
+            if(!IsValid)
+            {
+                var sign = securityService.SignData("Integrity is tainted", KeyPair.privKey);
+
+                var load = new LoggingOutTextDTO()
+                {
+                    OriginalData = "Integrity is tainted",
+                    Signature = sign,
+                    SenderUserId = payload.SenderUserId,
+                    PublicKey = KeyPair.pubKey
+                };
+                return BadRequest(load);
+            }
+
+            var dto = payload.OriginalData;
             var log = new LogItem()
             {
                 Action = dto.Action,
@@ -35,13 +61,35 @@ namespace TheCircleBackend.Controllers
             try
             {
                 this.logItemRepo.Add(log);
-                return Ok("Log added");
+
+                //Create signature
+                var sign = securityService.SignData("Log added", KeyPair.privKey);
+
+                var load = new LoggingOutTextDTO()
+                {
+                    OriginalData = "Log added",
+                    Signature = sign,
+                    SenderUserId = payload.SenderUserId,
+                    PublicKey = KeyPair.pubKey
+                };
+
+                return Ok(load);
 
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return StatusCode(500, "Unable to add log");
+                var error = "Integrity is tainted";
+                var sign = securityService.SignData(error, KeyPair.privKey);
+
+                var load = new LoggingOutTextDTO()
+                {
+                    OriginalData = error,
+                    Signature = sign,
+                    SenderUserId = payload.SenderUserId,
+                    PublicKey = KeyPair.pubKey
+                };
+                return StatusCode(500, load);
             }
 
         }
@@ -49,20 +97,60 @@ namespace TheCircleBackend.Controllers
         [HttpGet]
         public IActionResult GetAllLogItems()
         {
-            return Ok(this.logItemRepo.GetAllLogItems());
+            // Gets all logs
+            var list = this.logItemRepo.GetAllLogItems();
+
+            // Creates server keys
+            var KeyPair = securityService.GenerateKeys();
+
+            //Create signature
+            var Sign = securityService.SignData(list, KeyPair.privKey);
+
+            //Create payload to send back
+            var load = new
+            {
+                OriginalData = list,
+                PublicKey = KeyPair.pubKey,
+                Signature = Sign
+            };
+            return Ok(load);
         }
 
         [HttpGet ("{id}")]
-        public IActionResult GetLogItemById(int id)
+        public IActionResult GetLogItemById(int id, LoggingIdDTO dTO)
         {
+            // Get keypair of user
+            var KeyPair = securityService.GetKeys(dTO.SenderUserId);
+
+            // Check integrity
+            var isValid =securityService.HoldsIntegrity(id, dTO.Signature, KeyPair.pubKey);
+
             var result = this.logItemRepo.GetLogItemById(id);
-            if (result != null)
+            
+            if (result != null && isValid)
             {
-                return Ok(result);
+                var Sign = securityService.SignData (result, KeyPair.privKey);
+                var load = new LoggingOutDTO()
+                {
+                    OriginalData = result,
+                    Signature = Sign,
+                    PublicKey = KeyPair.pubKey,
+                    SenderUserId = dTO.SenderUserId,
+                };
+                return Ok(load);
             }
             else
             {
-                return NotFound();
+                var GeneralKeyPair = securityService.GenerateKeys();
+                var Sign = securityService.SignData("Integriteit is belast", GeneralKeyPair.privKey);
+                var load = new LoggingOutTextDTO()
+                {
+                    OriginalData = "Integriteit is belast",
+                    Signature = Sign,
+                    PublicKey = GeneralKeyPair.pubKey,
+                    SenderUserId = dTO.SenderUserId,
+                };
+                return NotFound(load);
             }
         }
     }
