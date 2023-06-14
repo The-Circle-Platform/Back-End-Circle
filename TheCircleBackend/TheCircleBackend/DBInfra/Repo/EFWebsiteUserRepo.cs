@@ -32,6 +32,12 @@ namespace TheCircleBackend.DBInfra.Repo
             this.logger.LogInformation("Get user with id {0}", id);
             return context.WebsiteUser.Where(u => u.Id == id).FirstOrDefault();
         }
+
+        public WebsiteUser GetByUserName(string UserName)
+        {
+            return context.WebsiteUser.Where(u => u.UserName == UserName).FirstOrDefault();
+        }
+
         public void Update(WebsiteUser user, int userId)
         {
             var result = context.WebsiteUser.Where(u => u.Id == userId).FirstOrDefault();

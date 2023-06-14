@@ -57,7 +57,7 @@ namespace TheCircleBackend.Controllers
             var DTO = new UserContentDTO()
             {
                 OriginalList = users,
-                ServerPublicKey = UserKeys.pubKey,
+                PublicKey = UserKeys.pubKey,
                 Signature = Signature
             };
 
@@ -95,7 +95,7 @@ namespace TheCircleBackend.Controllers
             var DTO = new UserContentDTO()
             {
                 OriginalData = user,
-                ServerPublicKey = UserKeys.pubKey,
+                PublicKey = UserKeys.pubKey,
                 Signature = Signature
             };
 

@@ -20,6 +20,7 @@ namespace TheCircleBackend.Hubs
             this.securityService = securityService;
         }
 
+        // Receiver method
         public override Task OnDisconnectedAsync(Exception? exception)
         {
             Console.WriteLine("Disconnection made");
@@ -44,7 +45,8 @@ namespace TheCircleBackend.Hubs
             //Deconnects connection
             return base.OnDisconnectedAsync(exception);
         }
-
+        
+        // Receiver method
         public async Task ConnectToStream(ViewerIncomingContentDTO content)
         {
             Console.WriteLine("Connection made");
@@ -82,6 +84,7 @@ namespace TheCircleBackend.Hubs
             }
         }
 
+
         private async Task UpdateViewCount(int streamId)
         {
             int watchCount = viewerRepository.GetViewershipCount(streamId);
@@ -96,7 +99,7 @@ namespace TheCircleBackend.Hubs
             {
                 Signature = ServerSignature,
                 OriginalCount = watchCount,
-                ServerPublicKey = keyPair.pubKey
+                PublicKey = keyPair.pubKey
             };
             await Clients.All.SendAsync($"UpdateViewerCount{streamId}", ViewerContentOut);
         }
@@ -111,7 +114,7 @@ namespace TheCircleBackend.Hubs
             var ViewerContentOut = new ViewerOutcomingContentDTO()
             {
                 Signature = ServerSignature,
-                ServerPublicKey = keyPair.pubKey,
+                PublicKey = keyPair.pubKey,
                 OriginalAllowWatch = isAllowed
             };
 

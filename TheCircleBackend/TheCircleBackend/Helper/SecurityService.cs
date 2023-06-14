@@ -82,5 +82,18 @@ namespace TheCircleBackend.Helper
         {
             return securityHelper.ConvertItem(item);
         }
+
+        public bool StoreKeys(int UserId, string privKey, string pubKey)
+        {
+            try
+            {
+                keyRepo.StoreKeys(UserId, privKey, pubKey);
+                return true;
+            } catch{
+                return false;
+            }
+            
+
+        }
     }
 }

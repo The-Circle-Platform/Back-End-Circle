@@ -24,7 +24,7 @@ namespace TheCircleBackend.Hubs
             this.logHelper = new LogHelper(logItemRepo, logger, "ChatHub");
         }
 
-
+        // Receiver method
         public async Task RetrieveCurrentChat(int receiverUserId)
         {
             //Retrieve current chat list
@@ -44,14 +44,15 @@ namespace TheCircleBackend.Hubs
                     ReceiverId = receiverUserId,
                     Messages = list
                 },
-                ServerPublicKey = ServerKeyPair.pubKey,
+                PublicKey = ServerKeyPair.pubKey,
                 Signature = signedData
             };
 
             //Send back to client.
             await Clients.All.SendAsync($"ReceiveChat-{receiverUserId}", ChatMessageDTO);
         }
-
+        
+        // Receiver method
         public async Task SendMessage(IncomingChatContent incomingChatMessage)
         {
             // RetrieveUserKeys
@@ -92,7 +93,7 @@ namespace TheCircleBackend.Hubs
                 // Creates DTO to send to client.
                 var OutcomingMessage = new OutComingChatContent()
                 {
-                    ServerPublicKey = ServerKeyPair.pubKey,
+                    PublicKey = ServerKeyPair.pubKey,
                     Signature = signedData,
                     OriginalContent = ChatMessageDTO,
                     SenderUserId = incomingChatMessage.SenderUserId
@@ -115,7 +116,6 @@ namespace TheCircleBackend.Hubs
         public override Task OnDisconnectedAsync(Exception? exception)
         {
             Console.WriteLine("Connectie verbroken!");
-            Console.WriteLine(Context.ConnectionId);
             return base.OnDisconnectedAsync(exception);
         }
     }

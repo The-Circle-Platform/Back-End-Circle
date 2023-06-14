@@ -8,10 +8,9 @@ namespace TheCircleBackend.Domain.DTO.EncryptedPayload
         public Viewer OriginalViewer { get; set; }
     }
 
-    public class ViewerOutcomingContentDTO : IContent
+    public class ViewerOutcomingContentDTO : IOutComingContent
     {
         public int OriginalCount { get; set; }
         public bool? OriginalAllowWatch { get; set; }
-        public string ServerPublicKey { get; set; }
     }
 }

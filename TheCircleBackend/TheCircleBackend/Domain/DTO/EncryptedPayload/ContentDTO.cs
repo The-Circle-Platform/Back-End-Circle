@@ -9,10 +9,9 @@ namespace TheCircleBackend.Domain.DTO.EncryptedPayload
         public ChatMessageDTOIncoming? OriginalContent { get; set; }
     }
 
-    public class OutComingChatContent : IContent
+    public class OutComingChatContent : IOutComingContent
     {
         [Required]
         public ChatMessageDTOOutcoming? OriginalContent { get; set; }
-        public string? ServerPublicKey { get; set; }
     }
 }
