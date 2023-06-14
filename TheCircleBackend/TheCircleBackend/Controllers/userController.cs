@@ -4,6 +4,8 @@ using TheCircleBackend.Domain.Models;
 using TheCircleBackend.DomainServices.IRepo;
 using Microsoft.Extensions.Logging;
 using TheCircleBackend.Helper;
+using TheCircleBackend.DomainServices.IHelpers;
+using TheCircleBackend.Domain.DTO;
 
 namespace TheCircleBackend.Controllers
 {
@@ -14,21 +16,43 @@ namespace TheCircleBackend.Controllers
 
         private readonly IWebsiteUserRepo websiteUserRepo;
         private readonly ILogItemRepo logItemRepo;
+        private readonly ISecurityService securityService;
         private readonly LogHelper logHelper;
 
-        public userController(IWebsiteUserRepo websiteUserRepo, ILogItemRepo logItemRepo, ILogger<userController> logger)
+        public userController(
+            IWebsiteUserRepo websiteUserRepo, 
+            ILogItemRepo logItemRepo, 
+            ILogger<userController> logger,
+            ISecurityService securityService)
         {
             this.websiteUserRepo = websiteUserRepo;
             this.logItemRepo = logItemRepo;
+            this.securityService = securityService;
             this.logHelper = new LogHelper(logItemRepo, logger, "UserController");
 
         }
 
         [HttpGet]
-        public IEnumerable<WebsiteUser> Get()
+        public UserContentDTO Get()
         {
-            return websiteUserRepo.GetAllWebsiteUsers();
+            // Get all website users.
+            var users = websiteUserRepo.GetAllWebsiteUsers();
 
+            // Generate server keypair.
+            var generatedKey = securityService.GenerateKeys();
+
+            //Create signature
+            var Signature = securityService.EncryptData(users, generatedKey.privKey);
+            
+            // Packs in dto to client.
+            var DTO = new UserContentDTO()
+            {
+                OriginalData = users.ToList(),
+                ServerPublicKey = generatedKey.pubKey,
+                Signature = Signature
+            };
+
+            return DTO;
         }
 
         [HttpGet("{id}")]

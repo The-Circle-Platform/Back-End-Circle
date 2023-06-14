@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Collections.Generic;
+using TheCircleBackend.Domain.DTO;
 using TheCircleBackend.Domain.Models;
+using TheCircleBackend.DomainServices.IHelpers;
 using TheCircleBackend.DomainServices.IRepo;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
@@ -10,10 +12,12 @@ namespace TheCircleBackend.Hubs
     public class ViewerHub: Hub
     {
         private readonly IViewerRepository viewerRepository;
+        private readonly ISecurityService securityService;
 
-        public ViewerHub(IViewerRepository viewerRepository)
+        public ViewerHub(IViewerRepository viewerRepository, ISecurityService securityService)
         {
             this.viewerRepository = viewerRepository;
+            this.securityService = securityService;
         }
 
         // TODO Methods need to be tested. Perhaps a seperate stream.
@@ -42,29 +46,39 @@ namespace TheCircleBackend.Hubs
             return base.OnDisconnectedAsync(exception);
         }
 
-        public async Task ConnectToStream(Viewer viewer)
+        public async Task ConnectToStream(ViewerIncomingContentDTO content)
         {
             Console.WriteLine("Connection made");
-            // TODO Needs security check.
+            // Retrieves public key of user.
+            var publicKeyUser = securityService.GetKeys(content.OriginalViewer.UserId).pubKey;
+            // Checks original data with signature, in order to control the data on data-integrity;
+            bool HoldsIntegrity = securityService.HoldsIntegrity(content.OriginalViewer, content.Signature, publicKeyUser);
+            
+            if (!HoldsIntegrity)
+            {
+                throw new Exception("Integrity is tainted.");
+            }
 
+            var Viewer = content.OriginalViewer;
+            
             // It needs to check if user has not more than 4 streams open.
-            bool IsAllowed = CheckMaxViews(viewer.UserId);
+            bool IsAllowed = CheckMaxViews(Viewer.UserId);
 
             //Appends ConnectionId to Viewer
-            viewer.ConnectionId = Context.ConnectionId;
+            Viewer.ConnectionId = Context.ConnectionId;
 
             if (!IsAllowed)
             {
                 //It will send back false and user is not allowed to watch the stream.
-                AllowUserToWatch(IsAllowed, viewer.ConnectionId);
+                AllowUserNotToWatch(IsAllowed, Viewer.ConnectionId);
             }
             else
             {
                 //Adds viewer to database
-                viewerRepository.Create(viewer);
+                viewerRepository.Create(Viewer);
 
                 // Updates new viewership count
-                await UpdateViewCount(viewer.StreamId);
+                await UpdateViewCount(Viewer.StreamId);
             }
         }
 
@@ -72,12 +86,24 @@ namespace TheCircleBackend.Hubs
         {
             int watchCount = viewerRepository.GetViewershipCount(streamId);
             Console.WriteLine("Count is " + watchCount);
-            await Clients.All.SendAsync($"UpdateViewerCount{streamId}", watchCount);
+
+            // Generate keypair
+            var keyPair = securityService.GenerateKeys();
+            //Signature
+            var ServerSignature = securityService.EncryptData(streamId, keyPair.privKey);
+
+            var ViewerContentOut = new ViewerOutcomingContentDTO()
+            {
+                Signature = ServerSignature,
+                OriginalCount = watchCount,
+                ServerPublicKey = keyPair.pubKey
+            };
+            await Clients.All.SendAsync($"UpdateViewerCount{streamId}", ViewerContentOut);
         }
 
-        private async Task AllowUserToWatch(bool isAllowed, string ConnectId)
+        private async Task AllowUserNotToWatch(bool isAllowed, string ConnectId)
         {
-            await Clients.Client(ConnectId).SendAsync("IsAllowed", isAllowed);
+            await Clients.Client(ConnectId).SendAsync("IsNotAllowed", isAllowed);
         }
 
         private bool CheckMaxViews(int watcherId)
