@@ -12,8 +12,8 @@ using TheCircleBackend.DBInfra;
 namespace TheCircleBackend.Migrations
 {
     [DbContext(typeof(DomainContext))]
-    [Migration("20230613203304_add tbl")]
-    partial class addtbl
+    [Migration("20230614072008_UpdatedKey")]
+    partial class UpdatedKey
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -75,7 +75,9 @@ namespace TheCircleBackend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Key");
+                    b.HasAlternateKey("UserId");
+
+                    b.ToTable("UserKeys");
                 });
 
             modelBuilder.Entity("TheCircleBackend.Domain.Models.LogItem", b =>

@@ -15,8 +15,8 @@ namespace TheCircleBackend.Hubs
         private readonly ILogItemRepo logItemRepo;
         private readonly LogHelper logHelper;
 
-        public ChatHub(IChatMessageRepository messageRepository, ISecurityService security)
-        public ChatHub(IChatMessageRepository messageRepository, ILogItemRepo logItemRepo, ILogger<ChatHub> logger)
+
+        public ChatHub(IChatMessageRepository messageRepository, ILogItemRepo logItemRepo, ILogger<ChatHub> logger, ISecurityService security)
         {
             this.messageRepository = messageRepository;
             this.security = security;
@@ -57,12 +57,13 @@ namespace TheCircleBackend.Hubs
             var publicKeyUser = security.GetUserKeys(incomingChatMessage.SenderUserId).pubKey;
 
             // Checks if integrity is held.
-            bool HeldIntegrity = security.HoldsIntegrity(incomingChatMessage, incomingChatMessage.Signature, publicKeyUser);
+            bool HeldIntegrity =
+                security.HoldsIntegrity(incomingChatMessage, incomingChatMessage.Signature, publicKeyUser);
 
             if (HeldIntegrity)
             {
                 throw new ArgumentException("Message has been tampered. Try later");
-            } 
+            }
             else
             {
                 // Persisteer in database. Tabel chats (StreamId, UserId, DatumTijd en Content)
@@ -96,9 +97,11 @@ namespace TheCircleBackend.Hubs
                 };
 
                 // Send new data to client.
-                await Clients.All.SendAsync($"ReceiveChat-{incomingChatMessage.OriginalContent.ReceiverId}", OutcomingMessage);
+                await Clients.All.SendAsync($"ReceiveChat-{incomingChatMessage.OriginalContent.ReceiverId}",
+                    OutcomingMessage);
             }
-            
+        }
+
         public override Task OnConnectedAsync()
         {
             string connectionId = Context.ConnectionId;
