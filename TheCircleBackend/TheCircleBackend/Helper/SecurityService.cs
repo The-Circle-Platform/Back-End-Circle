@@ -92,8 +92,16 @@ namespace TheCircleBackend.Helper
             } catch{
                 return false;
             }
-            
+        }
 
+        public string? EncryptData(object payload, string privateKey)
+        {
+            return securityHelper.EncryptData(payload, privateKey); 
+        }
+
+        public byte[]? DecryptData(string payload, string publicKey)
+        {
+            return securityHelper.DecryptData(payload, publicKey);
         }
     }
 }

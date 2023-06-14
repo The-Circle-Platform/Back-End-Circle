@@ -13,5 +13,7 @@ namespace TheCircleBackend.DomainServices.IHelpers
 
         bool VerifySignedData(byte[] DataToVerify, RSAParameters Key, byte[] SignedData);
         byte[]? SignData(byte[] DataToSign, RSAParameters Key);
+        string? EncryptData(object payload, string privateKey);
+        byte[]? DecryptData(string payload, string publicKey);
     }
 }
