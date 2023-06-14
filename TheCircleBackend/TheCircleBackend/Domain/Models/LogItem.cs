@@ -10,7 +10,9 @@ namespace TheCircleBackend.Domain.Models
         [Required]
         public string Ip { get; set; }
         [Required]
-        public string Location { get; set; }
+        public string Endpoint { get; set; }
+        [Required]
+        public string SubjectUser { get; set; }
         [Required]
         public string Action { get; set; }
     }

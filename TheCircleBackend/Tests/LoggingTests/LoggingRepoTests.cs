@@ -23,9 +23,9 @@ namespace Tests.LoggingTests
             var domainContext = new DomainContext(dbContextOptions);
             var ilogger = new Mock<ILogger<EFLogItemRepo>>();
             var repo = new EFLogItemRepo(domainContext, ilogger.Object);
-            var sut = new LogHelper(repo, ilogger.Object, "Testing");
+            var sut = new LogHelper(repo, ilogger.Object);
             //act
-            sut.UserLog("127.0.0.1", "This is a test");
+            sut.AddUserLog("127.0.0.1", "POST User", "1", "This is a test");
             //assert
             var result = domainContext.LogItem;
             Assert.True(result.Count() == 1);

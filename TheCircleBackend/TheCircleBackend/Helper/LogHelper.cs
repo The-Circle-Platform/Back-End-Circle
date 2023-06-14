@@ -14,28 +14,37 @@ namespace TheCircleBackend.Helper
         private LogItem logItem;
         private readonly ILogItemRepo logItemRepo;
 
-        public LogHelper(ILogItemRepo logItemRepo, ILogger logger, string location)
+        public LogHelper(ILogItemRepo logItemRepo, ILogger logger)
         {
             this.logItemRepo = logItemRepo;
             this.logger = logger;
-            this.location = location;
         }
 
 
-        public void UserLog(string ip, string msg)
+        public IActionResult AddUserLog(string ip, string endpoint, string subjectUser, string msg)
         {
-            SetLogItem(ip, msg);
-            
-            this.logItemRepo.Add(logItem);
+            SetLogItem(ip, endpoint, subjectUser, msg);
+            try
+            {
+                this.logItemRepo.Add(logItem);
+                return Ok("Log added");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return BadRequest(e);
+            }
+            //this.logItemRepo.Add(logItem);
             //this.logger.LogTrace("DateTime: {date} | IP: {ip} | User: {user} | At: {location} | Action: {msg}", DateTime.Now, ip, 1, location, msg);
         }
 
-        private void SetLogItem(string ip, string msg)
+        private void SetLogItem(string ip, string endpoint, string subjectUser, string msg)
         {
             logItem = new LogItem();
             logItem.DateTime = DateTime.Now;
             logItem.Ip = ip;
-            logItem.Location = location;
+            logItem.Endpoint = endpoint;
+            logItem.SubjectUser = subjectUser;
             logItem.Action = msg;
         }
     }

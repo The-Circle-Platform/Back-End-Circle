@@ -20,7 +20,7 @@ namespace TheCircleBackend.Hubs
         {
             this.messageRepository = messageRepository;
             this.security = security;
-            this.logHelper = new LogHelper(logItemRepo, logger, "ChatHub");
+            this.logHelper = new LogHelper(logItemRepo, logger);
         }
 
 

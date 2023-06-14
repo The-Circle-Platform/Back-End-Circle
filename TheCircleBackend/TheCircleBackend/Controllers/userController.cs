@@ -4,6 +4,7 @@ using TheCircleBackend.Domain.Models;
 using TheCircleBackend.DomainServices.IRepo;
 using Microsoft.Extensions.Logging;
 using TheCircleBackend.Helper;
+using System.Security.Claims;
 
 namespace TheCircleBackend.Controllers
 {
@@ -20,7 +21,7 @@ namespace TheCircleBackend.Controllers
         {
             this.websiteUserRepo = websiteUserRepo;
             this.logItemRepo = logItemRepo;
-            this.logHelper = new LogHelper(logItemRepo, logger, "UserController");
+            this.logHelper = new LogHelper(logItemRepo, logger);
 
         }
 
@@ -48,8 +49,12 @@ namespace TheCircleBackend.Controllers
         [HttpPost]
         public IActionResult post(WebsiteUser user)
         {
-            Console.WriteLine(this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString());
-            logHelper.UserLog(this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString(), "User " + 1 + " POST WebsiteUser with ID: " + user.Id + ", Name: " + user.UserName);
+            var ip = this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
+            var endpoint = "POST /user";
+            var currentUser = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var action = $"WebsiteUser with ID: {user.Id}, Name: {user.UserName}";
+            logHelper.AddUserLog(ip, endpoint, currentUser, action);
+
             Console.WriteLine(user);
             try
             {
@@ -66,18 +71,22 @@ namespace TheCircleBackend.Controllers
         [HttpPut("{id}")]
         public IActionResult put(WebsiteUser user, int id)
         {
-            logHelper.UserLog(Request.HttpContext.Connection.RemoteIpAddress.ToString(), "User " + 1 + " PUT WebsiteUser with ID: " + user.Id + ", Name: " + user.UserName);
-            Console.WriteLine(id);
-            try
-            {
-                websiteUserRepo.Update(user, id);
-                return Ok();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return BadRequest(e);
-            }
+            var ip = this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
+            var endpoint = $"PUT /user/{id}";
+            var subjectUser = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var action = $"WebsiteUser with ID: {user.Id}, Name: {user.UserName}";
+            return logHelper.AddUserLog(ip, endpoint, subjectUser, action); Console.WriteLine(id);
+
+            //try
+            //{
+            //    websiteUserRepo.Update(user, id);
+            //    return Ok();
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine(e);
+            //    return BadRequest(e);
+            //}
         }
     }
 }
