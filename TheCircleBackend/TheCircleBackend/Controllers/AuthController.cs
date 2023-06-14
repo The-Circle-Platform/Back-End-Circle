@@ -11,6 +11,7 @@ using TheCircleBackend.Domain.DTO;
 using TheCircleBackend.Domain.Models;
 using TheCircleBackend.DomainServices;
 using TheCircleBackend.DomainServices.IRepo;
+using TheCircleBackend.DomainServices.IHelpers;
 
 [Route("api/auth")]
 [ApiController]
@@ -20,23 +21,36 @@ public class AuthController : ControllerBase
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IConfiguration _configuration;
     private readonly IWebsiteUserRepo _websiteUserRepo;
+    private readonly ISecurityService securityService;
 
     public AuthController(
         UserManager<IdentityUser> userManager,
         RoleManager<IdentityRole> roleManager,
         IConfiguration configuration,
-        IWebsiteUserRepo _websiteUserRepo)
+        IWebsiteUserRepo _websiteUserRepo,
+        ISecurityService securityService)
     {
         _userManager = userManager;
         _roleManager = roleManager;
         _configuration = configuration;
         this._websiteUserRepo = _websiteUserRepo;
+        this.securityService = securityService;
     }
 
     [HttpPost]
     [Route("login")]
-    public async Task<IActionResult> Login(LoginDTO dto)
+    public async Task<IActionResult> Login(LoginDTO dto, [FromBody] UserIncomingDTO userIncomingDTO)
     {
+        // Gets keypair of Admin
+        var KeyPair = securityService.GetKeys(userIncomingDTO.SenderUserId);
+
+        bool HoldsIntegrity = securityService.HoldsIntegrity(userIncomingDTO.OriginalUserRequest, userIncomingDTO.Signature, KeyPair.pubKey);
+
+        if (!HoldsIntegrity)
+        {
+            return BadRequest();
+        }
+
         var user = await _userManager.FindByNameAsync(dto.UserName);
         if (user != null && await _userManager.CheckPasswordAsync(user, dto.Password))
         {

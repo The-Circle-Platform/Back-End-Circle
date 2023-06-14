@@ -6,7 +6,7 @@ namespace TheCircleBackend.Domain.DTO
     public class UserIncomingDTO: IContent
     {
         //One of these elements are being used in the signature.
-        public UserRequestBody OriginalUserRequest { get; set; }
+        public LoginBody OriginalUserRequest { get; set; }
     }
 
     public class UserRequestBody
@@ -17,14 +17,14 @@ namespace TheCircleBackend.Domain.DTO
 
     public class UserContentDTO : IContent
     {
-        public UserBody OriginalData { get; set; }
+        public WebsiteUser? OriginalData { get; set; }
+        public List<WebsiteUser>? OriginalList { get; set; }
         public string ServerPublicKey { get; set; }
     }
 
-    public class UserBody { 
-        public int OwnUserId { get; set; }
-        public List<WebsiteUser>? OriginalUserList { get; set; }
-        public WebsiteUser? OriginalUser { get; set; }
+    public class LoginBody {
+        public string UserName { get; set; }
+        public string Password { get; set; }
     }
 
 }

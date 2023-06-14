@@ -39,7 +39,7 @@ namespace TheCircleBackend.Controllers
             var UserKeys = securityService.GetKeys(userIncomingDTO.SenderUserId);
 
             // Checks on integrity
-            bool HoldsIntegrity = securityService.HoldsIntegrity(userIncomingDTO.OwnUserId, userIncomingDTO.Signature, UserKeys.pubKey);
+            bool HoldsIntegrity = securityService.HoldsIntegrity(userIncomingDTO.OriginalUserRequest, userIncomingDTO.Signature, UserKeys.pubKey);
 
             if (!HoldsIntegrity)
             {
@@ -56,10 +56,7 @@ namespace TheCircleBackend.Controllers
             // Packs in dto to client.
             var DTO = new UserContentDTO()
             {
-                OriginalData = new()
-                {
-                    OriginalUserList = users
-                },
+                OriginalList = users,
                 ServerPublicKey = UserKeys.pubKey,
                 Signature = Signature
             };
@@ -97,11 +94,7 @@ namespace TheCircleBackend.Controllers
 
             var DTO = new UserContentDTO()
             {
-                OriginalData = new()
-                {
-                    OriginalUser = user,
-                    OwnUserId = userIncomingDTO.SenderUserId
-                },
+                OriginalData = user,
                 ServerPublicKey = UserKeys.pubKey,
                 Signature = Signature
             };
