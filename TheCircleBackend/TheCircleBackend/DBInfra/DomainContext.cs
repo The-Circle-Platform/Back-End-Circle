@@ -9,6 +9,7 @@ namespace TheCircleBackend.DBInfra
         public DbSet<LogItem> LogItem { get; set; } = null!;
         public DbSet<ChatMessage> ChatMessage { get; set; } = null!;
         public DbSet<Viewer> Viewer { get; set; } = null!;
+        public DbSet<KeyStore> UserKeys { get; set; } = null!;
 
         public  DomainContext(DbContextOptions<DomainContext> options) : base(options) { }
 
@@ -42,6 +43,9 @@ namespace TheCircleBackend.DBInfra
                 .HasOne(v => v.Stream)
                 .WithMany(s => s.ViewList)
                 .HasForeignKey(v => v.StreamId);
+            
+            modelBuilder.Entity<KeyStore>().HasKey(ks => ks.Id);
+            modelBuilder.Entity<KeyStore>().HasAlternateKey(ks => ks.UserId);
 
             // Model LogItem
             modelBuilder.Entity<LogItem>().HasKey(logItem => new { logItem.Id });

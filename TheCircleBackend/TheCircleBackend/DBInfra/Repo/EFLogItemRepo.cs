@@ -19,5 +19,15 @@ namespace TheCircleBackend.DBInfra.Repo
             context.LogItem.Add(logItem);
             context.SaveChanges();
         }
+
+        public IEnumerable<LogItem> GetAllLogItems()
+        {
+            return context.LogItem;
+        }
+
+        public LogItem GetLogItemById(int id)
+        {
+            return context.LogItem.Where(l => l.Id == id).FirstOrDefault();
+        }
     }
 }

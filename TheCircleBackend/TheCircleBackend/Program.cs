@@ -8,6 +8,8 @@ using TheCircleBackend.DBInfra;
 using TheCircleBackend.DBInfra.Repo;
 using TheCircleBackend.DomainServices.IRepo;
 using TheCircleBackend.Hubs;
+using TheCircleBackend.DomainServices.IHelpers;
+using TheCircleBackend.Helper;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
@@ -60,12 +62,13 @@ builder.Services.AddAuthentication(options =>
 
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 builder.Services.AddScoped<IWebsiteUserRepo, EFWebsiteUserRepo>();
 builder.Services.AddScoped<IChatMessageRepository, EFChatMessageRepo>();
 builder.Services.AddScoped<ILogItemRepo, EFLogItemRepo>();
 builder.Services.AddScoped<IViewerRepository, EFViewerRepo>();
+builder.Services.AddScoped<ISecurityHelper, SecurityHelper>();
+builder.Services.AddScoped<ISecurityService, SecurityService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
