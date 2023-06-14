@@ -75,18 +75,18 @@ namespace TheCircleBackend.Controllers
             var endpoint = $"PUT /user/{id}";
             var subjectUser = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
             var action = $"WebsiteUser with ID: {user.Id}, Name: {user.UserName}";
-            return logHelper.AddUserLog(ip, endpoint, subjectUser, action); Console.WriteLine(id);
+            logHelper.AddUserLog(ip, endpoint, subjectUser, action); Console.WriteLine(id);
 
-            //try
-            //{
-            //    websiteUserRepo.Update(user, id);
-            //    return Ok();
-            //}
-            //catch (Exception e)
-            //{
-            //    Console.WriteLine(e);
-            //    return BadRequest(e);
-            //}
+            try
+            {
+                websiteUserRepo.Update(user, id);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return BadRequest(e);
+            }
         }
     }
 }

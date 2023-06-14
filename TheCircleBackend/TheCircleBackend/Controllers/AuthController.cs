@@ -11,6 +11,8 @@ using TheCircleBackend.Domain.DTO;
 using TheCircleBackend.Domain.Models;
 using TheCircleBackend.DomainServices;
 using TheCircleBackend.DomainServices.IRepo;
+using TheCircleBackend.Controllers;
+using TheCircleBackend.Helper;
 
 [Route("api/auth")]
 [ApiController]
@@ -20,17 +22,21 @@ public class AuthController : ControllerBase
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IConfiguration _configuration;
     private readonly IWebsiteUserRepo _websiteUserRepo;
+    private readonly LogHelper logHelper;
 
     public AuthController(
         UserManager<IdentityUser> userManager,
         RoleManager<IdentityRole> roleManager,
         IConfiguration configuration,
-        IWebsiteUserRepo _websiteUserRepo)
+        IWebsiteUserRepo _websiteUserRepo, 
+        ILogItemRepo logItemRepo, 
+        ILogger<AuthController> logger)
     {
         _userManager = userManager;
         _roleManager = roleManager;
         _configuration = configuration;
         this._websiteUserRepo = _websiteUserRepo;
+        this.logHelper = new LogHelper(logItemRepo, logger);
     }
 
     [HttpPost]
@@ -68,6 +74,13 @@ public class AuthController : ControllerBase
     [Route("register")]
     public async Task<IActionResult> Register(RegisterDTO dto)
     {
+        // TODO Get Proper User
+        var ip = this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
+        var endpoint = "POST /auth/register";
+        var currentUser = "1";
+        var action = $"Register with Email: {dto.Email}, Username: {dto.Username}";
+        logHelper.AddUserLog(ip, endpoint, currentUser, action);
+
         var userExists = await _userManager.FindByNameAsync(dto.Username);
         if (userExists != null)
             return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
