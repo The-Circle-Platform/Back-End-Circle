@@ -5,7 +5,6 @@ using TheCircleBackend.Domain.Models;
 namespace TheCircleBackend.Domain.DTO
 {
     public abstract class IChatDTO {
-        public int UserId { get; set; }
         public int ReceiverId { get; set; }
     }
 

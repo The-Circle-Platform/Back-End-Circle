@@ -1,31 +1,42 @@
 ﻿using System.Security.Cryptography;
+using TheCircleBackend.DBInfra.Repo;
 using TheCircleBackend.DomainServices.IHelpers;
+using TheCircleBackend.DomainServices.IRepo;
 
 namespace TheCircleBackend.Helper
 {
     public class SecurityService : ISecurityService
     {
         private readonly ISecurityHelper securityHelper;
+        private readonly IKeyRepo keyRepo;
 
-        public SecurityService(ISecurityHelper securityHelper)
+        public SecurityService(ISecurityHelper securityHelper, IKeyRepo keyRepo)
         {
             this.securityHelper = securityHelper;
+            this.keyRepo = keyRepo;
         }
 
         //Checks if data is tampered.
         public bool HoldsIntegrity(object inputData, byte[] signature, string InputPublicKey)
         {
-            //Convert inputdata to bytes
-            byte[] inputBytes = securityHelper.ConvertItem(inputData);
-            
-            // Convert key to RSAParameter
-            RSAParameters publicKey = securityHelper.DeserialiseKey(InputPublicKey);
+            try
+            {
+                //Convert inputdata to bytes
+                byte[] inputBytes = securityHelper.ConvertItem(inputData);
 
-            //Check data.
-            bool isValidData = securityHelper.VerifySignedData(inputBytes, publicKey, signature);
-            
-            //Checks if data is valid and holds integrity
-            return isValidData;
+                // Convert key to RSAParameter
+                RSAParameters publicKey = securityHelper.DeserialiseKey(InputPublicKey);
+
+                //Check data.
+                bool isValidData = securityHelper.VerifySignedData(inputBytes, publicKey, signature);
+
+                //Checks if data is valid and holds integrity
+                return isValidData;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         // Generates keypair.
@@ -46,22 +57,30 @@ namespace TheCircleBackend.Helper
             return securityHelper.SignData(GeneratedData, GeneratedPrivateKey);
         }
         
-        public (RSAParameters privKey, RSAParameters pubKey) GetKeys(int userId)
+        public (string privKey, string pubKey) GetKeys(int userId)
         {
             //Get userinfo
-
-            //Deserialize keystring 
-            throw new NotImplementedException();
+            try
+            {
+                var KeyPair = keyRepo.GetKeys(userId);
+                if(KeyPair == null)
+                {
+                    throw new InvalidOperationException("Keys not found");
+                }
+                else
+                {
+                    return KeyPair.Value;
+                }
+            }
+            catch(InvalidOperationException e)
+            {
+                throw e;
+            }
         }
 
         public byte[] ConvertItemIntoBytes(object item, string key)
         {
             return securityHelper.ConvertItem(item);
-        }
-
-        public (string privKey, string pubKey) GetUserKeys(int id)
-        {
-            throw new NotImplementedException();
         }
     }
 }

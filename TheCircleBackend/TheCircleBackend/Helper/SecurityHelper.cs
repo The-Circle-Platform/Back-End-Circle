@@ -24,11 +24,19 @@ namespace TheCircleBackend.Helper
 
         public RSAParameters DeserialiseKey(string key)
         {
-            using (StringReader reader = new StringReader(key))
+            try
             {
-                XmlSerializer serializer = new XmlSerializer(typeof(RSAParameters));
-                return (RSAParameters)serializer.Deserialize(reader);
+                using (StringReader reader = new StringReader(key))
+                {
+                    XmlSerializer serializer = new XmlSerializer(typeof(RSAParameters));
+                    return (RSAParameters)serializer.Deserialize(reader);
+                }
             }
+            catch
+            {
+                throw new Exception("Deserialisatie is misgegaan.");
+            }
+            
         }
 
         public (RSAParameters privateKey, RSAParameters publicKey) GenerateKeyPairs()
