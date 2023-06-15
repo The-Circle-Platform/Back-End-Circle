@@ -1,80 +1,44 @@
 ﻿using System;
+using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
+
 
 namespace TheCircleBackend.Hubs
 {
     public class LivestreamHub : Hub
     {
-        #region snippet1
-        public ChannelReader<int> Counter(
-            int count,
-            int delay,
-            CancellationToken cancellationToken)
+        private readonly string _id;
+
+        public LivestreamHub()
         {
-            var channel = Channel.CreateUnbounded<int>();
-
-            // We don't want to await WriteItemsAsync, otherwise we'd end up waiting 
-            // for all the items to be written before returning the channel back to
-            // the client.
-            _ = WriteItemsAsync(channel.Writer, count, delay, cancellationToken);
-
-            Console.WriteLine("testinggg");
-
-            return channel.Reader;
+            _id = Guid.NewGuid().ToString();
         }
 
+        public string Call() => _id;
 
 
-
-        private async Task WriteItemsAsync(
-            ChannelWriter<int> writer,
-            int count,
-            int delay,
-            CancellationToken cancellationToken)
+        public async Task Upload(IAsyncEnumerable<Data> dataStream)
         {
-            Exception localException = null;
-            try
+            await foreach (var data in dataStream)
             {
-                for (var i = 0; i < count; i++)
-                {
-                    await writer.WriteAsync(i, cancellationToken);
-
-                    // Use the cancellationToken in other APIs that accept cancellation
-                    // tokens so the cancellation can flow down to them.
-                    await Task.Delay(delay, cancellationToken);
-                }
-            }
-            catch (Exception ex)
-            {
-                localException = ex;
-            }
-            finally
-            {
-                writer.Complete(localException);
+                Console.WriteLine("Received Data: {0},{1},{2}", data.Name, data.Stream , _id);
             }
         }
-        #endregion
+    }
+}
 
-        #region snippet2
-        public async Task UploadStream(ChannelReader<string> stream)
-        {
-            while (await stream.WaitToReadAsync())
-            {
-                while (stream.TryRead(out var item))
-                {
-                    // do something with the stream item
-                    Console.WriteLine(item);
-                    Console.WriteLine("testinggg22");
-                }
-            }
-        }
-        #endregion
+public class Data
+{
+    public string Name { get; set; }
+    public Task<string>[] Stream { get; set; }
 
-
-
-
+    public Data(string name, Task<string>[] stream)
+    {
+        Name = name;
+        Stream = stream;
     }
 }
 
