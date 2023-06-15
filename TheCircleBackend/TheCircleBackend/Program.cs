@@ -56,7 +56,11 @@ builder.Services.AddAuthentication(options =>
 });
 
 
-
+builder.Services.AddSignalR(o =>
+{
+    o.EnableDetailedErrors = true;
+    o.MaximumReceiveMessageSize = 3024000;
+});
 
 
 // Add services to the container.

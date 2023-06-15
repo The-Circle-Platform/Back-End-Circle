@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading.Channels;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
@@ -11,6 +12,7 @@ namespace TheCircleBackend.Hubs
     public class LivestreamHub : Hub
     {
         private readonly string _id;
+        private string[] record;
 
         public LivestreamHub()
         {
@@ -20,14 +22,26 @@ namespace TheCircleBackend.Hubs
         public string Call() => _id;
 
 
-        public async Task Upload(IAsyncEnumerable<Data> dataStream)
+        public async Task Upload(Test test)
         {
-            await foreach (var data in dataStream)
-            {
-                Console.WriteLine("Received Data: {0},{1},{2}", data.Name, data.Stream , _id);
-            }
+            record.Append<string>(test.stream);
+            Console.WriteLine("incoming:");
+            Console.WriteLine(test.name + " " + test.stream);
+            return Clients.All.SendAsync("ImageMessage", test.stream);
+
+        }
+
+        public Task LivestreamForClient(Test test)
+        {
+            return Clients.All.SendAsync("ImageMessage", test.stream);
         }
     }
+}
+
+public class Test
+{
+    public string name { get; set; }
+    public string stream { get; set; }
 }
 
 public class Data
