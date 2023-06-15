@@ -4,17 +4,12 @@ using TheCircleBackend.Domain.Models;
 
 namespace TheCircleBackend.Domain.DTO.EncryptedPayload
 {
-    public abstract class IChatDTO
-    {
-        public int ReceiverId { get; set; }
-    }
-
-    public class ChatMessageDTOIncoming : IChatDTO
+    public class ChatMessageDTOIncoming : IContent
     {
         public ChatMessage? Message { get; set; }
     }
 
-    public class ChatMessageDTOOutcoming : IChatDTO
+    public class ChatMessageDTOOutcoming : IContent
     {
         public List<ChatMessage>? Messages { get; set; }
     }
