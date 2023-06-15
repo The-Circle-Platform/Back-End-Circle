@@ -5,6 +5,7 @@ using TheCircleBackend.DomainServices.IRepo;
 using Microsoft.Extensions.Logging;
 using TheCircleBackend.Helper;
 using System.Security.Claims;
+using System.Linq.Expressions;
 
 namespace TheCircleBackend.Controllers
 {
@@ -88,5 +89,45 @@ namespace TheCircleBackend.Controllers
                 return BadRequest(e);
             }
         }
+        [HttpGet("{id}/pfp")]
+        public IActionResult getPfp(WebsiteUser pfp)
+        {
+            string pic = websiteUserRepo.GetById(pfp.Id).Base64Image;
+            Console.WriteLine(pfp);
+            var user = websiteUserRepo.GetById(pfp.Id).Base64Image;
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(user);
+
+        }
+
+        [HttpPut("{id}/pfp")]
+        public IActionResult postImage(string image, int id)
+        {
+            var user = this.websiteUserRepo.GetById(id);
+
+            var ip = this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
+            var endpoint = "POST /user";
+            var currentUser = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var action = $"WebsiteUser with ID: {user.Id}, Name: {user.UserName}";
+            logHelper.AddUserLog(ip, endpoint, currentUser, action);
+
+            Console.WriteLine(user);
+            try
+            {
+                user.Base64Image = image;
+                this.websiteUserRepo.Update(user,id);
+                return Ok("user updated");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return BadRequest(e);
+            }
+        }
+
     }
 }
