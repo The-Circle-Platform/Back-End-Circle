@@ -37,17 +37,17 @@ namespace Tests.ServiceTest
                 }
             };
 
-            var KeyPair = ServiceInQuestion.GenerateKeyPairs;
+            var KeyPair = ServiceInQuestion.GenerateKeyPairs();
 
             var TestDataBytes = ServiceInQuestion.ConvertItem(testData);
 
             var PublicKey = KeyPair.publicKey;
             var PrivateKey = KeyPair.privateKey;
 
-            var Signature = ServiceInQuestion.SignData(TestDataBytes, PrivateKey);
+            var Signature = ServiceInQuestion.SignData(TestDataBytes, PrivateKey, true);
             //Act
 
-            var Result = ServiceInQuestion.VerifySignedData(TestDataBytes, PublicKey, Signature);
+            var Result = ServiceInQuestion.VerifySignedData(TestDataBytes, PublicKey, Signature, false);
             //Assert
             Assert.True(Result);
         }
@@ -86,10 +86,10 @@ namespace Tests.ServiceTest
             var PublicKey = OtherKeyPair.publicKey;
             var PrivateKey = KeyPair.privateKey;
 
-            var Signature = ServiceInQuestion.SignData(TestDataBytes, PrivateKey);
+            var Signature = ServiceInQuestion.SignData(TestDataBytes, PrivateKey, true);
             //Act
 
-            var Result = ServiceInQuestion.VerifySignedData(TestDataBytes, PublicKey, Signature);
+            var Result = ServiceInQuestion.VerifySignedData(TestDataBytes, PublicKey, Signature, false);
             //Assert
             Assert.False(Result);
         }
@@ -97,8 +97,8 @@ namespace Tests.ServiceTest
         [Fact]
         public void ExternalKeysShouldBeCompatibel()
         {
-            var PrivateKey = "<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<RSAParameters xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <D>K6uQu2D0LQHSieBb2tZUOADlIaEShfzgCZpfze4KWXSxLQ5Lqg0wZieQmqI9j7Hz4gCiChHvm2zZDh76aHDYaAkfny8v/lusNZZIlBDPNjt5AlcUfK06V+ZsxFJxxP/uBZOdQ5QWtn/3G9BJBpKyzBvXLZf5zociXWi3pDH7QSU=</D>\r\n  <DP>nzhz61N+mH5L+r4cADSKRomhFLx3+ci4Ruaqqs4zJMXDGT98cUjqLOFXBO/SYOthxJp/0Y2Uv7kF2hxNeRJyVQ==</DP>\r\n  <DQ>AujHv1YV/IKR5X5tRprT19cA8mofWfefedyFtW/sWrVS/nCzem9WOfS85MipjZg3VVOfMM4iiupFBLFP2K79zQ==</DQ>\r\n  <Exponent>AQAB</Exponent>\r\n  <InverseQ>gyIEECWXneF088Ut2Q/2Gv3Uj83f0gObg2TqZrhQakBD+8KwBx29Meo5toZjkcGfFEKMGpDhW4wBJZPnouRU3A==</InverseQ>\r\n  <Modulus>t+wRShu6zgmAXX3VDHTrwPoDj+dTT5DBkyoW31dpKli3XOzYkl2VOD8nJB/rPL85VRQe6EKfb7Io8m2bmqWt7b+oeKJPeg1nUC5YvkT6BmkgQ4PegGboXM1mHk9pDgBTBHI8RGJzIWqJRTNVxznIMRQWw4eX6i6wK2ikjkEKKqk=</Modulus>\r\n  <P>3MSwPZFTa2g97FFzwXqUvooyUWyN7+guGaq3Ak/dyTcPWBHh6XnkoCn2vWhSgL2fkhjJX3kFLJAZlMsgD2y+Cw==</P>\r\n  <Q>1UYO7HrwIoWOn04byQy6UiO7rmi9BNxVL4jA/ZqSOJseSTgaGNwb3DIRnfCiJk4nYsdzPIOJLXn3r1fHTPuOmw==</Q>\r\n</RSAParameters>";
-            var PublicKey = "<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<RSAParameters xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <Exponent>AQAB</Exponent>\r\n  <Modulus>t+wRShu6zgmAXX3VDHTrwPoDj+dTT5DBkyoW31dpKli3XOzYkl2VOD8nJB/rPL85VRQe6EKfb7Io8m2bmqWt7b+oeKJPeg1nUC5YvkT6BmkgQ4PegGboXM1mHk9pDgBTBHI8RGJzIWqJRTNVxznIMRQWw4eX6i6wK2ikjkEKKqk=</Modulus>\r\n</RSAParameters>";
+            var PrivateKey = "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAMJefUpb8rGnf7WiUtC4funvWKjgLQIoXrUbJItDb2Q5Dq4NAaYMtih/2iq4eABCn9keb+NWe2F2ZcbyI7iLwj+UiLVpCffgj3CfoeYExE1RqLn1S5CXI9kMJNaTsQXPSA/BnjppX+5Z0zAI+TZef44B6NwRIsE/dYb0dtMejT+VAgMBAAECgYAJ+JLw15qxpmgUx0j8UBqioZaowydL7wo8vDG5uzHhsFOidiRZgllt5nEos+HkEYblunv+65bUvyAlfpJ6iyDhzxgs9fSapdkhiz057BVkmwOqzIDDefHjpqh00k+sEZWeZKq0flXG12yF8LI4c1qXnjTnTUCVzIJXhe4kPqufGQJBAMkIY+8QG4EO4RsvOkdS4Bmz+GSZr7n9FLKsWEQU958v99aGC4T8OLaMFpztRrDwj7tZcvEWl7qVHbI5aTrjnbcCQQD3g6oZdQSLEvU4F4NIiUijTMtMgImzKujbhLdchETqrG0G4UUzGl5Itp/NMhLjscsykgl5mlI/4N2We2Hoi80TAkAEP5olDjkWlCLruSbJJRY5VNVWAu10x8VtNTk0TyEgixn4vaJ2sAHe0b0UmesZiCvxcKV+NNUGC2qyPoZbyT2nAkEA4VhTPngmWcQ51Aa8NQcgReS91vnT5HZ1qJ5tHmMiJ5IydSgVi5A/NO5oETa8secGPBVvYPIaXiQJOl885a6aVwJBALIPMLuUps82cKIanFRh0OC8vIZwtFgv8PUpCAYDG1LKo6RDaSoRL7qtighAagxp+pYcU0rQAyuwHf9mHGiyESM=";
+            var PublicKey = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCXn1KW/Kxp3+1olLQuH7p71io4C0CKF61GySLQ29kOQ6uDQGmDLYof9oquHgAQp/ZHm/jVnthdmXG8iO4i8I/lIi1aQn34I9wn6HmBMRNUai59UuQlyPZDCTWk7EFz0gPwZ46aV/uWdMwCPk2Xn+OAejcESLBP3WG9HbTHo0/lQIDAQAB";
             //Arrange
 
             var ServiceInQuestion = new SecurityHelper();
@@ -126,36 +126,12 @@ namespace Tests.ServiceTest
 
             var TestDataBytes = ServiceInQuestion.ConvertItem(testData);
 
-            var Signature = ServiceInQuestion.SignData(TestDataBytes, DeserialisedPrivateKey);
+            var Signature = ServiceInQuestion.SignData(TestDataBytes, DeserialisedPrivateKey, true);
             //Act
 
-            var Result = ServiceInQuestion.VerifySignedData(TestDataBytes, DeserialisedPublicKey, Signature);
+            var Result = ServiceInQuestion.VerifySignedData(TestDataBytes, DeserialisedPublicKey, Signature, false);
             //Assert
             Assert.True(Result);
-        }
-
-        [Fact]
-        public void TestEncryptiom()
-        {
-            //Arrange
-            var PrivateKey = "<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<RSAParameters xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <D>K6uQu2D0LQHSieBb2tZUOADlIaEShfzgCZpfze4KWXSxLQ5Lqg0wZieQmqI9j7Hz4gCiChHvm2zZDh76aHDYaAkfny8v/lusNZZIlBDPNjt5AlcUfK06V+ZsxFJxxP/uBZOdQ5QWtn/3G9BJBpKyzBvXLZf5zociXWi3pDH7QSU=</D>\r\n  <DP>nzhz61N+mH5L+r4cADSKRomhFLx3+ci4Ruaqqs4zJMXDGT98cUjqLOFXBO/SYOthxJp/0Y2Uv7kF2hxNeRJyVQ==</DP>\r\n  <DQ>AujHv1YV/IKR5X5tRprT19cA8mofWfefedyFtW/sWrVS/nCzem9WOfS85MipjZg3VVOfMM4iiupFBLFP2K79zQ==</DQ>\r\n  <Exponent>AQAB</Exponent>\r\n  <InverseQ>gyIEECWXneF088Ut2Q/2Gv3Uj83f0gObg2TqZrhQakBD+8KwBx29Meo5toZjkcGfFEKMGpDhW4wBJZPnouRU3A==</InverseQ>\r\n  <Modulus>t+wRShu6zgmAXX3VDHTrwPoDj+dTT5DBkyoW31dpKli3XOzYkl2VOD8nJB/rPL85VRQe6EKfb7Io8m2bmqWt7b+oeKJPeg1nUC5YvkT6BmkgQ4PegGboXM1mHk9pDgBTBHI8RGJzIWqJRTNVxznIMRQWw4eX6i6wK2ikjkEKKqk=</Modulus>\r\n  <P>3MSwPZFTa2g97FFzwXqUvooyUWyN7+guGaq3Ak/dyTcPWBHh6XnkoCn2vWhSgL2fkhjJX3kFLJAZlMsgD2y+Cw==</P>\r\n  <Q>1UYO7HrwIoWOn04byQy6UiO7rmi9BNxVL4jA/ZqSOJseSTgaGNwb3DIRnfCiJk4nYsdzPIOJLXn3r1fHTPuOmw==</Q>\r\n</RSAParameters>";
-            var PublicKey = "<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<RSAParameters xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <Exponent>AQAB</Exponent>\r\n  <Modulus>t+wRShu6zgmAXX3VDHTrwPoDj+dTT5DBkyoW31dpKli3XOzYkl2VOD8nJB/rPL85VRQe6EKfb7Io8m2bmqWt7b+oeKJPeg1nUC5YvkT6BmkgQ4PegGboXM1mHk9pDgBTBHI8RGJzIWqJRTNVxznIMRQWw4eX6i6wK2ikjkEKKqk=</Modulus>\r\n</RSAParameters>";
-            
-            
-            var ServiceInQuestion = new SecurityHelper();
-            var KeyPair = ServiceInQuestion.GetKeyString();
-
-            var load = "Hello wereld";
-
-            var test = ServiceInQuestion.EncryptData(load, KeyPair.publicKeyString);
-
-            //Act
-            var result = ServiceInQuestion.DecryptData(test, KeyPair.privateKeyString);
-
-            //Assert
-            var encodedResult = Encoding.UTF8.GetString(result);
-
-            Assert.Equal("Hello wereld", $"{encodedResult.Replace("\"", "")}");
         }
     }
 }

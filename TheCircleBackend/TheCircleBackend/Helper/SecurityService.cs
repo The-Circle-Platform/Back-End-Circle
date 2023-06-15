@@ -25,10 +25,10 @@ namespace TheCircleBackend.Helper
                 byte[] inputBytes = securityHelper.ConvertItem(inputData);
 
                 // Convert key to RSAParameter
-                RSAParameters publicKey = securityHelper.DeserialiseKey(InputPublicKey);
+                byte[] publicKey = securityHelper.DeserialiseKey(InputPublicKey);
 
                 //Check data.
-                bool isValidData = securityHelper.VerifySignedData(inputBytes, publicKey, signature);
+                bool isValidData = securityHelper.VerifySignedData(inputBytes, publicKey, signature, false);
 
                 //Checks if data is valid and holds integrity
                 return isValidData;
@@ -52,9 +52,9 @@ namespace TheCircleBackend.Helper
             //   Converts input to a byte array.
             byte[] GeneratedData = securityHelper.ConvertItem(inputData);
 
-            RSAParameters GeneratedPrivateKey = securityHelper.DeserialiseKey(privateKey);
+            byte[] GeneratedPrivateKey = securityHelper.DeserialiseKey(privateKey);
 
-            return securityHelper.SignData(GeneratedData, GeneratedPrivateKey);
+            return securityHelper.SignData(GeneratedData, GeneratedPrivateKey, true);
         }
         
         public (string privKey, string pubKey) GetKeys(int userId)
@@ -92,16 +92,6 @@ namespace TheCircleBackend.Helper
             } catch{
                 return false;
             }
-        }
-
-        public string? EncryptData(object payload, string privateKey)
-        {
-            return securityHelper.EncryptData(payload, privateKey); 
-        }
-
-        public byte[]? DecryptData(string payload, string publicKey)
-        {
-            return securityHelper.DecryptData(payload, publicKey);
         }
     }
 }

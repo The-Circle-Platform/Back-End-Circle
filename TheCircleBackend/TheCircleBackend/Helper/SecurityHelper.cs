@@ -4,6 +4,7 @@ using System.Text;
 using System.Xml.Serialization;
 using Org.BouncyCastle.Utilities.Encoders;
 using TheCircleBackend.DomainServices.IHelpers;
+using Org.BouncyCastle.Crypto;
 
 namespace TheCircleBackend.Helper
 {
@@ -23,16 +24,11 @@ namespace TheCircleBackend.Helper
             return Encoding.UTF8.GetBytes(jsonString);
         }
 
-        public RSAParameters DeserialiseKey(string key)
+        public byte[] DeserialiseKey(string key)
         {
             try
             {
-                using (StringReader reader = new StringReader(key))
-                {
-                    
-                    XmlSerializer serializer = new XmlSerializer(typeof(RSAParameters));
-                    return (RSAParameters)serializer.Deserialize(reader);
-                }
+                return Convert.FromBase64String(key);
             }
             catch
             {
@@ -41,15 +37,11 @@ namespace TheCircleBackend.Helper
             
         }
 
-        public (RSAParameters privateKey, RSAParameters publicKey) GenerateKeyPairs()
+        public (byte[] privateKey, byte[] publicKey) GenerateKeyPairs()
         {
             var rsaService = new RSACryptoServiceProvider();
-            Console.WriteLine("PRIVATE KEY");
-            Console.WriteLine(Convert.ToBase64String(rsaService.ExportPkcs8PrivateKey()));
-            Console.WriteLine();
-            Console.WriteLine("PUBLIC KEY");
-            Console.WriteLine(Convert.ToBase64String(rsaService.ExportSubjectPublicKeyInfo()));
-            return (rsaService.ExportParameters(true), rsaService.ExportParameters(false));
+
+            return (rsaService.ExportPkcs8PrivateKey(), rsaService.ExportSubjectPublicKeyInfo());
         }
 
         // Generates keypair.
@@ -63,14 +55,22 @@ namespace TheCircleBackend.Helper
         }
 
         
-        public byte[]? SignData(byte[] DataToSign, RSAParameters Key)
+        public byte[]? SignData(byte[] DataToSign, byte[] Key, bool IsPrivate)
         {
             try
             {
                 RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
 
-                rsa.ImportParameters(Key);
-
+                if (IsPrivate)
+                {
+                    // Set rsa with private key
+                    rsa.ImportPkcs8PrivateKey(Key, out _);
+                } else
+                {
+                    // Set rsa with public key
+                    rsa.ImportSubjectPublicKeyInfo(Key, out _);
+                }
+ 
                 // Internally creates a hash of the original message and creates signature based on it, encrypted with private key.
                 return rsa.SignData(DataToSign, SHA256.Create());
             }
@@ -80,7 +80,7 @@ namespace TheCircleBackend.Helper
             }
         }
 
-        public bool VerifySignedData(byte[] DataToVerify, RSAParameters Key, byte[] SignedData)
+        public bool VerifySignedData(byte[] DataToVerify, byte[] Key, byte[] SignedData, bool IsPrivate)
         {
             try
             {
@@ -88,7 +88,16 @@ namespace TheCircleBackend.Helper
                 // key from RSAParameters.
                 RSACryptoServiceProvider RSAalg = new RSACryptoServiceProvider();
 
-                RSAalg.ImportParameters(Key);
+                if (IsPrivate)
+                {
+                    // Set rsa with private key
+                    RSAalg.ImportPkcs8PrivateKey(Key, out _);
+                }
+                else
+                {
+                    // Set rsa with public key
+                    RSAalg.ImportSubjectPublicKeyInfo(Key, out _);
+                }
 
                 // Verify the data using the signature.  Pass a new instance of SHA256
                 // to specify the hashing algorithm.
@@ -101,83 +110,14 @@ namespace TheCircleBackend.Helper
         }
 
         // OVerloaded-method: Keys are already in RSAParameter format.
-        public (string privateKeyString, string publicKeyString) GetKeyString(RSAParameters ExternalPrivateKey, RSAParameters ExternalPublicKey)
+        public (string privateKeyString, string publicKeyString) GetKeyString(byte[] ExternalPrivateKey, byte[] ExternalPublicKey)
         {
-            var sw = new StringWriter();
-            var sw2 = new StringWriter();
-            var xs = new XmlSerializer(typeof(RSAParameters));
-            var xs2 = new XmlSerializer(typeof(RSAParameters));
-            //Serializing keys
-            //Private key string
-            xs.Serialize(sw, ExternalPrivateKey);
-            //Public key string
-            xs2.Serialize(sw2, ExternalPublicKey);
 
-            string privateKey = sw.ToString();
-            string publicKey = sw2.ToString();
-
-
+            string privateKey = Convert.ToBase64String(ExternalPrivateKey);
+            string publicKey = Convert.ToBase64String(ExternalPublicKey);
 
             return (privateKey, publicKey);
         }
 
-        public string? EncryptData(object payload, string privateKey)
-        {
-            var rsaServe = new RSACryptoServiceProvider();
-            
-            RSAParameters privateKeyParam = DeserialiseKey(privateKey);
-
-            rsaServe.ImportParameters(privateKeyParam);
-
-            byte[] data = ConvertItem(payload);
-
-            var cypher = rsaServe.Encrypt(data, true);
-
-            return Convert.ToBase64String(cypher);
-        }
-
-        public byte[]? DecryptData(string payload, string publicKey)
-        {
-            var rsa = new RSACryptoServiceProvider();
-
-            var databytes = Convert.FromBase64String(payload);
-            
-            var pubKey = DeserialiseKey(publicKey);
-
-            rsa.ImportParameters(pubKey);
-
-            var plainText = rsa.Decrypt(databytes, true);
-
-            return plainText;
-        }
-
-
-
-        /*
-        public byte[]? SignHash(byte[] encrypted, RSAParameters Key)
-        {
-            RSACryptoServiceProvider rsaCSP = new RSACryptoServiceProvider();
-            SHA1Managed hash = new SHA1Managed();
-            byte[] hashedData;
-
-            //Encrypts with private key
-            rsaCSP.ImportParameters(Key);
-
-            hashedData = hash.ComputeHash(encrypted);
-            return rsaCSP.SignHash(hashedData, CryptoConfig.MapNameToOID("SHA1"));
-        }
-
-        public bool VerifyHash(RSAParameters rsaParams, byte[] signedData, byte[] signature)
-        {
-            RSACryptoServiceProvider rsaCSP = new RSACryptoServiceProvider();
-            SHA1Managed hash = new SHA1Managed();
-            byte[] hashedData;
-
-            rsaCSP.ImportParameters(rsaParams);
-            bool dataOK = rsaCSP.VerifyData(signedData, CryptoConfig.MapNameToOID("SHA1"), signature);
-            hashedData = hash.ComputeHash(signedData);
-            return rsaCSP.VerifyHash(hashedData, CryptoConfig.MapNameToOID("SHA1"), signature);
-        }
-        */
     }
 }

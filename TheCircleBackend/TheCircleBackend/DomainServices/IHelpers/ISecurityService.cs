@@ -11,7 +11,5 @@ namespace TheCircleBackend.DomainServices.IHelpers
         // byte[] EncryptHash(byte[] inputData, string privateKey);
         (string privKey, string pubKey) GetKeys(int userId);
         bool StoreKeys(int UserId, string privKey, string pubKey);
-        string? EncryptData(object payload, string privateKey);
-        byte[]? DecryptData(string payload, string publicKey);
     }
 }
