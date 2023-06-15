@@ -93,6 +93,7 @@ namespace Controllers.AuthController
 
                 AuthOutRegisterDTO authOut = new()
                 {
+                    PublicKey= KeyPair.pubKey,
                     Signature = Signature,
                     SenderUserId = WebsiteUser.Id,
                     OriginalLoad = PayLoad
@@ -189,8 +190,19 @@ namespace Controllers.AuthController
 
         [HttpPost]
         [Route("register-admin")]
-        public async Task<IActionResult> RegisterAdmin(RegisterDTO dto)
+        public async Task<IActionResult> RegisterAdmin(AuthRegisterDTO request)
         {
+
+            var keyPair = securityService.GetKeys(request.SenderUserId);
+
+            var HoldsIntegrity =
+                securityService.HoldsIntegrity(request.OriginalRegisterData, request.Signature, keyPair.pubKey);
+            if (!HoldsIntegrity)
+            {
+                return StatusCode(StatusCodes.Status406NotAcceptable,
+                    new Response { Status = "Error", Message = "Data has been tampered" });
+            }
+            var dto = request.OriginalRegisterData;
             var pwd = new Password();
             var password = pwd.Next();
             Console.WriteLine(password);

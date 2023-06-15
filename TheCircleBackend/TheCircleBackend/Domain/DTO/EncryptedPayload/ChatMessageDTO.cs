@@ -6,12 +6,17 @@ namespace TheCircleBackend.Domain.DTO.EncryptedPayload
 {
     public class ChatMessageDTOIncoming : IContent
     {
-        public ChatMessage? Message { get; set; }
+        public ChatMessage? OriginalData { get; set; }
     }
 
-    public class ChatMessageDTOOutcoming : IContent
+    public class ChatMessageDTOOutcoming : IOutComingContent
     {
-        public List<ChatMessage>? Messages { get; set; }
+        public ChatMessage? OriginalData { get; set; }
+    }
+
+    public class ChatListDTOOutcoming : IOutComingContent
+    {
+        public List<ChatMessage>? OriginalList { get; set; }
     }
 
 

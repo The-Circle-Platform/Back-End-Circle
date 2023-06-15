@@ -37,13 +37,9 @@ namespace TheCircleBackend.Hubs
             var signedData = security.SignData(list, ServerKeyPair.privKey);
 
             // Creates DTO to send to client.
-            var ChatMessageDTO = new OutComingChatContent()
+            var ChatMessageDTO = new ChatListDTOOutcoming()
             {
-                OriginalContent = new ChatMessageDTOOutcoming()
-                {
-                    ReceiverId = receiverUserId,
-                    Messages = list
-                },
+                OriginalList = list,
                 PublicKey = ServerKeyPair.pubKey,
                 Signature = signedData
             };
@@ -53,13 +49,13 @@ namespace TheCircleBackend.Hubs
         }
         
         // Receiver method
-        public async Task SendMessage(IncomingChatContent incomingChatMessage)
+        public async Task SendMessage(ChatMessageDTOIncoming incomingChatMessage)
         {
             // RetrieveUserKeys
             var publicKeyUser = security.GetKeys(incomingChatMessage.SenderUserId).pubKey;
 
             // Checks if integrity is held.
-            bool HeldIntegrity = security.HoldsIntegrity(incomingChatMessage.OriginalContent, incomingChatMessage.Signature, publicKeyUser);
+            bool HeldIntegrity = security.HoldsIntegrity(incomingChatMessage.OriginalData, incomingChatMessage.Signature, publicKeyUser);
 
             if (HeldIntegrity)
             {
@@ -69,38 +65,31 @@ namespace TheCircleBackend.Hubs
             {
                 // Persisteer in database. Tabel chats (StreamId, UserId, DatumTijd en Content)
 
-                ChatMessage chatMessage = incomingChatMessage.OriginalContent.Message;
+                ChatMessage chatMessage = incomingChatMessage.OriginalData;
 
                 //Inserts chat message
                 messageRepository.Create(chatMessage);
 
                 // Lees geupdate versie
-                var updatedList = messageRepository.GetStreamChat(incomingChatMessage.OriginalContent.ReceiverId);
+                var updatedList = messageRepository.GetStreamChat(incomingChatMessage.OriginalData.ReceiverId);
 
                 // Generate server keypair
                 var ServerKeyPair = security.GenerateKeys();
 
                 // Creates hash and creates signature, based on this hash.
-                // CreateDTO
-                var ChatMessageDTO = new ChatMessageDTOOutcoming()
-                {
-                    ReceiverId = incomingChatMessage.OriginalContent.ReceiverId,
-                    Messages = updatedList
-                };
-
-                var signedData = security.SignData(ChatMessageDTO, ServerKeyPair.privKey);
+                var signedData = security.SignData(updatedList, ServerKeyPair.privKey);
 
                 // Creates DTO to send to client.
-                var OutcomingMessage = new OutComingChatContent()
+                var OutcomingMessage = new ChatListDTOOutcoming()
                 {
                     PublicKey = ServerKeyPair.pubKey,
                     Signature = signedData,
-                    OriginalContent = ChatMessageDTO,
+                    OriginalList = updatedList,
                     SenderUserId = incomingChatMessage.SenderUserId
                 };
 
                 // Send new data to client.
-                await Clients.All.SendAsync($"ReceiveChat-{incomingChatMessage.OriginalContent.ReceiverId}",
+                await Clients.All.SendAsync($"ReceiveChat-{incomingChatMessage.OriginalData.ReceiverId}",
                     OutcomingMessage);
             }
         }
