@@ -11,6 +11,8 @@ using TheCircleBackend.Domain.DTO;
 using TheCircleBackend.Domain.Models;
 using TheCircleBackend.DomainServices;
 using TheCircleBackend.DomainServices.IRepo;
+using TheCircleBackend.DomainServices.IHelpers;
+using TheCircleBackend.Domain.DTO.EncryptedPayload;
 using TheCircleBackend.Controllers;
 using TheCircleBackend.Helper;
 
@@ -22,12 +24,14 @@ public class AuthController : ControllerBase
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IConfiguration _configuration;
     private readonly IWebsiteUserRepo _websiteUserRepo;
-    private readonly LogHelper logHelper;
+    private readonly ISecurityService securityService;
 
     public AuthController(
         UserManager<IdentityUser> userManager,
         RoleManager<IdentityRole> roleManager,
         IConfiguration configuration,
+        IWebsiteUserRepo _websiteUserRepo,
+        ISecurityService securityService)
         IWebsiteUserRepo _websiteUserRepo, 
         ILogItemRepo logItemRepo, 
         ILogger<AuthController> logger)
@@ -36,6 +40,7 @@ public class AuthController : ControllerBase
         _roleManager = roleManager;
         _configuration = configuration;
         this._websiteUserRepo = _websiteUserRepo;
+        this.securityService = securityService;
         this.logHelper = new LogHelper(logItemRepo, logger);
     }
 
@@ -43,6 +48,7 @@ public class AuthController : ControllerBase
     [Route("login")]
     public async Task<IActionResult> Login(LoginDTO dto)
     {
+
         var user = await _userManager.FindByNameAsync(dto.UserName);
         if (user != null && await _userManager.CheckPasswordAsync(user, dto.Password))
         {
@@ -61,30 +67,51 @@ public class AuthController : ControllerBase
 
             var token = GetToken(authClaims);
 
-            return Ok(new
+            // Retrieves user from database.
+            var WebsiteUser = _websiteUserRepo.GetByUserName(user.UserName);
+            var KeyPair = securityService.GetKeys(WebsiteUser.Id);
+
+            //Create payload
+            var PayLoad = new
             {
+                WebsiteUser = WebsiteUser,
+                PrivKey = KeyPair.privKey,
+                PubKey = KeyPair.pubKey,
                 token = new JwtSecurityTokenHandler().WriteToken(token),
                 expiration = token.ValidTo
-            });
+            };
+
+            //Signs signature
+            var Signature = securityService.SignData(PayLoad, KeyPair.privKey);
+
+            AuthOutRegisterDTO authOut = new() 
+            { 
+                Signature = Signature,
+                SenderUserId = WebsiteUser.Id,
+                OriginalLoad = PayLoad 
+            };
+
+            return Ok(authOut);
         }
         return Unauthorized();
     }
 
     [HttpPost]
     [Route("register")]
-    public async Task<IActionResult> Register(RegisterDTO dto)
+    public async Task<IActionResult> Register(AuthRegisterDTO request)
     {
-        // TODO Get Proper User
-        var ip = this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
-        var endpoint = "POST /auth/register";
-        var currentUser = "1";
-        var action = $"Register with Email: {dto.Email}, Username: {dto.Username}";
-        logHelper.AddUserLog(ip, endpoint, currentUser, action);
 
-        var userExists = await _userManager.FindByNameAsync(dto.Username);
-        if (userExists != null)
+        // Decrypts with admin keys
+        var keyPair = securityService.GetKeys(request.SenderUserId);
+
+        var HoldsIntegrity = securityService.HoldsIntegrity(request.OriginalRegisterData,request.Signature, keyPair.pubKey);
+
+        var userExists = await _userManager.FindByNameAsync(request.OriginalRegisterData.Username);
+        
+        if (userExists != null || !HoldsIntegrity)
             return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
 
+        var dto = request.OriginalRegisterData;
         IdentityUser user = new()
         {
             Email = dto.Email,
@@ -115,14 +142,30 @@ public class AuthController : ControllerBase
 
         _websiteUserRepo.Add(newUser);
 
+        // Creates new keypair and stores the keys in database
+        var KeyPair = securityService.GenerateKeys();
+
+        var Succeeded = securityService.StoreKeys(newUser.Id, KeyPair.privKey, KeyPair.pubKey);
+        if (!Succeeded)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
+        }
+
+        // Creates a mail to the user.
         Mailer mailer = new Mailer(_configuration);
 
         string emailbody =
             $"Hello {dto.Username} An account has been created by a TheCircle admin using: \n email: {dto.Email} \n Username: {dto.Username} \n Your generated password is: {password}";
         mailer.SendMail(dto.Email, "The Circle Account Creation", emailbody, "The Circle Team");
-        return Ok(new Response { Status = "Success", Message = "User created successfully!" });
 
-        return Ok(new Response { Status = "Success", Message = "User created successfully!" });
+        // Encrypts data
+        var Response = new Response { Status = "Success", Message = "User created successfully!" };
+
+        //Creates signature
+        var Signature = securityService.SignData(Response, keyPair.privKey);
+        
+        AuthOutRegisterDTO authOut = new AuthOutRegisterDTO() { OriginalLoad = Response, Signature = Signature, PublicKey = keyPair.pubKey};
+        return Ok(authOut);
     }
 
     [HttpPost]

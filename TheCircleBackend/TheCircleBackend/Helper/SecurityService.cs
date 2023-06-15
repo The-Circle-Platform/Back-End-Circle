@@ -46,7 +46,7 @@ namespace TheCircleBackend.Helper
         }
 
         //Encrypts data, by signing the data with a pri
-        public byte[]? EncryptData(object inputData, string privateKey)
+        public byte[]? SignData(object inputData, string privateKey)
         {
 
             //   Converts input to a byte array.
@@ -81,6 +81,27 @@ namespace TheCircleBackend.Helper
         public byte[] ConvertItemIntoBytes(object item, string key)
         {
             return securityHelper.ConvertItem(item);
+        }
+
+        public bool StoreKeys(int UserId, string privKey, string pubKey)
+        {
+            try
+            {
+                keyRepo.StoreKeys(UserId, privKey, pubKey);
+                return true;
+            } catch{
+                return false;
+            }
+        }
+
+        public string? EncryptData(object payload, string privateKey)
+        {
+            return securityHelper.EncryptData(payload, privateKey); 
+        }
+
+        public byte[]? DecryptData(string payload, string publicKey)
+        {
+            return securityHelper.DecryptData(payload, publicKey);
         }
     }
 }

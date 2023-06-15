@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using TheCircleBackend.Domain.Interfaces;
 
-namespace TheCircleBackend.Domain.DTO
+namespace TheCircleBackend.Domain.DTO.EncryptedPayload
 {
     public class IncomingChatContent : IContent
     {
@@ -9,10 +9,9 @@ namespace TheCircleBackend.Domain.DTO
         public ChatMessageDTOIncoming? OriginalContent { get; set; }
     }
 
-    public class OutComingChatContent : IContent
+    public class OutComingChatContent : IOutComingContent
     {
         [Required]
         public ChatMessageDTOOutcoming? OriginalContent { get; set; }
-        public string? ServerPublicKey { get; set; }
     }
 }

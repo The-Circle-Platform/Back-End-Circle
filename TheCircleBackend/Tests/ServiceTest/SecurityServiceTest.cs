@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TheCircleBackend.Domain.DTO;
+using TheCircleBackend.Domain.DTO.EncryptedPayload;
 using TheCircleBackend.Domain.Models;
 using TheCircleBackend.DomainServices.IRepo;
 using TheCircleBackend.Helper;
@@ -32,7 +33,7 @@ namespace Tests.ServiceTest
                 ReceiverId = 1,
             };
             var KeyPairs = SecurityHelper.GetKeyString();
-            var signature = ServiceInQuestion.EncryptData(DTO, KeyPairs.privateKeyString);
+            var signature = ServiceInQuestion.SignData(DTO, KeyPairs.privateKeyString);
             var IncomingMessage = new IncomingChatContent()
             {
                 OriginalContent = DTO,
@@ -63,7 +64,7 @@ namespace Tests.ServiceTest
             };
             var KeyPairs = SecurityHelper.GetKeyString();
             var OtherKeyPairs = SecurityHelper.GetKeyString();
-            var signature = ServiceInQuestion.EncryptData(DTO, KeyPairs.privateKeyString);
+            var signature = ServiceInQuestion.SignData(DTO, KeyPairs.privateKeyString);
             var IncomingMessage = new IncomingChatContent()
             {
                 OriginalContent = DTO,
@@ -122,7 +123,7 @@ namespace Tests.ServiceTest
             };
 
             //Act
-            var signature = Assert.Throws<Exception>(() => ServiceInQuestion.EncryptData(DTO, "Irrelevant"));
+            var signature = Assert.Throws<Exception>(() => ServiceInQuestion.SignData(DTO, "Irrelevant"));
 
             //Assert
             Assert.Equal(signature.Message, "Deserialisatie is misgegaan.");
@@ -146,7 +147,7 @@ namespace Tests.ServiceTest
                 ReceiverId = 1,
             };
             var KeyPairs = SecurityHelper.GetKeyString();
-            var signature = ServiceInQuestion.EncryptData(DTO, KeyPairs.privateKeyString);
+            var signature = ServiceInQuestion.SignData(DTO, KeyPairs.privateKeyString);
             var IncomingMessage = new IncomingChatContent()
             {
                 OriginalContent = DTO,

@@ -113,6 +113,38 @@ namespace TheCircleBackend.Helper
             return (privateKey, publicKey);
         }
 
+        public string? EncryptData(object payload, string privateKey)
+        {
+            var rsaServe = new RSACryptoServiceProvider();
+            
+            RSAParameters privateKeyParam = DeserialiseKey(privateKey);
+            
+            rsaServe.ImportParameters(privateKeyParam);
+
+            byte[] data = ConvertItem(payload);
+
+            var cypher = rsaServe.Encrypt(data, true);
+
+            return Convert.ToBase64String(cypher);
+        }
+
+        public byte[]? DecryptData(string payload, string publicKey)
+        {
+            var rsa = new RSACryptoServiceProvider();
+
+            var databytes = Convert.FromBase64String(payload);
+            
+            var pubKey = DeserialiseKey(publicKey);
+
+            rsa.ImportParameters(pubKey);
+
+            var plainText = rsa.Decrypt(databytes, true);
+
+            return plainText;
+        }
+
+
+
         /*
         public byte[]? SignHash(byte[] encrypted, RSAParameters Key)
         {
