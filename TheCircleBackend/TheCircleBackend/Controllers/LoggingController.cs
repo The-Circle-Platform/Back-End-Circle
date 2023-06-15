@@ -26,7 +26,7 @@ namespace TheCircleBackend.Controllers
         {
             this.logItemRepo = logItemRepo;
             this.securityService = securityService;
-            this.logHelper = new LogHelper(logItemRepo, logger, "LoggingController");
+            this.logHelper = new LogHelper(logItemRepo, logger);
         }
 
         [HttpPost]
@@ -57,7 +57,6 @@ namespace TheCircleBackend.Controllers
                 Action = dto.Action,
                 DateTime = DateTime.Now,
                 Ip = this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString(),
-                Location = dto.Location
             };
             try
             {

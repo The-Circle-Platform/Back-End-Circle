@@ -2,6 +2,7 @@
 using System.Text.Json;
 using System.Text;
 using System.Xml.Serialization;
+using Org.BouncyCastle.Utilities.Encoders;
 using TheCircleBackend.DomainServices.IHelpers;
 
 namespace TheCircleBackend.Helper
@@ -28,6 +29,7 @@ namespace TheCircleBackend.Helper
             {
                 using (StringReader reader = new StringReader(key))
                 {
+                    
                     XmlSerializer serializer = new XmlSerializer(typeof(RSAParameters));
                     return (RSAParameters)serializer.Deserialize(reader);
                 }
@@ -42,7 +44,11 @@ namespace TheCircleBackend.Helper
         public (RSAParameters privateKey, RSAParameters publicKey) GenerateKeyPairs()
         {
             var rsaService = new RSACryptoServiceProvider();
-
+            Console.WriteLine("PRIVATE KEY");
+            Console.WriteLine(Convert.ToBase64String(rsaService.ExportPkcs8PrivateKey()));
+            Console.WriteLine();
+            Console.WriteLine("PUBLIC KEY");
+            Console.WriteLine(Convert.ToBase64String(rsaService.ExportSubjectPublicKeyInfo()));
             return (rsaService.ExportParameters(true), rsaService.ExportParameters(false));
         }
 
@@ -110,6 +116,8 @@ namespace TheCircleBackend.Helper
             string privateKey = sw.ToString();
             string publicKey = sw2.ToString();
 
+
+
             return (privateKey, publicKey);
         }
 
@@ -118,7 +126,7 @@ namespace TheCircleBackend.Helper
             var rsaServe = new RSACryptoServiceProvider();
             
             RSAParameters privateKeyParam = DeserialiseKey(privateKey);
-            
+
             rsaServe.ImportParameters(privateKeyParam);
 
             byte[] data = ConvertItem(payload);

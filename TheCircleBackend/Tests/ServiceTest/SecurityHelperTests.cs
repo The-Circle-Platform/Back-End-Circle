@@ -37,7 +37,7 @@ namespace Tests.ServiceTest
                 }
             };
 
-            var KeyPair = ServiceInQuestion.GenerateKeyPairs();
+            var KeyPair = ServiceInQuestion.GenerateKeyPairs;
 
             var TestDataBytes = ServiceInQuestion.ConvertItem(testData);
 

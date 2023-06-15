@@ -29,7 +29,7 @@ namespace TheCircleBackend.Controllers
             this.websiteUserRepo = websiteUserRepo;
             this.logItemRepo = logItemRepo;
             this.securityService = securityService;
-            this.logHelper = new LogHelper(logItemRepo, logger, "UserController");
+            this.logHelper = new LogHelper(logItemRepo, logger);
 
         }
 
