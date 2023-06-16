@@ -20,7 +20,7 @@ namespace TheCircleBackend.Hubs
             this.securityService = securityService;
         }
 
-        // Receiver method
+        // Receiver method, override
         public override Task OnDisconnectedAsync(Exception? exception)
         {
             Console.WriteLine("Disconnection made");

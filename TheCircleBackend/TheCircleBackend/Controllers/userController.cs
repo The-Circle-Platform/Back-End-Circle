@@ -34,31 +34,21 @@ namespace TheCircleBackend.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get([FromBody] UserIncomingDTO userIncomingDTO)
+        public IActionResult Get()
         {
-            // Access the Request object
-            var UserKeys = securityService.GetKeys(userIncomingDTO.SenderUserId);
-
-            // Checks on integrity
-            bool HoldsIntegrity = securityService.HoldsIntegrity(userIncomingDTO.OriginalUserRequest, userIncomingDTO.Signature, UserKeys.pubKey);
-
-            if (!HoldsIntegrity)
-            {
-                //Sends 400 code back to user.
-                return BadRequest();
-            }
-
+           
             // Get all website users.
             var users = websiteUserRepo.GetAllWebsiteUsers().ToList();
 
             //Create signature
-            var Signature = securityService.SignData(users, UserKeys.privKey);
+            var KeyPair = securityService.GenerateKeys();
+            var Signature = securityService.SignData(users, KeyPair.privKey);
             
             // Packs in dto to client.
             var DTO = new UserContentDTO()
             {
                 OriginalList = users,
-                PublicKey = UserKeys.pubKey,
+                PublicKey = KeyPair.pubKey,
                 Signature = Signature
             };
 
@@ -66,23 +56,8 @@ namespace TheCircleBackend.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult get([FromBody] UserIncomingDTO userIncomingDTO, int id)
+        public IActionResult get(int id)
         {
-            // Access the Request object
-            var UserKeys = securityService.GetKeys(userIncomingDTO.SenderUserId);
-
-            // Checks on integrity
-            // Note: This userIncomingDTO contains the userId it wants to request and senderId.
-            // If a user searches on Id 6 for example, the DTO contains RequestId = 6. 
-            // Those two variabels will be stored in a object and signed by RSA.
-            bool HoldsIntegrity = securityService.HoldsIntegrity(userIncomingDTO.OriginalUserRequest, userIncomingDTO.Signature, UserKeys.pubKey);
-
-            if (!HoldsIntegrity)
-            {
-                //Sends 400 code back to user.
-                return BadRequest();
-            }
-
             Console.WriteLine(id);
             var user = websiteUserRepo.GetById(id);
             if (user == null)
@@ -91,12 +66,13 @@ namespace TheCircleBackend.Controllers
             }
             //Stores 
             //Create signature
-            var Signature = securityService.SignData(user, UserKeys.privKey);
+            var KeyPair = securityService.GenerateKeys();
+            var Signature = securityService.SignData(user, KeyPair.privKey);
 
             var DTO = new UserContentDTO()
             {
                 OriginalData = user,
-                PublicKey = UserKeys.pubKey,
+                PublicKey = KeyPair.pubKey,
                 Signature = Signature
             };
 

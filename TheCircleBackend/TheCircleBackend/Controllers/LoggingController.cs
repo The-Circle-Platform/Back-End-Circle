@@ -117,38 +117,31 @@ namespace TheCircleBackend.Controllers
         }
 
         [HttpGet ("{id}")]
-        public IActionResult GetLogItemById(int id, LoggingIdDTO dTO)
+        public IActionResult GetLogItemById(int id)
         {
-            // Get keypair of user
-            var KeyPair = securityService.GetKeys(dTO.SenderUserId);
-
-            // Check integrity
-            var isValid =securityService.HoldsIntegrity(id, dTO.Signature, KeyPair.pubKey);
 
             var result = this.logItemRepo.GetLogItemById(id);
-            
-            if (result != null && isValid)
+            var ServerKey = securityService.GenerateKeys();
+
+            if (result != null)
             {
-                var Sign = securityService.SignData (result, KeyPair.privKey);
+                var Sign = securityService.SignData (result, ServerKey.privKey);
                 var load = new LoggingOutDTO()
                 {
                     OriginalData = result,
                     Signature = Sign,
-                    PublicKey = KeyPair.pubKey,
-                    SenderUserId = dTO.SenderUserId,
+                    PublicKey = ServerKey.pubKey
                 };
                 return Ok(load);
             }
             else
             {
-                var GeneralKeyPair = securityService.GenerateKeys();
-                var Sign = securityService.SignData("Integriteit is belast", GeneralKeyPair.privKey);
+                var Sign = securityService.SignData("Integriteit is belast", ServerKey.privKey);
                 var load = new LoggingOutTextDTO()
                 {
                     OriginalData = "Integriteit is belast",
                     Signature = Sign,
-                    PublicKey = GeneralKeyPair.pubKey,
-                    SenderUserId = dTO.SenderUserId,
+                    PublicKey = ServerKey.pubKey,
                 };
                 return NotFound(load);
             }
