@@ -82,8 +82,6 @@ namespace Controllers.AuthController
                 var PayLoad = new
                 {
                     WebsiteUser = WebsiteUser,
-                    PrivKey = KeyPair.privKey,
-                    PubKey = KeyPair.pubKey,
                     token = new JwtSecurityTokenHandler().WriteToken(token),
                     expiration = token.ValidTo
                 };
@@ -93,7 +91,6 @@ namespace Controllers.AuthController
 
                 AuthOutRegisterDTO authOut = new()
                 {
-                    PublicKey= KeyPair.pubKey,
                     Signature = Signature,
                     SenderUserId = WebsiteUser.Id,
                     OriginalLoad = PayLoad
@@ -184,7 +181,10 @@ namespace Controllers.AuthController
             var Signature = securityService.SignData(Response, keyPair.privKey);
 
             AuthOutRegisterDTO authOut = new AuthOutRegisterDTO()
-                { OriginalLoad = Response, Signature = Signature, PublicKey = keyPair.pubKey };
+                { 
+                OriginalLoad = Response, 
+                Signature = Signature,
+                };
             return Ok(authOut);
         }
 

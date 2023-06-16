@@ -46,7 +46,6 @@ namespace TheCircleBackend.Controllers
                     OriginalData = "Integrity is tainted",
                     Signature = sign,
                     SenderUserId = payload.SenderUserId,
-                    PublicKey = KeyPair.pubKey
                 };
                 return BadRequest(load);
             }
@@ -69,8 +68,7 @@ namespace TheCircleBackend.Controllers
                 {
                     OriginalData = "Log added",
                     Signature = sign,
-                    SenderUserId = payload.SenderUserId,
-                    PublicKey = KeyPair.pubKey
+                    SenderUserId = payload.SenderUserId
                 };
 
                 return Ok(load);
@@ -86,8 +84,7 @@ namespace TheCircleBackend.Controllers
                 {
                     OriginalData = error,
                     Signature = sign,
-                    SenderUserId = payload.SenderUserId,
-                    PublicKey = KeyPair.pubKey
+                    SenderUserId = payload.SenderUserId
                 };
                 return StatusCode(500, load);
             }
@@ -101,7 +98,7 @@ namespace TheCircleBackend.Controllers
             var list = this.logItemRepo.GetAllLogItems();
 
             // Creates server keys
-            var KeyPair = securityService.GenerateKeys();
+            var KeyPair = securityService.GetServerKeys();
 
             //Create signature
             var Sign = securityService.SignData(list, KeyPair.privKey);
@@ -121,7 +118,7 @@ namespace TheCircleBackend.Controllers
         {
 
             var result = this.logItemRepo.GetLogItemById(id);
-            var ServerKey = securityService.GenerateKeys();
+            var ServerKey = securityService.GetServerKeys();
 
             if (result != null)
             {
@@ -130,7 +127,6 @@ namespace TheCircleBackend.Controllers
                 {
                     OriginalData = result,
                     Signature = Sign,
-                    PublicKey = ServerKey.pubKey
                 };
                 return Ok(load);
             }
@@ -140,8 +136,7 @@ namespace TheCircleBackend.Controllers
                 var load = new LoggingOutTextDTO()
                 {
                     OriginalData = "Integriteit is belast",
-                    Signature = Sign,
-                    PublicKey = ServerKey.pubKey,
+                    Signature = Sign
                 };
                 return NotFound(load);
             }

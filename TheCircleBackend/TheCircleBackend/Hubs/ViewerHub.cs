@@ -91,15 +91,14 @@ namespace TheCircleBackend.Hubs
             Console.WriteLine("Count is " + watchCount);
 
             // Generate keypair
-            var keyPair = securityService.GenerateKeys();
+            var keyPair = securityService.GetServerKeys();
             //Signature
-            var ServerSignature = securityService.SignData(streamId, keyPair.privKey);
+            var ServerSignature = securityService.SignData(watchCount, keyPair.privKey);
 
             var ViewerContentOut = new ViewerOutcomingContentDTO()
             {
                 Signature = ServerSignature,
-                OriginalCount = watchCount,
-                PublicKey = keyPair.pubKey
+                OriginalCount = watchCount
             };
             await Clients.All.SendAsync($"UpdateViewerCount{streamId}", ViewerContentOut);
         }
@@ -107,14 +106,13 @@ namespace TheCircleBackend.Hubs
         private async Task AllowUserNotToWatch(bool isAllowed, string ConnectId, int streamId)
         {
             // Generate server keypair
-            var keyPair = securityService.GenerateKeys();
+            var keyPair = securityService.GetServerKeys();
             //Signature
             var ServerSignature = securityService.SignData(isAllowed, keyPair.privKey);
 
             var ViewerContentOut = new ViewerOutcomingContentDTO()
             {
                 Signature = ServerSignature,
-                PublicKey = keyPair.pubKey,
                 OriginalAllowWatch = isAllowed
             };
 

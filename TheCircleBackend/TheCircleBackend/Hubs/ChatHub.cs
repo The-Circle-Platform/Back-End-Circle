@@ -31,7 +31,7 @@ namespace TheCircleBackend.Hubs
             List<ChatMessage> list = messageRepository.GetStreamChat(receiverUserId);
 
             // Generate server keypair
-            var ServerKeyPair = security.GenerateKeys();
+            var ServerKeyPair = security.GetServerKeys();
 
             // Creates hash and creates signature, based on this hash.
             var signedData = security.SignData(list, ServerKeyPair.privKey);
@@ -40,7 +40,7 @@ namespace TheCircleBackend.Hubs
             var ChatMessageDTO = new ChatListDTOOutcoming()
             {
                 OriginalList = list,
-                PublicKey = ServerKeyPair.pubKey,
+/*                PublicKey = ServerKeyPair.pubKey,*/
                 Signature = signedData
             };
 
@@ -74,7 +74,7 @@ namespace TheCircleBackend.Hubs
                 var updatedList = messageRepository.GetStreamChat(incomingChatMessage.OriginalData.ReceiverId);
 
                 // Generate server keypair
-                var ServerKeyPair = security.GenerateKeys();
+                var ServerKeyPair = security.GetServerKeys();
 
                 // Creates hash and creates signature, based on this hash.
                 var signedData = security.SignData(updatedList, ServerKeyPair.privKey);
@@ -82,7 +82,6 @@ namespace TheCircleBackend.Hubs
                 // Creates DTO to send to client.
                 var OutcomingMessage = new ChatListDTOOutcoming()
                 {
-                    PublicKey = ServerKeyPair.pubKey,
                     Signature = signedData,
                     OriginalList = updatedList,
                     SenderUserId = incomingChatMessage.SenderUserId

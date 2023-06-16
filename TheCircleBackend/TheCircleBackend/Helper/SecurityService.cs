@@ -93,5 +93,10 @@ namespace TheCircleBackend.Helper
                 return false;
             }
         }
+
+        public (string privKey, string pubKey) GetServerKeys()
+        {
+            return securityHelper.GetServerKeys();
+        }
     }
 }

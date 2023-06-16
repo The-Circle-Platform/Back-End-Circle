@@ -9,6 +9,5 @@
 
     public abstract class IOutComingContent: IContent
     {
-        public string PublicKey { get; set; }
     }
 }

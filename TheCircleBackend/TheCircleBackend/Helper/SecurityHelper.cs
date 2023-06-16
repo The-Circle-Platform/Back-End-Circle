@@ -119,5 +119,11 @@ namespace TheCircleBackend.Helper
             return (privateKey, publicKey);
         }
 
+        public (string privKey, string pubKey) GetServerKeys()
+        {
+            var privateKey = Environment.GetEnvironmentVariable("SERVER_PRIVKEY");
+            var publicKey = Environment.GetEnvironmentVariable("SERVER_PUBKEY");
+            return (privateKey, publicKey);
+        }
     }
 }
