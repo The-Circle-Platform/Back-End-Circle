@@ -20,8 +20,9 @@ namespace TheCircleBackend.Helper
 
         public byte[] ConvertItem(object input)
         {
-            string jsonString = JsonSerializer.Serialize(input);
-            return Encoding.UTF8.GetBytes(jsonString);
+            string jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(input);
+            Console.WriteLine(jsonString);
+;           return Encoding.UTF8.GetBytes(jsonString);
         }
 
         public byte[] DeserialiseKey(string key)
