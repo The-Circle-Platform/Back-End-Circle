@@ -28,8 +28,6 @@ namespace TheCircleBackend.DBInfra.Repo
                 throw new Exception();
             }
         }
-
-
             public Stream Delete(int id)
         {
             throw new NotImplementedException();
@@ -46,12 +44,14 @@ namespace TheCircleBackend.DBInfra.Repo
             return domainContext.Stream.Where(u => u.Id == id).FirstOrDefault();
         }
 
-        public void Update(Stream stream, int streamId)
+        public void UpdateStream(Stream stream, int streamId)
         {
             var result = domainContext.Stream.Where(u => u.Id == streamId).FirstOrDefault();
             Console.WriteLine(result.Title);
             if (result != null)
             {
+                result.StartTime = stream.StartTime;
+                result.EndTime = stream.EndTime;
                 result.Title = stream.Title;
                 result.StreamVid = stream.StreamVid;
                 domainContext.SaveChanges();

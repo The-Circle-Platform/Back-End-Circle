@@ -129,4 +129,5 @@ app.MapControllers();
 
 app.MapHub<ChatHub>("/hubs/ChatHub");
 app.MapHub<ViewerHub>("/hubs/ViewHub");
+app.MapHub<LivestreamHub>("/hubs/Livestream");
 app.Run();

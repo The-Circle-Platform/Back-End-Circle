@@ -47,6 +47,8 @@ namespace TheCircleBackend.DBInfra
 
             // Model LogItem
             modelBuilder.Entity<LogItem>().HasKey(logItem => new { logItem.Id });
+
+            modelBuilder.Entity<SeeChangeStreamChunk>().HasKey(SCSC  => SCSC.UserId);
         }
     }
 }
