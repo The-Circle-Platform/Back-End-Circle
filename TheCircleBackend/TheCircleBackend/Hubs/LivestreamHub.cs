@@ -22,19 +22,20 @@ namespace TheCircleBackend.Hubs
         public string Call() => _id;
 
 
-        public async Task Upload(Test test)
+        public Task Upload(Test test)
         {
-            record.Append<string>(test.stream);
-            Console.WriteLine("incoming:");
-            Console.WriteLine(test.name + " " + test.stream);
-            return Clients.All.SendAsync("ImageMessage", test.stream);
+            //record.Append<string>(test.stream);
+            //Console.WriteLine("incoming:");
+            //Console.WriteLine(test.name + " " + test.stream);
+            //Console.WriteLine(test.stream);
+            return Clients.All.SendAsync("test", test);
 
         }
 
-        public Task LivestreamForClient(Test test)
-        {
-            return Clients.All.SendAsync("ImageMessage", test.stream);
-        }
+        //public Task LivestreamHub(Test test)
+        //{
+
+        //}
     }
 }
 
