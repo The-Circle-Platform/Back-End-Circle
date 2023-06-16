@@ -133,5 +133,47 @@ namespace Tests.ServiceTest
             //Assert
             Assert.True(Result);
         }
+
+        [Fact]
+        public void EnvironmentKeysCheck()
+        {
+            var PrivateKey = Environment.GetEnvironmentVariable("SERVER_PRIVKEY");
+            var PublicKey = Environment.GetEnvironmentVariable("SERVER_PUBKEY");
+            //Arrange
+
+            var ServiceInQuestion = new SecurityHelper();
+            var testData = new List<ChatMessage>()
+            {
+                new ChatMessage() {
+                    Id = 1,
+                    ReceiverId = 1,
+                    Message = "Hello world",
+                    Date = DateTime.Now,
+                    WebUserId = 1,
+                    Writer = new WebsiteUser() { Id = 3, IsOnline = true, UserName = "Boi"}
+                },
+                new ChatMessage() {
+                    Id = 2,
+                    ReceiverId = 1,
+                    Message = "How are you",
+                    Date = DateTime.Now,
+                    WebUserId = 1,
+                    Writer = new WebsiteUser() { Id = 3, IsOnline = true, UserName = "Boi"}
+                }
+            };
+            var DeserialisedPublicKey = ServiceInQuestion.DeserialiseKey(PublicKey);
+            var DeserialisedPrivateKey = ServiceInQuestion.DeserialiseKey(PrivateKey);
+
+            var TestDataBytes = ServiceInQuestion.ConvertItem(testData);
+
+            var Signature = ServiceInQuestion.SignData(TestDataBytes, DeserialisedPrivateKey, true);
+            //Act
+
+            var Result = ServiceInQuestion.VerifySignedData(TestDataBytes, DeserialisedPublicKey, Signature, false);
+            //Assert
+            Assert.True(Result);
+        }
+
+
     }
 }
