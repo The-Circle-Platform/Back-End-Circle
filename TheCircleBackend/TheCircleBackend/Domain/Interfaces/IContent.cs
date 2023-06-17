@@ -6,4 +6,8 @@
         public byte[]? Signature { get; set; }
         public int SenderUserId { get; set; }
     }
+
+    public abstract class IOutComingContent: IContent
+    {
+    }
 }

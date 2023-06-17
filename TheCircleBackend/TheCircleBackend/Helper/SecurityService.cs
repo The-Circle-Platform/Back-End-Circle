@@ -25,10 +25,10 @@ namespace TheCircleBackend.Helper
                 byte[] inputBytes = securityHelper.ConvertItem(inputData);
 
                 // Convert key to RSAParameter
-                RSAParameters publicKey = securityHelper.DeserialiseKey(InputPublicKey);
+                byte[] publicKey = securityHelper.DeserialiseKey(InputPublicKey);
 
                 //Check data.
-                bool isValidData = securityHelper.VerifySignedData(inputBytes, publicKey, signature);
+                bool isValidData = securityHelper.VerifySignedData(inputBytes, publicKey, signature, false);
 
                 //Checks if data is valid and holds integrity
                 return isValidData;
@@ -46,15 +46,15 @@ namespace TheCircleBackend.Helper
         }
 
         //Encrypts data, by signing the data with a pri
-        public byte[]? EncryptData(object inputData, string privateKey)
+        public byte[]? SignData(object inputData, string privateKey)
         {
 
             //   Converts input to a byte array.
             byte[] GeneratedData = securityHelper.ConvertItem(inputData);
 
-            RSAParameters GeneratedPrivateKey = securityHelper.DeserialiseKey(privateKey);
+            byte[] GeneratedPrivateKey = securityHelper.DeserialiseKey(privateKey);
 
-            return securityHelper.SignData(GeneratedData, GeneratedPrivateKey);
+            return securityHelper.SignData(GeneratedData, GeneratedPrivateKey, true);
         }
         
         public (string privKey, string pubKey) GetKeys(int userId)
@@ -81,6 +81,22 @@ namespace TheCircleBackend.Helper
         public byte[] ConvertItemIntoBytes(object item, string key)
         {
             return securityHelper.ConvertItem(item);
+        }
+
+        public bool StoreKeys(int UserId, string privKey, string pubKey)
+        {
+            try
+            {
+                keyRepo.StoreKeys(UserId, privKey, pubKey);
+                return true;
+            } catch{
+                return false;
+            }
+        }
+
+        public (string privKey, string pubKey) GetServerKeys()
+        {
+            return securityHelper.GetServerKeys();
         }
     }
 }

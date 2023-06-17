@@ -4,14 +4,15 @@ namespace TheCircleBackend.DomainServices.IHelpers
 {
     public interface ISecurityHelper
     {
-        RSAParameters DeserialiseKey(string key);
-        (string privateKeyString, string publicKeyString) GetKeyString(RSAParameters ExternalPrivateKey, RSAParameters ExternalPublicKey);
+        byte[] DeserialiseKey(string key);
+        (string privateKeyString, string publicKeyString) GetKeyString(byte[] ExternalPrivateKey, byte[] ExternalPublicKey);
         (string privateKeyString, string publicKeyString) GetKeyString();
         
         byte[] ConvertItem(object input);
         object ConvertFromByteArray(byte[] byteArray, Type targetType);
 
-        bool VerifySignedData(byte[] DataToVerify, RSAParameters Key, byte[] SignedData);
-        byte[]? SignData(byte[] DataToSign, RSAParameters Key);
+        bool VerifySignedData(byte[] DataToVerify, byte[] Key, byte[] SignedData, bool IsPrivate);
+        byte[]? SignData(byte[] DataToSign, byte[] Key, bool IsPrivate);
+        (string privKey, string pubKey) GetServerKeys();
     }
 }

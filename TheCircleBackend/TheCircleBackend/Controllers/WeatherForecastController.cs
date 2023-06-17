@@ -3,19 +3,21 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TheCircleBackend.Domain.AuthModels;
-
+using TheCircleBackend.Domain.Models;
+using TheCircleBackend.DomainServices.IRepo;
+using Microsoft.Extensions.Logging;
+using TheCircleBackend.Helper;
+using System.Security.Claims;
+using TheCircleBackend.DomainServices.IHelpers;
+using TheCircleBackend.Domain.DTO.EncryptedPayload;
 
 namespace TheCircleBackend.Controllers
 {
     [ApiController]
-    [Authorize(Roles = UserRoles.Admin)]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
        
-        public WeatherForecastController()
-        {
-        }
 
         [HttpGet(Name = "GetWeatherForecast")]
         public string Get()

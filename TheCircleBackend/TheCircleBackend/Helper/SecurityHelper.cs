@@ -2,7 +2,9 @@
 using System.Text.Json;
 using System.Text;
 using System.Xml.Serialization;
+using Org.BouncyCastle.Utilities.Encoders;
 using TheCircleBackend.DomainServices.IHelpers;
+using Org.BouncyCastle.Crypto;
 
 namespace TheCircleBackend.Helper
 {
@@ -22,15 +24,11 @@ namespace TheCircleBackend.Helper
             return Encoding.UTF8.GetBytes(jsonString);
         }
 
-        public RSAParameters DeserialiseKey(string key)
+        public byte[] DeserialiseKey(string key)
         {
             try
             {
-                using (StringReader reader = new StringReader(key))
-                {
-                    XmlSerializer serializer = new XmlSerializer(typeof(RSAParameters));
-                    return (RSAParameters)serializer.Deserialize(reader);
-                }
+                return Convert.FromBase64String(key);
             }
             catch
             {
@@ -39,11 +37,11 @@ namespace TheCircleBackend.Helper
             
         }
 
-        public (RSAParameters privateKey, RSAParameters publicKey) GenerateKeyPairs()
+        public (byte[] privateKey, byte[] publicKey) GenerateKeyPairs()
         {
             var rsaService = new RSACryptoServiceProvider();
 
-            return (rsaService.ExportParameters(true), rsaService.ExportParameters(false));
+            return (rsaService.ExportPkcs8PrivateKey(), rsaService.ExportSubjectPublicKeyInfo());
         }
 
         // Generates keypair.
@@ -57,14 +55,22 @@ namespace TheCircleBackend.Helper
         }
 
         
-        public byte[]? SignData(byte[] DataToSign, RSAParameters Key)
+        public byte[]? SignData(byte[] DataToSign, byte[] Key, bool IsPrivate)
         {
             try
             {
                 RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
 
-                rsa.ImportParameters(Key);
-
+                if (IsPrivate)
+                {
+                    // Set rsa with private key
+                    rsa.ImportPkcs8PrivateKey(Key, out _);
+                } else
+                {
+                    // Set rsa with public key
+                    rsa.ImportSubjectPublicKeyInfo(Key, out _);
+                }
+ 
                 // Internally creates a hash of the original message and creates signature based on it, encrypted with private key.
                 return rsa.SignData(DataToSign, SHA256.Create());
             }
@@ -74,7 +80,7 @@ namespace TheCircleBackend.Helper
             }
         }
 
-        public bool VerifySignedData(byte[] DataToVerify, RSAParameters Key, byte[] SignedData)
+        public bool VerifySignedData(byte[] DataToVerify, byte[] Key, byte[] SignedData, bool IsPrivate)
         {
             try
             {
@@ -82,7 +88,16 @@ namespace TheCircleBackend.Helper
                 // key from RSAParameters.
                 RSACryptoServiceProvider RSAalg = new RSACryptoServiceProvider();
 
-                RSAalg.ImportParameters(Key);
+                if (IsPrivate)
+                {
+                    // Set rsa with private key
+                    RSAalg.ImportPkcs8PrivateKey(Key, out _);
+                }
+                else
+                {
+                    // Set rsa with public key
+                    RSAalg.ImportSubjectPublicKeyInfo(Key, out _);
+                }
 
                 // Verify the data using the signature.  Pass a new instance of SHA256
                 // to specify the hashing algorithm.
@@ -95,49 +110,20 @@ namespace TheCircleBackend.Helper
         }
 
         // OVerloaded-method: Keys are already in RSAParameter format.
-        public (string privateKeyString, string publicKeyString) GetKeyString(RSAParameters ExternalPrivateKey, RSAParameters ExternalPublicKey)
+        public (string privateKeyString, string publicKeyString) GetKeyString(byte[] ExternalPrivateKey, byte[] ExternalPublicKey)
         {
-            var sw = new StringWriter();
-            var sw2 = new StringWriter();
-            var xs = new XmlSerializer(typeof(RSAParameters));
-            var xs2 = new XmlSerializer(typeof(RSAParameters));
-            //Serializing keys
-            //Private key string
-            xs.Serialize(sw, ExternalPrivateKey);
-            //Public key string
-            xs2.Serialize(sw2, ExternalPublicKey);
 
-            string privateKey = sw.ToString();
-            string publicKey = sw2.ToString();
+            string privateKey = Convert.ToBase64String(ExternalPrivateKey);
+            string publicKey = Convert.ToBase64String(ExternalPublicKey);
 
             return (privateKey, publicKey);
         }
 
-        /*
-        public byte[]? SignHash(byte[] encrypted, RSAParameters Key)
+        public (string privKey, string pubKey) GetServerKeys()
         {
-            RSACryptoServiceProvider rsaCSP = new RSACryptoServiceProvider();
-            SHA1Managed hash = new SHA1Managed();
-            byte[] hashedData;
-
-            //Encrypts with private key
-            rsaCSP.ImportParameters(Key);
-
-            hashedData = hash.ComputeHash(encrypted);
-            return rsaCSP.SignHash(hashedData, CryptoConfig.MapNameToOID("SHA1"));
+            var privateKey = "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAMJefUpb8rGnf7WiUtC4funvWKjgLQIoXrUbJItDb2Q5Dq4NAaYMtih/2iq4eABCn9keb+NWe2F2ZcbyI7iLwj+UiLVpCffgj3CfoeYExE1RqLn1S5CXI9kMJNaTsQXPSA/BnjppX+5Z0zAI+TZef44B6NwRIsE/dYb0dtMejT+VAgMBAAECgYAJ+JLw15qxpmgUx0j8UBqioZaowydL7wo8vDG5uzHhsFOidiRZgllt5nEos+HkEYblunv+65bUvyAlfpJ6iyDhzxgs9fSapdkhiz057BVkmwOqzIDDefHjpqh00k+sEZWeZKq0flXG12yF8LI4c1qXnjTnTUCVzIJXhe4kPqufGQJBAMkIY+8QG4EO4RsvOkdS4Bmz+GSZr7n9FLKsWEQU958v99aGC4T8OLaMFpztRrDwj7tZcvEWl7qVHbI5aTrjnbcCQQD3g6oZdQSLEvU4F4NIiUijTMtMgImzKujbhLdchETqrG0G4UUzGl5Itp/NMhLjscsykgl5mlI/4N2We2Hoi80TAkAEP5olDjkWlCLruSbJJRY5VNVWAu10x8VtNTk0TyEgixn4vaJ2sAHe0b0UmesZiCvxcKV+NNUGC2qyPoZbyT2nAkEA4VhTPngmWcQ51Aa8NQcgReS91vnT5HZ1qJ5tHmMiJ5IydSgVi5A/NO5oETa8secGPBVvYPIaXiQJOl885a6aVwJBALIPMLuUps82cKIanFRh0OC8vIZwtFgv8PUpCAYDG1LKo6RDaSoRL7qtighAagxp+pYcU0rQAyuwHf9mHGiyESM=";
+            var publicKey = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCXn1KW/Kxp3+1olLQuH7p71io4C0CKF61GySLQ29kOQ6uDQGmDLYof9oquHgAQp/ZHm/jVnthdmXG8iO4i8I/lIi1aQn34I9wn6HmBMRNUai59UuQlyPZDCTWk7EFz0gPwZ46aV/uWdMwCPk2Xn+OAejcESLBP3WG9HbTHo0/lQIDAQAB";
+            return (privateKey, publicKey);
         }
-
-        public bool VerifyHash(RSAParameters rsaParams, byte[] signedData, byte[] signature)
-        {
-            RSACryptoServiceProvider rsaCSP = new RSACryptoServiceProvider();
-            SHA1Managed hash = new SHA1Managed();
-            byte[] hashedData;
-
-            rsaCSP.ImportParameters(rsaParams);
-            bool dataOK = rsaCSP.VerifyData(signedData, CryptoConfig.MapNameToOID("SHA1"), signature);
-            hashedData = hash.ComputeHash(signedData);
-            return rsaCSP.VerifyHash(hashedData, CryptoConfig.MapNameToOID("SHA1"), signature);
-        }
-        */
     }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TheCircleBackend.Domain.DTO;
+using TheCircleBackend.Domain.DTO.EncryptedPayload;
 using TheCircleBackend.Domain.Models;
 using TheCircleBackend.DomainServices.IRepo;
 using TheCircleBackend.Helper;
@@ -26,21 +27,17 @@ namespace Tests.ServiceTest
             var ServiceInQuestion = new SecurityService(SecurityHelper, MockKeyRepo.Object);
             //Creates signature
             ChatMessage message = new() { Message = "Hello", ReceiverId = 1, WebUserId = 1 };
+            
             var DTO = new ChatMessageDTOIncoming()
             {
-                Message = message,
-                ReceiverId = 1,
+                OriginalData = message
             };
             var KeyPairs = SecurityHelper.GetKeyString();
-            var signature = ServiceInQuestion.EncryptData(DTO, KeyPairs.privateKeyString);
-            var IncomingMessage = new IncomingChatContent()
-            {
-                OriginalContent = DTO,
-                Signature = signature
-            };
+            var signature = ServiceInQuestion.SignData(DTO.OriginalData, KeyPairs.privateKeyString);
 
+            DTO.Signature = signature;
             //Act
-            var Result = ServiceInQuestion.HoldsIntegrity(IncomingMessage.OriginalContent, IncomingMessage.Signature, KeyPairs.publicKeyString);
+            var Result = ServiceInQuestion.HoldsIntegrity(DTO.OriginalData, DTO.Signature, KeyPairs.publicKeyString);
 
             //Assert
             Assert.True(Result);
@@ -56,22 +53,18 @@ namespace Tests.ServiceTest
             var ServiceInQuestion = new SecurityService(SecurityHelper, MockKeyRepo.Object);
             //Creates signature
             ChatMessage message = new() { Message = "Hello", ReceiverId = 1, WebUserId = 1 };
-            var DTO = new ChatMessageDTOIncoming()
-            {
-                Message = message,
-                ReceiverId = 1,
-            };
+
             var KeyPairs = SecurityHelper.GetKeyString();
             var OtherKeyPairs = SecurityHelper.GetKeyString();
-            var signature = ServiceInQuestion.EncryptData(DTO, KeyPairs.privateKeyString);
-            var IncomingMessage = new IncomingChatContent()
+            var signature = ServiceInQuestion.SignData(message, KeyPairs.privateKeyString);
+            var IncomingMessage = new ChatMessageDTOIncoming()
             {
-                OriginalContent = DTO,
+                OriginalData = message,
                 Signature = signature
             };
 
             //Act
-            var Result = ServiceInQuestion.HoldsIntegrity(IncomingMessage.OriginalContent, IncomingMessage.Signature, OtherKeyPairs.publicKeyString);
+            var Result = ServiceInQuestion.HoldsIntegrity(IncomingMessage.OriginalData, IncomingMessage.Signature, OtherKeyPairs.publicKeyString);
 
             //Assert
             Assert.False(Result);
@@ -91,8 +84,7 @@ namespace Tests.ServiceTest
             ChatMessage message = new() { Message = "Hello", ReceiverId = 1, WebUserId = 1 };
             var DTO = new ChatMessageDTOIncoming()
             {
-                Message = message,
-                ReceiverId = 1,
+                OriginalData  = message,
             };
 
             //Act
@@ -117,12 +109,11 @@ namespace Tests.ServiceTest
             ChatMessage message = new() { Message = "Hello", ReceiverId = 1, WebUserId = 1 };
             var DTO = new ChatMessageDTOIncoming()
             {
-                Message = message,
-                ReceiverId = 1,
+                OriginalData = message,
             };
 
             //Act
-            var signature = Assert.Throws<Exception>(() => ServiceInQuestion.EncryptData(DTO, "Irrelevant"));
+            var signature = Assert.Throws<Exception>(() => ServiceInQuestion.SignData(DTO.OriginalData, "Irrelevant"));
 
             //Assert
             Assert.Equal(signature.Message, "Deserialisatie is misgegaan.");
@@ -142,19 +133,15 @@ namespace Tests.ServiceTest
             ChatMessage message = new() { Message = "Hello", ReceiverId = 1, WebUserId = 1 };
             var DTO = new ChatMessageDTOIncoming()
             {
-                Message = message,
-                ReceiverId = 1,
+                OriginalData = message,
             };
             var KeyPairs = SecurityHelper.GetKeyString();
-            var signature = ServiceInQuestion.EncryptData(DTO, KeyPairs.privateKeyString);
-            var IncomingMessage = new IncomingChatContent()
-            {
-                OriginalContent = DTO,
-                Signature = signature
-            };
+            var signature = ServiceInQuestion.SignData(DTO.OriginalData, KeyPairs.privateKeyString);
+            
+            DTO.Signature = signature; 
 
             //Act
-            var Result = ServiceInQuestion.HoldsIntegrity(IncomingMessage.OriginalContent, IncomingMessage.Signature, "Irrelevante data");
+            var Result = ServiceInQuestion.HoldsIntegrity(DTO.OriginalData, DTO.Signature, "Irrelevante data");
 
             //Assert
             Assert.False(Result);

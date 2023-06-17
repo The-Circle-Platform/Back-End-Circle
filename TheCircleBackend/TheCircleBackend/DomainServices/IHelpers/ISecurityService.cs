@@ -6,9 +6,11 @@ namespace TheCircleBackend.DomainServices.IHelpers
     {
         bool HoldsIntegrity(object inputData, byte[] signature, string publicKey);
         (string privKey, string pubKey) GenerateKeys();
-        byte[] EncryptData(object inputData, string privateKey);
+        byte[] SignData(object inputData, string privateKey);
         byte[] ConvertItemIntoBytes(object item, string key);
         // byte[] EncryptHash(byte[] inputData, string privateKey);
         (string privKey, string pubKey) GetKeys(int userId);
+        bool StoreKeys(int UserId, string privKey, string pubKey);
+        (string privKey, string pubKey) GetServerKeys();
     }
 }
