@@ -10,19 +10,16 @@ namespace TheCircleBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class userController : ControllerBase
+    public class UserController : ControllerBase
     {
 
         private readonly IWebsiteUserRepo websiteUserRepo;
-        private readonly ILogItemRepo logItemRepo;
         private readonly LogHelper logHelper;
 
-        public userController(IWebsiteUserRepo websiteUserRepo, ILogItemRepo logItemRepo, ILogger<userController> logger)
+        public UserController(IWebsiteUserRepo websiteUserRepo, ILogItemRepo logItemRepo, ILogger<UserController> logger, ILogger<LogHelper> loghelperLogger)
         {
             this.websiteUserRepo = websiteUserRepo;
-            this.logItemRepo = logItemRepo;
-            this.logHelper = new LogHelper(logItemRepo, logger);
-
+            this.logHelper = new LogHelper(logItemRepo, loghelperLogger);
         }
 
         [HttpGet]
@@ -49,15 +46,19 @@ namespace TheCircleBackend.Controllers
         [HttpPost]
         public IActionResult post(WebsiteUser user)
         {
-            var ip = this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
-            var endpoint = "POST /user";
-            var currentUser = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            var action = $"WebsiteUser with ID: {user.Id}, Name: {user.UserName}";
-            logHelper.AddUserLog(ip, endpoint, currentUser, action);
-
-            Console.WriteLine(user);
             try
             {
+                var logItem = new LogItem()
+                {
+                    Ip = this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString(),
+                    Endpoint = "POST /user",
+                    Action = $"WebsiteUser with ID: {user.Id}, Name: {user.UserName}",
+                    DateTime = DateTime.UtcNow,
+                    SubjectUser = "1"
+                };
+
+                logHelper.AddUserLog(logItem);
+
                 this.websiteUserRepo.Add(user);
                 return Ok("user added");
             }
@@ -71,14 +72,19 @@ namespace TheCircleBackend.Controllers
         [HttpPut("{id}")]
         public IActionResult put(WebsiteUser user, int id)
         {
-            var ip = this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
-            var endpoint = $"PUT /user/{id}";
-            var subjectUser = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            var action = $"WebsiteUser with ID: {user.Id}, Name: {user.UserName}";
-            logHelper.AddUserLog(ip, endpoint, subjectUser, action); Console.WriteLine(id);
-
             try
             {
+                var logItem = new LogItem()
+                {
+                    Ip = this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString(),
+                    Endpoint = $"POST /user/{id}",
+                    Action = $"WebsiteUser with ID: {user.Id}, Name: {user.UserName}",
+                    DateTime = DateTime.UtcNow,
+                    SubjectUser = "1"
+                };
+
+                logHelper.AddUserLog(logItem);
+
                 websiteUserRepo.Update(user, id);
                 return Ok();
             }
@@ -87,6 +93,13 @@ namespace TheCircleBackend.Controllers
                 Console.WriteLine(e);
                 return BadRequest(e);
             }
+        }
+
+        [HttpGet("{streamerId}/followers/{followerId}/exists")]
+        public IActionResult CheckFollowerExists(int streamerId, int followerId)
+        {
+            bool followerExists = websiteUserRepo.FollowerExists(streamerId, followerId);
+            return Ok(followerExists);
         }
     }
 }

@@ -30,13 +30,14 @@ public class AuthController : ControllerBase
         IConfiguration configuration,
         IWebsiteUserRepo _websiteUserRepo, 
         ILogItemRepo logItemRepo, 
-        ILogger<AuthController> logger)
+        ILogger<AuthController> logger,
+        ILogger<LogHelper> loghelperLogger)
     {
         _userManager = userManager;
         _roleManager = roleManager;
         _configuration = configuration;
         this._websiteUserRepo = _websiteUserRepo;
-        this.logHelper = new LogHelper(logItemRepo, logger);
+        this.logHelper = new LogHelper(logItemRepo, loghelperLogger);
     }
 
     [HttpPost]
@@ -74,12 +75,16 @@ public class AuthController : ControllerBase
     [Route("register")]
     public async Task<IActionResult> Register(RegisterDTO dto)
     {
-        // TODO Get Proper User
-        var ip = this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
-        var endpoint = "POST /auth/register";
-        var currentUser = "1";
-        var action = $"Register with Email: {dto.Email}, Username: {dto.Username}";
-        logHelper.AddUserLog(ip, endpoint, currentUser, action);
+        var logItem = new LogItem()
+        {
+            Ip = this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString(),
+            Endpoint = "POST /auth/register",
+            Action = $"Register with Email: {dto.Email}, Username: {dto.Username}",
+            DateTime = DateTime.UtcNow,
+            SubjectUser = "1"
+        };
+
+        logHelper.AddUserLog(logItem);
 
         var userExists = await _userManager.FindByNameAsync(dto.Username);
         if (userExists != null)

@@ -12,15 +12,11 @@ namespace TheCircleBackend.Hubs
         
         private readonly IChatMessageRepository messageRepository;
         private readonly ISecurityService security;
-        private readonly ILogItemRepo logItemRepo;
-        private readonly LogHelper logHelper;
 
-
-        public ChatHub(IChatMessageRepository messageRepository, ILogItemRepo logItemRepo, ILogger<ChatHub> logger, ISecurityService security)
+        public ChatHub(IChatMessageRepository messageRepository, ISecurityService security)
         {
             this.messageRepository = messageRepository;
             this.security = security;
-            this.logHelper = new LogHelper(logItemRepo, logger);
         }
 
 

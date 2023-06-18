@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TheCircleBackend.Domain.DTO;
 using TheCircleBackend.Domain.Models;
-using TheCircleBackend.DomainServices.IRepo;
+using TheCircleBackend.DomainServices.IHelpers;
 using TheCircleBackend.Helper;
 
 namespace TheCircleBackend.Controllers
@@ -12,57 +12,50 @@ namespace TheCircleBackend.Controllers
     [ApiController]
     public class LoggingController : ControllerBase
     {
+        private readonly ILogger<LogHelper> _logger;
+        private readonly ILogHelper _logHelper;
 
-        private readonly ILogItemRepo logItemRepo;
-        private readonly LogHelper logHelper;
-
-        public LoggingController(ILogItemRepo logItemRepo, ILogger<LoggingController> logger)
+        public LoggingController(ILogHelper logHelper, ILogger<LogHelper> logger)
         {
-            this.logItemRepo = logItemRepo;
-            this.logHelper = new LogHelper(logItemRepo, logger);
+            this._logHelper = logHelper;
+            this._logger = logger;
         }
 
         [HttpPost]
         public IActionResult AddLog(LogDTO dto)
         {
-            //TODO better action description
-            var ip = this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
-            var endpoint = "POST /logging";
-            var subjectUser = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            var action = $"Logging with: ";
-            return logHelper.AddUserLog(ip, endpoint, subjectUser, action);
+            try
+            {
+                var log = new LogItem()
+                {
+                    Action = dto.Action,
+                    DateTime = DateTime.Now,
+                    Endpoint = "POST /logging",
+                    SubjectUser = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value,
+                    Ip = this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString(),
+                };
 
-            //var log = new LogItem()
-            //{
-            //    Action = dto.Action,
-            //    DateTime = DateTime.Now,
+                this._logHelper.AddUserLog(log);
+                return Ok("Log added");
 
-            //    Ip = this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString(),
-            //};
-            //try
-            //{
-            //    this.logItemRepo.Add(log);
-            //    return Ok("Log added");
-
-            //}
-            //catch (Exception e)
-            //{
-            //    Console.WriteLine(e);
-            //    return StatusCode(500, "Unable to add log");
-            //}
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, "Unable to add log");
+            }
 
         }
 
         [HttpGet]
         public IActionResult GetAllLogItems()
         {
-            return Ok(this.logItemRepo.GetAllLogItems());
+            return Ok(this._logHelper.GetAllLogItems());
         }
 
         [HttpGet ("{id}")]
         public IActionResult GetLogItemById(int id)
         {
-            var result = this.logItemRepo.GetLogItemById(id);
+            var result = this._logHelper.GetLogItemById(id);
             if (result != null)
             {
                 return Ok(result);

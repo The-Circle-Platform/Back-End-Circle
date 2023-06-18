@@ -6,7 +6,7 @@ namespace TheCircleBackend.Domain.Models
     public class WebsiteUser
     {
         public int Id { get; set; }
-        [Required]
+        [Required]  
         public string UserName { get; set; }
         public bool IsOnline { get; set; } = false;
 
@@ -18,5 +18,10 @@ namespace TheCircleBackend.Domain.Models
 
         [JsonIgnore]
         public List<Viewer>? CurrentWatchList { get; set; }
+
+        [JsonIgnore]
+        public List<Viewer>? Followers { get; set; }
+
+        public List<Viewer>? Following { get; set;}
     }
 }

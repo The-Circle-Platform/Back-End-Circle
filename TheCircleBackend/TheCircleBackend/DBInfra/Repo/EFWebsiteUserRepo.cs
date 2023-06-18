@@ -22,6 +22,11 @@ namespace TheCircleBackend.DBInfra.Repo
             context.SaveChanges();
         }
 
+        public bool FollowerExists(int streamerId, int followerId)
+        {
+            return context.WebsiteUser.Any(u => u.Id == followerId && u.Followers!.Any(f => f.UserId == streamerId));
+        }
+
         public IEnumerable<WebsiteUser> GetAllWebsiteUsers()
         {
             return context.WebsiteUser;

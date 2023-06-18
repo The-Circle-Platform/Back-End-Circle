@@ -4,48 +4,47 @@ using System.Net;
 using Microsoft.Extensions.Logging;
 using TheCircleBackend.Domain.Models;
 using TheCircleBackend.DomainServices.IRepo;
+using TheCircleBackend.DomainServices.IHelpers;
+using TheCircleBackend.Domain.DTO;
 
 namespace TheCircleBackend.Helper
 {
-    public class LogHelper : ControllerBase
+    public class LogHelper : ControllerBase, ILogHelper
     {
-        private readonly ILogger logger;
-        private readonly string location;
-        private LogItem logItem;
-        private readonly ILogItemRepo logItemRepo;
+        private readonly ILogger _logger; 
+        //private readonly string location;
+        private readonly ILogItemRepo _logItemRepo;
 
-        public LogHelper(ILogItemRepo logItemRepo, ILogger logger)
+        public LogHelper(ILogItemRepo logItemRepo, ILogger<LogHelper> logger)
         {
-            this.logItemRepo = logItemRepo;
-            this.logger = logger;
+            this._logItemRepo = logItemRepo;
+            this._logger = logger;
+
         }
-
-
-        public IActionResult AddUserLog(string ip, string endpoint, string subjectUser, string msg)
+        
+        // TODO: Change LogItem to DTO if neccessary
+        public IActionResult AddUserLog(LogItem logItem)
         {
-            SetLogItem(ip, endpoint, subjectUser, msg);
             try
             {
-                this.logItemRepo.Add(logItem);
+                this._logItemRepo.Add(logItem);
                 return Ok("Log added");
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                _logger.LogError(e, "Error adding user log");
                 return BadRequest(e);
             }
-            //this.logItemRepo.Add(logItem);
-            //this.logger.LogTrace("DateTime: {date} | IP: {ip} | User: {user} | At: {location} | Action: {msg}", DateTime.Now, ip, 1, location, msg);
         }
 
-        private void SetLogItem(string ip, string endpoint, string subjectUser, string msg)
+        public IEnumerable<LogItem> GetAllLogItems()
         {
-            logItem = new LogItem();
-            logItem.DateTime = DateTime.Now;
-            logItem.Ip = ip;
-            logItem.Endpoint = endpoint;
-            logItem.SubjectUser = subjectUser;
-            logItem.Action = msg;
+            return _logItemRepo.GetAllLogItems();
+        }
+
+        public LogItem GetLogItemById(int id)
+        {
+            return _logItemRepo.GetLogItemById(id);
         }
     }
 }

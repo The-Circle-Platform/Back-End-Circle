@@ -9,6 +9,7 @@ namespace TheCircleBackend.DomainServices.IRepo
         public WebsiteUser GetById(int id);
         public void Update(WebsiteUser user, int userId);
 
+        public bool FollowerExists(int streamerId, int followerId);
         
     }
 }
