@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TheCircleBackend.DBInfra;
 
@@ -11,9 +12,11 @@ using TheCircleBackend.DBInfra;
 namespace TheCircleBackend.Migrations.IdentityDB
 {
     [DbContext(typeof(IdentityDBContext))]
-    partial class IdentityDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230619101043_Added seeded data")]
+    partial class Addedseededdata
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,22 +50,6 @@ namespace TheCircleBackend.Migrations.IdentityDB
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "fab4fac1-c546-41de-aebc-a14da6895711",
-                            ConcurrencyStamp = "1",
-                            Name = "Admin",
-                            NormalizedName = "Admin"
-                        },
-                        new
-                        {
-                            Id = "c7b013f0-5201-4317-abd8-c211f91b7330",
-                            ConcurrencyStamp = "2",
-                            Name = "User",
-                            NormalizedName = "User"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -159,15 +146,15 @@ namespace TheCircleBackend.Migrations.IdentityDB
                         {
                             Id = "b74ddd14-6340-4840-95c2-db12554843e5",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "65c86c2b-dc15-4185-9191-4623d413300f",
+                            ConcurrencyStamp = "a57d94db-ca4b-41e6-b743-465186d695d4",
                             Email = "Admin@example.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@EXAMPLE.COM",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAEAACcQAAAAEHKTRk6TBjwBWQl4fh07e9ar+lwKa8xHgM5BAUmeWn1r/4kmTP8W++cKq5P4wIgfoQ==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEN/fGhX6NvJ5QJJkDTS6ZQDjqWN9jCMejNBZljSex98H0L/h/n8Iuc81pn9rD1jzdg==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "bcbf46b3-6a50-4456-9802-afeb73de2d11",
+                            SecurityStamp = "7e27c93a-22d5-4e92-bfc9-0cb30e5b5674",
                             TwoFactorEnabled = false,
                             UserName = "Admin"
                         });
@@ -233,13 +220,6 @@ namespace TheCircleBackend.Migrations.IdentityDB
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            UserId = "b74ddd14-6340-4840-95c2-db12554843e5",
-                            RoleId = "fab4fac1-c546-41de-aebc-a14da6895711"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
