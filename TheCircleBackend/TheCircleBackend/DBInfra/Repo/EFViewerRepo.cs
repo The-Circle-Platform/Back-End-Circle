@@ -45,8 +45,7 @@ namespace TheCircleBackend.DBInfra.Repo
 
         public int GetCurrentViewerCount(int userId)
         {
-            //TODO: IMPLEMENT METHOD
-            return 1;
+            return domainContext.Viewer.Where(v => v.UserId == userId).Count();
         }
 
         public Viewer? GetStreamOfViewers(string connectionId)

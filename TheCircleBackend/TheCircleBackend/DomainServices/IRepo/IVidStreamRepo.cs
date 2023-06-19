@@ -1,4 +1,5 @@
-﻿using TheCircleBackend.Domain.Interfaces;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using TheCircleBackend.Domain.Interfaces;
 
 namespace TheCircleBackend.DomainServices.IRepo
 {
@@ -6,7 +7,7 @@ namespace TheCircleBackend.DomainServices.IRepo
     {
         public bool StartStream(int UserId, string title);
         public bool StopStream(int UserId, int StreamId);
-
+        public Domain.Models.Stream GetCurrentStream(int HostId);
 
     }
 }

@@ -20,13 +20,24 @@ namespace TheCircleBackend.Controllers
             VidStreamRepo = vidStreamRepo;
         }
 
-        
-
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        [HttpGet("{hostId}")]
+        public IActionResult Get(int hostId)
         {
             //Get videostream
-            Domain.Models.Stream? VideoStream = VidStreamRepo.GetById(id);
+            Domain.Models.Stream? VideoStream = VidStreamRepo.GetCurrentStream(hostId);
+            //Server keypair
+            var ServerKeys = securityService.GetServerKeys();
+
+            if(VideoStream == null)
+            {
+                var sign = securityService.SignData("Geen runnende stream aanwezig", ServerKeys.privKey);
+                var DTO = new
+                {
+                    Signature = sign,
+                    OriginalData = "Geen runnende stream aanwezig"
+                };
+                return BadRequest(DTO);
+            }
 
             var VidStreamDTO = new VideoStreamDTO()
             {
@@ -37,9 +48,6 @@ namespace TheCircleBackend.Controllers
                 title = VideoStream.Title,
                 transparantUserName = VideoStream.User.UserName
             };
-
-            //Server keypair
-            var ServerKeys = securityService.GetServerKeys();
 
             var Signature = securityService.SignData(VidStreamDTO, ServerKeys.privKey);
 

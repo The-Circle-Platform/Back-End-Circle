@@ -1,4 +1,5 @@
-﻿using TheCircleBackend.DomainServices.IRepo;
+﻿using TheCircleBackend.Domain.Models;
+using TheCircleBackend.DomainServices.IRepo;
 
 namespace TheCircleBackend.DBInfra.Repo
 {
@@ -26,19 +27,38 @@ namespace TheCircleBackend.DBInfra.Repo
             throw new NotImplementedException();
         }
 
-        public Domain.Models.Stream? GetById(int id)
+        public Domain.Models.Stream GetById(int StreamId)
         {
             try
             {
                 //Retrieves current stream
-                return domainContext.VideoStream
+                var list = domainContext
+                    .VideoStream
                     .OrderByDescending(v => v.StartStream)
-                    .FirstOrDefault(vs => vs.Id == id && vs.EndStream != null);
+                    .ToList();
+
+                var entity = list.First(v => v.Id == StreamId);
+
+                return entity;
             }
-            catch
+            catch(Exception ex)
             {
-                throw new Exception("Stream vinden ging niet goed");
+
+                throw new Exception(ex.Message);
             }
+        }
+
+        public Domain.Models.Stream? GetCurrentStream(int HostId)
+        {
+            //Retrieves current stream
+            var list = domainContext
+                .VideoStream
+                .OrderByDescending(v => v.StartStream)
+                .ToList();
+
+            var entity = list.FirstOrDefault(v => v.StreamUserId == HostId && v.EndStream != null);
+
+            return entity;
         }
 
         public bool StartStream(int UserId, string title)
