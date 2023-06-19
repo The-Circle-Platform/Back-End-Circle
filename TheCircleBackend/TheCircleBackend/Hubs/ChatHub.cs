@@ -33,10 +33,10 @@ namespace TheCircleBackend.Hubs
             // Generate server keypair
             var ServerKeyPair = security.GetServerKeys();
             // Converts code
-            var NewUpdatedList = new List<ChatMessageLite2>();
+            var NewUpdatedList = new List<ChatMessageLite>();
             foreach (ChatMessage message in list)
             {
-                NewUpdatedList.Add(new ChatMessageLite2()
+                NewUpdatedList.Add(new ChatMessageLite()
                 {
                     receiverUser = message.ReceiverUser.UserName,
                     writer = message.Writer.UserName,
@@ -87,10 +87,10 @@ namespace TheCircleBackend.Hubs
                     // Lees geupdate versie
                     var updatedList = messageRepository.GetStreamChat(incomingChatMessage.OriginalData.ReceiverId);
                     // Converts code
-                    var NewUpdatedList = new List<ChatMessageLite2>();
+                    var NewUpdatedList = new List<ChatMessageLite>();
                     foreach (ChatMessage message in updatedList)
                     {
-                        NewUpdatedList.Add(new ChatMessageLite2()
+                        NewUpdatedList.Add(new ChatMessageLite()
                         {
                             receiverUser = message.ReceiverUser.UserName,
                             writer = message.Writer.UserName,
