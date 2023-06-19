@@ -15,6 +15,11 @@ namespace TheCircleBackend.Domain.Models
         public string? ImageName { get; set; }
         public string? Base64Image { get; set; }
 
+        public int FollowCount { get; set; }
+        //public string Email { get; set; }
+        public int Balance { get; set; }
+
+
         [JsonIgnore]
         public List<ChatMessage>? UserChatMessages { get; set; }
         
