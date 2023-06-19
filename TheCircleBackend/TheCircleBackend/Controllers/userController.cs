@@ -5,6 +5,7 @@ using TheCircleBackend.DomainServices.IRepo;
 using Microsoft.Extensions.Logging;
 using TheCircleBackend.Helper;
 using System.Security.Claims;
+using TheCircleBackend.Domain.DTO;
 using TheCircleBackend.DomainServices.IHelpers;
 using TheCircleBackend.Domain.DTO.EncryptedPayload;
 
@@ -40,14 +41,29 @@ namespace TheCircleBackend.Controllers
             // Get all website users.
             var users = websiteUserRepo.GetAllWebsiteUsers().ToList();
 
+            var dtoList = new List<WebsiteUserDTO>();
+
+            foreach (var user in users)
+            {
+                var userDTO = new WebsiteUserDTO()
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    IsOnline = user.IsOnline,
+                    FollowCount = user.FollowCount,
+                    Balance = user.Balance,
+                };
+                dtoList.Add(userDTO);
+            }
+
             //Create signature
             var KeyPair = securityService.GetServerKeys();
-            var Signature = securityService.SignData(users, KeyPair.privKey);
+            var Signature = securityService.SignData(dtoList, KeyPair.privKey);
             
             // Packs in dto to client.
-            var DTO = new UserContentDTO()
+            var DTO = new 
             {
-                OriginalList = users,
+                OriginalList = dtoList,
                 Signature = Signature
             };
 
@@ -59,14 +75,26 @@ namespace TheCircleBackend.Controllers
         {
             Console.WriteLine(id);
             var user = websiteUserRepo.GetById(id);
+
+
+
             if (user == null)
             {
                 return NotFound();
             }
+            //putting in DTO for signature
+            var userDTO = new WebsiteUserDTO()
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                IsOnline = user.IsOnline,
+                FollowCount = user.FollowCount,
+                Balance = user.Balance,
+            };
             //Stores 
             //Create signature
             var KeyPair = securityService.GetServerKeys();
-            var Signature = securityService.SignData(user, KeyPair.privKey);
+            var Signature = securityService.SignData(userDTO, KeyPair.privKey);
 
             var DTO = new UserContentDTO()
             {
