@@ -14,5 +14,7 @@ namespace TheCircleBackend.DomainServices.IHelpers
         bool VerifySignedData(byte[] DataToVerify, byte[] Key, byte[] SignedData, bool IsPrivate);
         byte[]? SignData(byte[] DataToSign, byte[] Key, bool IsPrivate);
         (string privKey, string pubKey) GetServerKeys();
+
+        Task<string> DecryptMessage(string message);
     }
 }

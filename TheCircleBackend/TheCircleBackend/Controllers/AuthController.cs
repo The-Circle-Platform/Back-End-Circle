@@ -56,8 +56,11 @@ namespace Controllers.AuthController
         public async Task<IActionResult> Login(LoginDTO dto)
         {
 
-            var user = await _userManager.FindByNameAsync(dto.UserName);
-            if (user != null && await _userManager.CheckPasswordAsync(user, dto.Password))
+            var decryptedPassword = await this.securityService.DecryptMessage(dto.Password);
+            Console.WriteLine(decryptedPassword);
+
+                var user = await _userManager.FindByNameAsync(dto.UserName);
+            if (user != null && await _userManager.CheckPasswordAsync(user, decryptedPassword))
             {
                 var userRoles = await _userManager.GetRolesAsync(user);
 
@@ -72,22 +75,39 @@ namespace Controllers.AuthController
                     authClaims.Add(new Claim(ClaimTypes.Role, userRole));
                 }
 
-                var token = GetToken(authClaims);
+
+
 
                 // Retrieves user from database.
                 var WebsiteUser = _websiteUserRepo.GetByUserName(user.UserName);
                 var KeyPair = securityService.GetKeys(WebsiteUser.Id);
+                var token = GetToken(authClaims, WebsiteUser.Id);
+
+                 var userDTO = new WebsiteUserDTO()
+                {
+                    Id = WebsiteUser.Id,
+                    UserName = WebsiteUser.UserName,
+                    IsOnline = WebsiteUser.IsOnline,
+                    FollowCount = WebsiteUser.FollowCount,
+                    Balance = WebsiteUser.Balance,
+                };
+
 
                 //Create payload
                 var PayLoad = new
                 {
-                    WebsiteUser = WebsiteUser,
+                    WebsiteUser = userDTO,
                     token = new JwtSecurityTokenHandler().WriteToken(token),
-                    expiration = token.ValidTo
+                    expiration = token.ValidTo,
+                    PrivateKey = KeyPair.privKey,
+                    PublicKey = KeyPair.pubKey,
                 };
 
-                //Signs signature
-                var Signature = securityService.SignData(PayLoad, KeyPair.privKey);
+                //Console.WriteLine(KeyPair.privKey);
+                Console.WriteLine(KeyPair.pubKey);
+                    //Signs signature
+                    var ServerKeys = securityService.GetServerKeys();
+                var Signature = securityService.SignData(PayLoad, ServerKeys.privKey);
 
                 AuthOutRegisterDTO authOut = new()
                 {
@@ -267,7 +287,7 @@ namespace Controllers.AuthController
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
 
-        private JwtSecurityToken GetToken(List<Claim> authClaims)
+        private JwtSecurityToken GetToken(List<Claim> authClaims, int Id)
         {
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
 
@@ -278,6 +298,8 @@ namespace Controllers.AuthController
                 claims: authClaims,
                 signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
             );
+
+            token.Payload["Id"] = Id;
 
             return token;
         }
