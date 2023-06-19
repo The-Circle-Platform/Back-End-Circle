@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Collections.Generic;
+using TheCircleBackend.Domain.DTO;
 using TheCircleBackend.Domain.DTO.EncryptedPayload;
 using TheCircleBackend.Domain.Models;
 using TheCircleBackend.DomainServices.IHelpers;
@@ -47,21 +48,16 @@ namespace TheCircleBackend.Hubs
         }
         
         // Receiver method
-        public async Task ConnectToStream(ViewerIncomingContentDTO content)
+        public async Task ConnectToStream(int UserId, int StreamId)
         {
             Console.WriteLine("Connection made");
-            // Retrieves public key of user.
-            var publicKeyUser = securityService.GetKeys(content.OriginalViewer.UserId).pubKey;
 
-            // Checks original data with signature, in order to control the data on data-integrity;
-            bool HoldsIntegrity = securityService.HoldsIntegrity(content.OriginalViewer, content.Signature, publicKeyUser);
-            
-            if (!HoldsIntegrity)
+            var Viewer = new Viewer()
             {
-                throw new Exception("Integrity is tainted.");
-            }
-
-            var Viewer = content.OriginalViewer;
+                UserId = UserId,
+                StreamId = StreamId,
+                ConnectionId = null
+            };
             
             // It needs to check if user has not more than 4 streams open.
             bool IsAllowed = CheckMaxViews(Viewer.UserId);
