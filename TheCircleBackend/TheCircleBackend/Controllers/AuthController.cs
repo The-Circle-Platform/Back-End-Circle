@@ -299,7 +299,7 @@ namespace Controllers.AuthController
                 signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
             );
 
-            token.Payload["Id"] = Id;
+            token.Payload["id"] = Id;
 
             return token;
         }
