@@ -98,5 +98,10 @@ namespace TheCircleBackend.Helper
         {
             return securityHelper.GetServerKeys();
         }
+
+        public async Task<string> DecryptMessage(string message)
+        {
+            return await this.securityHelper.DecryptMessage(message);
+        }
     }
 }
