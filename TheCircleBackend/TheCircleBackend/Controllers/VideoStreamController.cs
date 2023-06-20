@@ -58,5 +58,48 @@ namespace TheCircleBackend.Controllers
             };
             return Ok(streamInfoPackage);
         }
+
+        public  IActionResult Post(VidStreamDTO videoStreamDTO)
+        {
+            var KeyPair = securityService.GetKeys(videoStreamDTO.SenderUserId);
+            var isValid = securityService.HoldsIntegrity(videoStreamDTO.OriginalData, videoStreamDTO.Signature, KeyPair.pubKey);
+            var ServerKeys = securityService.GetServerKeys();
+            if(isValid)
+            {
+                VidStreamRepo.StartStream(videoStreamDTO.OriginalData.transparantUserId, videoStreamDTO.OriginalData.title);
+
+
+                var succes = new
+                {
+                    Message = "Data succesvol toegevoegd"
+                };
+                var signatureSucces = securityService.SignData(succes, ServerKeys.privKey);
+                var succesDTO = new
+                {
+                    Signature = signatureSucces,
+                    OriginalData = succes,
+                };
+                return Ok(succesDTO);
+            }
+            var fail = new
+            {
+                Message = "Data is niet integer"
+            };
+
+            var signatureOut = securityService.SignData(fail, ServerKeys.privKey);
+
+            var failDTO = new
+            {
+                Signature = signatureOut,
+                OriginalData = fail
+            };
+            return BadRequest(failDTO);
+        }
+
+        [HttpPut("{hostId}/StopStream/{streamId}")]
+        public IActionResult Put(int hostId, int streamId)
+        {
+
+        }
     }
 }

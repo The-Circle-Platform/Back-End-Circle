@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using TheCircleBackend.Domain.DTO.EncryptedPayload;
 using TheCircleBackend.Domain.Models;
 using TheCircleBackend.DomainServices.IHelpers;
+using TheCircleBackend.DomainServices.IRepo;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace TheCircleBackend.Hubs
@@ -18,11 +19,14 @@ namespace TheCircleBackend.Hubs
         private readonly ISecurityService securityService;
         private string[] record;
         public string ClientEndpoint { get; private set; }
-        public LivestreamHub(ISecurityService securityService)
+        public IStreamChunkRepo StreamChunkRepo { get; }
+
+        public LivestreamHub(ISecurityService securityService, IStreamChunkRepo streamChunkRepo)
         {
             _id = Guid.NewGuid().ToString();
             this.ClientEndpoint = "Stream-";
             this.securityService = securityService;
+            StreamChunkRepo = streamChunkRepo;
         }
 
         public string Call() => _id;
@@ -65,7 +69,7 @@ namespace TheCircleBackend.Hubs
             };
 
             //sla chunk op in database
-
+            StreamChunkRepo.Create(ActualStreamChunk);
             // Creeer signature
             var SignatureOut = securityService.SignData(Original, ServerKeyPair.privKey);
 
@@ -76,7 +80,7 @@ namespace TheCircleBackend.Hubs
             //Console.WriteLine(test.name + " " + test.stream);
             //Console.WriteLine(test.stream);
 
-            return Clients.All.SendAsync(this.ClientEndpoint + dto.OriginalData.streamId, ActualStreamChunk);
+            return Clients.All.SendAsync(this.ClientEndpoint + dto.OriginalData.streamId, dto);
 
         }
 
@@ -87,10 +91,12 @@ namespace TheCircleBackend.Hubs
     }
 }
 
-public class Test
+public class Stream
 {
-    public string name { get; set; }
-    public string stream { get; set; }
+    public int StreamId { get; set; }
+    public DateTimeOffset TimeStamp { get; set; }
+    public int ChunkSize { get; set; }
+    public string Chunk { get; set; }
 }
 
 public class Data

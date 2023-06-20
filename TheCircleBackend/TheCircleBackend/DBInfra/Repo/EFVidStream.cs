@@ -14,7 +14,7 @@ namespace TheCircleBackend.DBInfra.Repo
 
         public bool Create(Domain.Models.Stream entity)
         {
-            throw new NotImplementedException();
+           throw new NotImplementedException();
         }
 
         public Domain.Models.Stream Delete(int id)

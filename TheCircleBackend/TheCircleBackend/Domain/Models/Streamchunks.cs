@@ -7,7 +7,6 @@ namespace TheCircleBackend.Domain.Models
 
         //ForeignKey relatie naar stream
         public int StreamId { get; set; }
-        //public long SequenceNr { get; set; }
         public DateTimeOffset TimeStamp { get; set; }
         public int ChunkSize { get; set; }
         public string Chunk { get; set; }
