@@ -6,7 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TheCircleBackend.Migrations
 {
     /// <inheritdoc />
+<<<<<<<< HEAD:TheCircleBackend/TheCircleBackend/Migrations/20230614072008_UpdatedKey.cs
     public partial class UpdatedKey : Migration
+========
+    public partial class AddedStreamvidtoStream : Migration
+>>>>>>>> Marcel:TheCircleBackend/TheCircleBackend/Migrations/20230613074953_Added Streamvid to Stream.cs
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -33,7 +37,8 @@ namespace TheCircleBackend.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StreamVid = table.Column<byte[]>(type: "varbinary(MAX)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -89,7 +94,7 @@ namespace TheCircleBackend.Migrations
                         column: x => x.ReceiverId,
                         principalTable: "WebsiteUser",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_ChatMessage_WebsiteUser_WebUserId",
                         column: x => x.WebUserId,

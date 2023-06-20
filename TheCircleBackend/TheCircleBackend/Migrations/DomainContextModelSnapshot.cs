@@ -220,7 +220,7 @@ namespace TheCircleBackend.Migrations
                     b.HasOne("TheCircleBackend.Domain.Models.WebsiteUser", "Writer")
                         .WithMany("UserChatMessages")
                         .HasForeignKey("WebUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("ReceiverUser");
