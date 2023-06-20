@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.Identity.Client;
@@ -192,7 +193,7 @@ namespace Controllers.AuthController
 
             string emailbody =
                 $"Hello {dto.Username} An account has been created by a TheCircle admin using: \n email: {dto.Email} \n Username: {dto.Username} \n Your generated password is: {password}";
-            mailer.SendMail(dto.Email, "The Circle Account Creation", emailbody, "The Circle Team");
+            //mailer.SendMail(dto.Email, "The Circle Account Creation", emailbody, "The Circle Team");
 
             // Encrypts data
             var Response = new Response { Status = "Success", Message = "User created successfully!" };
@@ -213,15 +214,15 @@ namespace Controllers.AuthController
         public async Task<IActionResult> RegisterAdmin(AuthRegisterDTO request)
         {
 
-            var keyPair = securityService.GetKeys(request.SenderUserId);
+            //var keyPair = securityService.GetKeys(request.SenderUserId);
 
-            var HoldsIntegrity =
-                securityService.HoldsIntegrity(request.OriginalRegisterData, request.Signature, keyPair.pubKey);
-            if (!HoldsIntegrity)
-            {
-                return StatusCode(StatusCodes.Status406NotAcceptable,
-                    new Response { Status = "Error", Message = "Data has been tampered" });
-            }
+            //var HoldsIntegrity =
+            //    securityService.HoldsIntegrity(request.OriginalRegisterData, request.Signature, keyPair.pubKey);
+            //if (!HoldsIntegrity)
+            //{
+            //    return StatusCode(StatusCodes.Status406NotAcceptable,
+            //        new Response { Status = "Error", Message = "Data has been tampered" });
+            //}
             var dto = request.OriginalRegisterData;
             var pwd = new Password();
             var password = pwd.Next();
@@ -280,10 +281,30 @@ namespace Controllers.AuthController
 
 
             Mailer mailer = new Mailer(_configuration);
+            string fileName = System.IO.Path.GetTempPath() + Guid.NewGuid().ToString() + ".txt";
+            StreamWriter sw = new StreamWriter(fileName);
+            sw.WriteLine(KeyPair.privKey);
+            sw.Close();
+            System.Net.Mail.Attachment privateKey = new System.Net.Mail.Attachment(fileName);
+            privateKey.Name = "PrivateKey.txt";  // set name here
+            string fileName2 = System.IO.Path.GetTempPath() + Guid.NewGuid().ToString() + ".txt";
+            StreamWriter sw2 = new StreamWriter(fileName2);
+            sw2.WriteLine(KeyPair.pubKey);
+            sw2.Close();
+            System.Net.Mail.Attachment publicKey = new System.Net.Mail.Attachment(fileName2);
+            publicKey.Name = "PublicKey.txt";
+            List<System.Net.Mail.Attachment> attachments = new List<System.Net.Mail.Attachment>();
+            attachments.Add(privateKey);
+            attachments.Add(publicKey);
+
+
+
+
+
 
             string emailbody =
                 $"Hello {dto.Username} An account has been created by a TheCircle admin using: \n email: {dto.Email} \n Username: {dto.Username} \n Your generated password is: {password}";
-            mailer.SendMail(dto.Email, "The Circle Account Creation", emailbody, "The Circle Team");
+            mailer.SendMail(dto.Email, "The Circle Account Creation", emailbody, "The Circle Team", attachments);
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
 
