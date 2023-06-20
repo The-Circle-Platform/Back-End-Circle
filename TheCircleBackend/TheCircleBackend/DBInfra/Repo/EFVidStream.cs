@@ -56,7 +56,7 @@ namespace TheCircleBackend.DBInfra.Repo
                 .OrderByDescending(v => v.StartStream)
                 .ToList();
 
-            var entity = list.FirstOrDefault(v => v.StreamUserId == HostId && v.EndStream != null);
+            var entity = list.Find(v => v.StreamUserId == HostId && v.EndStream == null);
 
             return entity;
         }
