@@ -1,13 +1,14 @@
 ﻿using TheCircleBackend.Domain.Models;
+using TheCircleBackend.DomainServices.IHelpers;
 using TheCircleBackend.DomainServices.IRepo;
 
 namespace TheCircleBackend.Helper
 {
-    public class CoinHelper
+    public class CoinHelper : ICoinHelper
     {
         private IWebsiteUserRepo? websiteUserRepo { get; set; }
         private WebsiteUser user { get; set; }
-        private DateTime startDate;
+        private DateTime startDate { get; set; }
         private DateTime endDate;
 
         public CoinHelper(IWebsiteUserRepo websiteUserRepo, WebsiteUser user)
@@ -61,5 +62,6 @@ namespace TheCircleBackend.Helper
                 Console.WriteLine(e);
             }
         }
+
     }
 }
