@@ -6,6 +6,7 @@ using TheCircleBackend.Domain.Models;
 using TheCircleBackend.DomainServices.IRepo;
 using TheCircleBackend.DomainServices.IHelpers;
 using TheCircleBackend.Domain.DTO;
+using TheCircleBackend.DBInfra.Repo;
 
 namespace TheCircleBackend.Helper
 {
@@ -21,7 +22,11 @@ namespace TheCircleBackend.Helper
             this._logger = logger;
 
         }
-        
+
+        public LogHelper(EFLogItemRepo repo, ILogger<EFLogItemRepo> @object)
+        {
+        }
+
         // TODO: Change LogItem to DTO if neccessary
         public IActionResult AddUserLog(LogItem logItem)
         {
