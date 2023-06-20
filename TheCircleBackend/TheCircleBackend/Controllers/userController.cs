@@ -50,8 +50,7 @@ namespace TheCircleBackend.Controllers
                     Id = user.Id,
                     UserName = user.UserName,
                     IsOnline = user.IsOnline,
-                    FollowCount = user.FollowCount,
-                    Balance = user.Balance,
+  
                 };
                 dtoList.Add(userDTO);
             }
@@ -88,8 +87,6 @@ namespace TheCircleBackend.Controllers
                 Id = user.Id,
                 UserName = user.UserName,
                 IsOnline = user.IsOnline,
-                FollowCount = user.FollowCount,
-                Balance = user.Balance,
             };
             //Stores 
             //Create signature

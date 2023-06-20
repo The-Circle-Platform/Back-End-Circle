@@ -44,9 +44,8 @@ namespace TheCircleBackend.Controllers
                 id = 0,
                 endStream = null,
                 startStream = new DateTime(),
-                transparantUserId = VideoStream.User.Id,
-                title = VideoStream.Title,
-                transparantUserName = VideoStream.User.UserName
+                transparantUserId = hostId,
+                title = VideoStream.Title
             };
 
             var Signature = securityService.SignData(VidStreamDTO, ServerKeys.privKey);

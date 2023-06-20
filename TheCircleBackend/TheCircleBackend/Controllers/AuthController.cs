@@ -88,8 +88,6 @@ namespace Controllers.AuthController
                     Id = WebsiteUser.Id,
                     UserName = WebsiteUser.UserName,
                     IsOnline = WebsiteUser.IsOnline,
-                    FollowCount = WebsiteUser.FollowCount,
-                    Balance = WebsiteUser.Balance,
                 };
 
 
