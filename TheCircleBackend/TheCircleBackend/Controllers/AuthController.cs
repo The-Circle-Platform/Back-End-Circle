@@ -89,8 +89,6 @@ namespace Controllers.AuthController
                     Id = WebsiteUser.Id,
                     UserName = WebsiteUser.UserName,
                     IsOnline = WebsiteUser.IsOnline,
-                    FollowCount = WebsiteUser.FollowCount,
-                    Balance = WebsiteUser.Balance,
                 };
 
 
@@ -214,14 +212,14 @@ namespace Controllers.AuthController
         public async Task<IActionResult> RegisterAdmin(AuthRegisterDTO request)
         {
 
-            //var keyPair = securityService.GetKeys(request.SenderUserId);
+            //var keypair = securityservice.getkeys(request.senderuserid);
 
-            //var HoldsIntegrity =
-            //    securityService.HoldsIntegrity(request.OriginalRegisterData, request.Signature, keyPair.pubKey);
-            //if (!HoldsIntegrity)
+            //var holdsintegrity =
+            //    securityservice.holdsintegrity(request.originalregisterdata, request.signature, keypair.pubkey);
+            //if (!holdsintegrity)
             //{
-            //    return StatusCode(StatusCodes.Status406NotAcceptable,
-            //        new Response { Status = "Error", Message = "Data has been tampered" });
+            //    return statuscode(statuscodes.status406notacceptable,
+            //        new response { status = "error", message = "data has been tampered" });
             //}
             var dto = request.OriginalRegisterData;
             var pwd = new Password();

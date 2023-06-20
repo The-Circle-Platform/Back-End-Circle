@@ -10,5 +10,7 @@ namespace TheCircleBackend.Domain.DTO
         public int FollowCount { get; set; }
         //public string Email { get; set; }
         public int Balance { get; set; }
+        public string ImageName { get; set; }   
+        public string Base64Image { get; set; }
     }
 }

@@ -10,6 +10,7 @@ namespace TheCircleBackend.DBInfra
         public DbSet<ChatMessage> ChatMessage { get; set; } = null!;
         public DbSet<Viewer> Viewer { get; set; } = null!;
         public DbSet<KeyStore> UserKeys { get; set; } = null!;
+        public DbSet<Domain.Models.Stream> VideoStream { get; set; } = null!;
 
         public  DomainContext(DbContextOptions<DomainContext> options) : base(options) { }
 
@@ -49,6 +50,11 @@ namespace TheCircleBackend.DBInfra
 
             // Model LogItem
             modelBuilder.Entity<LogItem>().HasKey(logItem => new { logItem.Id });
+
+            //Model videoStream
+            modelBuilder.Entity<Domain.Models.Stream>().HasKey(s => s.Id);
+            modelBuilder.Entity<Domain.Models.Stream>().HasOne(tp => tp.User).WithMany(vs => vs.StreamList)
+                .HasForeignKey(tp => tp.StreamUserId);
 
             WebsiteUser AdminUser = new()
             {
