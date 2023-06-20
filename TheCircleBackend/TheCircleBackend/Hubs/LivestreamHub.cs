@@ -57,30 +57,35 @@ namespace TheCircleBackend.Hubs
                 
                 return Clients.All.SendAsync(this.ClientEndpoint + "Error-" + dto.OriginalData.streamId, errorDto);
             }
-            var Original = dto.OriginalData;
-            //Zet dto om naar echte object
-            var ActualStreamChunk = new Streamchunks()
+            else
             {
-                StreamId = Original.streamId,
-                Id = Original.id,
-                Chunk = Original.chunk,
-                ChunkSize = Original.chunkSize,
-                TimeStamp = Original.timeStamp
-            };
+                var Original = dto.OriginalData;
+                //Zet dto om naar echte object
+                var ActualStreamChunk = new Streamchunks()
+                {
+                    StreamId = Original.streamId,
+                    Id = Original.id,
+                    Chunk = Original.chunk,
+                    ChunkSize = Original.chunkSize,
+                    TimeStamp = Original.timeStamp
+                };
 
-            //sla chunk op in database
-            StreamChunkRepo.Create(ActualStreamChunk);
-            // Creeer signature
-            var SignatureOut = securityService.SignData(Original, ServerKeyPair.privKey);
+                //sla chunk op in database
+                StreamChunkRepo.Create(ActualStreamChunk);
+                // Creeer signature
+                var SignatureOut = securityService.SignData(Original, ServerKeyPair.privKey);
 
-            dto.Signature = SignatureOut;
-            dto.OriginalData = Original;
-            //record.Append<string>(test.stream);
-            //Console.WriteLine("incoming:");
-            //Console.WriteLine(test.name + " " + test.stream);
-            //Console.WriteLine(test.stream);
+                dto.Signature = SignatureOut;
+                dto.OriginalData = Original;
+                //record.Append<string>(test.stream);
+                //Console.WriteLine("incoming:");
+                //Console.WriteLine(test.name + " " + test.stream);
+                //Console.WriteLine(test.stream);
 
-            return Clients.All.SendAsync(this.ClientEndpoint + dto.OriginalData.streamId, dto);
+
+                return Clients.All.SendAsync(this.ClientEndpoint + dto.OriginalData.streamId, dto);
+            }
+            
 
         }
 
