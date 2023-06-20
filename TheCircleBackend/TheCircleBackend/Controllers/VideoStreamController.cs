@@ -72,11 +72,11 @@ namespace TheCircleBackend.Controllers
             {
                 VidStreamRepo.StartStream(videoStreamDTO.OriginalData.transparantUserId, videoStreamDTO.OriginalData.title);
 
-
+                var latestStream = VidStreamRepo.GetCurrentStream(videoStreamDTO.OriginalData.transparantUserId);
                 //Succes response
                 var succes = new
                 {
-                    Message = "Data succesvol toegevoegd"
+                    streamId = latestStream.Id
                 };
                 var signatureSucces = securityService.SignData(succes, ServerKeys.privKey);
                 var succesDTO = new
