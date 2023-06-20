@@ -56,7 +56,11 @@ builder.Services.AddAuthentication(options =>
 });
 
 
-
+builder.Services.AddSignalR(o =>
+{
+    o.EnableDetailedErrors = true;
+    o.MaximumReceiveMessageSize = 3024000;
+});
 
 
 // Add services to the container.
@@ -129,4 +133,5 @@ app.MapControllers();
 
 app.MapHub<ChatHub>("/hubs/ChatHub");
 app.MapHub<ViewerHub>("/hubs/ViewHub");
+app.MapHub<LivestreamHub>("/hubs/Livestream");
 app.Run();
