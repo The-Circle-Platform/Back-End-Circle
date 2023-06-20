@@ -51,7 +51,7 @@ namespace TheCircleBackend.Controllers
                     UserName = user.UserName,
                     IsOnline = user.IsOnline,
                     ImageName = user.ImageName,
-                        Base64Image = user.Base64Image
+                    Base64Image = user.Base64Image
   
                 };
                 dtoList.Add(userDTO);
@@ -72,7 +72,7 @@ namespace TheCircleBackend.Controllers
         }
 
         [HttpPut("{id}/pfp")]
-        public IActionResult postImage(WebsiteUser websiteUser, int id)
+        public IActionResult PostImage(WebsiteUserDTO websiteUser, int id)
         {
             var user = this.websiteUserRepo.GetById(id);
             Console.WriteLine("test");
@@ -98,7 +98,7 @@ namespace TheCircleBackend.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult get(int id)
+        public IActionResult Get(int id)
         {
             Console.WriteLine(id);
             var user = websiteUserRepo.GetById(id);
@@ -115,6 +115,8 @@ namespace TheCircleBackend.Controllers
                 Id = user.Id,
                 UserName = user.UserName,
                 IsOnline = user.IsOnline,
+                Base64Image = user.Base64Image,
+                ImageName = user.ImageName
             };
             
             //Stores 
@@ -132,7 +134,7 @@ namespace TheCircleBackend.Controllers
 
         }
         [HttpGet("{id}/pfp")]
-        public IActionResult getPfp(WebsiteUser pfp)
+        public IActionResult GetPfp(WebsiteUser pfp)
         {
             string pic = websiteUserRepo.GetById(pfp.Id).Base64Image;
             Console.WriteLine(pfp);
