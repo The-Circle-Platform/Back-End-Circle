@@ -59,16 +59,21 @@ namespace TheCircleBackend.Controllers
             return Ok(streamInfoPackage);
         }
 
+        [HttpPost]
         public  IActionResult Post(VidStreamDTO videoStreamDTO)
         {
+            //Get userId keys
             var KeyPair = securityService.GetKeys(videoStreamDTO.SenderUserId);
+            //check integrity
             var isValid = securityService.HoldsIntegrity(videoStreamDTO.OriginalData, videoStreamDTO.Signature, KeyPair.pubKey);
+            //server keys
             var ServerKeys = securityService.GetServerKeys();
             if(isValid)
             {
                 VidStreamRepo.StartStream(videoStreamDTO.OriginalData.transparantUserId, videoStreamDTO.OriginalData.title);
 
 
+                //Succes response
                 var succes = new
                 {
                     Message = "Data succesvol toegevoegd"
@@ -81,6 +86,8 @@ namespace TheCircleBackend.Controllers
                 };
                 return Ok(succesDTO);
             }
+
+            //Fail response
             var fail = new
             {
                 Message = "Data is niet integer"
@@ -96,10 +103,26 @@ namespace TheCircleBackend.Controllers
             return BadRequest(failDTO);
         }
 
-        [HttpPut("{hostId}/StopStream/{streamId}")]
+        [HttpPut("{hostId}/CurrentStream/{streamId}")]
         public IActionResult Put(int hostId, int streamId)
         {
+            //Server keys
+            var ServerKeys = securityService.GetServerKeys();
+           //Stream wordt gestopt
+            VidStreamRepo.StopStream(hostId, streamId);
 
+            //Succes response
+            var succes = new
+            {
+                Message = "Data succesvol toegevoegd"
+            };
+            var signatureSucces = securityService.SignData(succes, ServerKeys.privKey);
+            var succesDTO = new
+            {
+                Signature = signatureSucces,
+                OriginalData = succes,
+            };
+            return Ok(succesDTO);
         }
     }
 }
