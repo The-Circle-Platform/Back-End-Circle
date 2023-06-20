@@ -37,7 +37,7 @@ namespace TheCircleBackend.Hubs
 
             var isValid = securityService.HoldsIntegrity(dto.OriginalData, dto.Signature, keyPair.pubKey);
             var ServerKeyPair = securityService.GetServerKeys();
-            if (isValid)
+            if (!isValid)
             {
                 
                 var ErrorChunk = new StreamError()
