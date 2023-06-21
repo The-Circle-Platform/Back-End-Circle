@@ -1,4 +1,5 @@
-﻿using TheCircleBackend.Domain.Interfaces;
+﻿using Newtonsoft.Json;
+using TheCircleBackend.Domain.Interfaces;
 
 namespace TheCircleBackend.Domain.Models
 {
@@ -12,5 +13,8 @@ namespace TheCircleBackend.Domain.Models
         public WebsiteUser User { get; set; }
 
         public List<Viewer> ViewList { get; set; }
+
+        [JsonIgnore]
+        public List<Streamchunks> RelatedStreamChunks { get; set; }
     }
 }

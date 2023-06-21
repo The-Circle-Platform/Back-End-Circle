@@ -14,7 +14,7 @@ namespace TheCircleBackend.DBInfra.Repo
 
         public bool Create(Domain.Models.Stream entity)
         {
-            throw new NotImplementedException();
+           throw new NotImplementedException();
         }
 
         public Domain.Models.Stream Delete(int id)
@@ -56,7 +56,7 @@ namespace TheCircleBackend.DBInfra.Repo
                 .OrderByDescending(v => v.StartStream)
                 .ToList();
 
-            var entity = list.FirstOrDefault(v => v.StreamUserId == HostId && v.EndStream != null);
+            var entity = list.Find(v => v.StreamUserId == HostId && v.EndStream == null);
 
             return entity;
         }
