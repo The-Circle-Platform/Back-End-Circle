@@ -41,11 +41,11 @@ namespace TheCircleBackend.Controllers
             // Get all website users.
             var users = websiteUserRepo.GetAllWebsiteUsers().ToList();
 
-            var dtoList = new List<WebsiteUserDTO>();
+            var dtoList = new List<WebsiteUserDTORequest>();
 
             foreach (var user in users)
             {
-                var userDTO = new WebsiteUserDTO()
+                var userDTO = new WebsiteUserDTORequest()
                 {
                     Id = user.Id,
                     UserName = user.UserName,
@@ -74,8 +74,23 @@ namespace TheCircleBackend.Controllers
         [HttpPut("{id}/pfp")]
         public IActionResult PostImage(WebsiteUserDTO websiteUser, int id)
         {
+            try
+            {
+                var keys = securityService.GetKeys(websiteUser.Request.Id);
+                Console.WriteLine(keys.privKey);
+                var isSameUser = securityService.HoldsIntegrity(websiteUser.Request, Convert.FromBase64String(websiteUser.Signature),
+                    keys.pubKey);
+                Console.WriteLine(isSameUser);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+            
+
             var user = this.websiteUserRepo.GetById(id);
-            Console.WriteLine("test");
+            //Console.WriteLine("test");
 
             var ip = this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
             var endpoint = "POST /user";
@@ -83,16 +98,16 @@ namespace TheCircleBackend.Controllers
              var action = $"WebsiteUser with ID: {user.Id}, Name: {user.UserName}";
              logHelper.AddUserLog(ip, endpoint, currentUser, action);*/
 
-            Console.WriteLine(user);
+            //Console.WriteLine(user);
             try
             {
-                user.Base64Image = websiteUser.Base64Image;
+                user.Base64Image = websiteUser.Request.Base64Image;
                 this.websiteUserRepo.Update(user, id);
                 return Ok("user updated");
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                //Console.WriteLine(e);
                 return BadRequest(e);
             }
         }
@@ -110,13 +125,14 @@ namespace TheCircleBackend.Controllers
                 return NotFound();
             }
             //putting in DTO for signature
-            var userDTO = new WebsiteUserDTO()
+            var userDTO = new WebsiteUserDTORequest()
             {
                 Id = user.Id,
                 UserName = user.UserName,
                 IsOnline = user.IsOnline,
                 Base64Image = user.Base64Image,
-                ImageName = user.ImageName
+                ImageName = user.ImageName,
+                TimeStamp = null
             };
             
             //Stores 
@@ -124,9 +140,9 @@ namespace TheCircleBackend.Controllers
             var KeyPair = securityService.GetServerKeys();
             var Signature = securityService.SignData(userDTO, KeyPair.privKey);
 
-            var DTO = new UserContentDTO()
+            var DTO = new
             {
-                OriginalData = user,
+                OriginalData = userDTO,
                 Signature = Signature
             };
 

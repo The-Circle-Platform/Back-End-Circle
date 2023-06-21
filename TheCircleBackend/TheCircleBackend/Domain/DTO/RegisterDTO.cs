@@ -10,5 +10,10 @@ namespace TheCircleBackend.Domain.DTO
         [EmailAddress]
         [Required(ErrorMessage = "Email is required")]
         public string? Email { get; set; }
+
+        public string UsernameOfAdmin { get; set; }
+        public long TimeStamp { get; set; }
+
     }
+
 }
