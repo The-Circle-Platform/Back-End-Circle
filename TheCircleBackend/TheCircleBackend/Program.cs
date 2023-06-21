@@ -133,6 +133,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.MapHub<LivestreamHub>("/hubs/Livestream");
 app.MapHub<ChatHub>("/hubs/ChatHub");
 app.MapHub<ViewerHub>("/hubs/ViewHub");
+
 app.Run();

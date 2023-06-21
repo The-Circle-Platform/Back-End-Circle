@@ -38,6 +38,16 @@ namespace TheCircleBackend.DBInfra.Repo
             return context.WebsiteUser.Where(u => u.UserName == UserName).FirstOrDefault();
         }
 
+        public void SetUserOnline(int userId)
+        {
+            var user = context.WebsiteUser.First(u => u.Id == userId);
+
+            user.IsOnline = true;
+
+            context.WebsiteUser.Update(user);
+            context.SaveChanges();
+        }
+
         public void Update(WebsiteUser user, int userId)
         {
             var result = context.WebsiteUser.Where(u => u.Id == userId).FirstOrDefault();

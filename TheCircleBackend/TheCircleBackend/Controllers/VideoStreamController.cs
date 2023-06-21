@@ -13,11 +13,13 @@ namespace TheCircleBackend.Controllers
     {
         private readonly ISecurityService securityService;
         private readonly IVidStreamRepo VidStreamRepo;
+        private readonly IWebsiteUserRepo websiteUserRepo;
 
-        public VideoStreamController(ISecurityService securityService, IVidStreamRepo vidStreamRepo)
+        public VideoStreamController(ISecurityService securityService, IVidStreamRepo vidStreamRepo, IWebsiteUserRepo websiteUserRepo)
         {
             this.securityService = securityService;
             VidStreamRepo = vidStreamRepo;
+            this.websiteUserRepo = websiteUserRepo;
         }
 
         [HttpGet("{hostId}")]
@@ -72,6 +74,8 @@ namespace TheCircleBackend.Controllers
             {
                 VidStreamRepo.StartStream(videoStreamDTO.OriginalData.transparantUserId, videoStreamDTO.OriginalData.title);
 
+                websiteUserRepo.SetUserOnline(videoStreamDTO.OriginalData.transparantUserId);
+
                 var latestStream = VidStreamRepo.GetCurrentStream(videoStreamDTO.OriginalData.transparantUserId);
                 //Succes response
                 var succes = new
@@ -86,6 +90,7 @@ namespace TheCircleBackend.Controllers
                 };
                 return Ok(succesDTO);
             }
+
 
             //Fail response
             var fail = new

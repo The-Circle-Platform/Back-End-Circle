@@ -31,62 +31,32 @@ namespace TheCircleBackend.Hubs
 
         public string Call() => _id;
 
-        public Task Upload(StreamChunkDTO dto)
+        public async Task Upload(string chunk, int streamId, int HostId)
         {
-            var keyPair = securityService.GetKeys(dto.SenderUserId);
-
-            var isValid = securityService.HoldsIntegrity(dto.OriginalData, dto.Signature, keyPair.pubKey);
-            var ServerKeyPair = securityService.GetServerKeys();
-            if (!isValid)
+            /*var ActualStreamChunk = new Streamchunks()
             {
-                
-                var ErrorChunk = new StreamError()
-                {
-                    Error = true,
-                    Message = "Data integriteit is aantetast"
-                };
-                //Signature
-                var Signature = securityService.SignData(ErrorChunk, ServerKeyPair.privKey);
+                StreamId = streamId,
+                Id = 0,
+                Chunk = chunk,
+                ChunkSize = chunk.Length,
+                TimeStamp = new DateTimeOffset()
+            };
 
-                var errorDto = new StreamErrorChunkDTO()
-                {
-                    Signature = Signature,
-                    SenderUserId = dto.SenderUserId,
-                    Error = ErrorChunk
-                };
-                
-                return Clients.All.SendAsync(this.ClientEndpoint + "Error-" + dto.OriginalData.streamId, errorDto);
-            }
-            else
-            {
-                var Original = dto.OriginalData;
-                //Zet dto om naar echte object
-                var ActualStreamChunk = new Streamchunks()
-                {
-                    StreamId = Original.streamId,
-                    Id = Original.id,
-                    Chunk = Original.chunk,
-                    ChunkSize = Original.chunkSize,
-                    TimeStamp = Original.timeStamp
-                };
+             //sla chunk op in database
+             StreamChunkRepo.Create(ActualStreamChunk);
+             var ServerKeyPair = securityService.GetServerKeys();
+             // Creeer signature
+             var SignatureOut = securityService.SignData(ActualStreamChunk, ServerKeyPair.privKey);
 
-                //sla chunk op in database
-                StreamChunkRepo.Create(ActualStreamChunk);
-                // Creeer signature
-                var SignatureOut = securityService.SignData(Original, ServerKeyPair.privKey);
-
-                dto.Signature = SignatureOut;
-                dto.OriginalData = Original;
-                //record.Append<string>(test.stream);
-                //Console.WriteLine("incoming:");
-                //Console.WriteLine(test.name + " " + test.stream);
-                //Console.WriteLine(test.stream);
-
-
-                return Clients.All.SendAsync(this.ClientEndpoint + dto.OriginalData.streamId, dto);
-            }
-            
-
+             var dto = new
+             {
+                 Signature = SignatureOut,
+                 OriginalData = ActualStreamChunk
+             };*/
+            Console.WriteLine("Endpoint Host: " + HostId);
+            Console.WriteLine("Endpoint stream" + streamId);
+            Console.WriteLine("Endpoint chunk" + chunk);
+            await Clients.All.SendAsync("Stream-1", "Endpoint is aangekomen" + chunk + HostId);
         }
 
         //public Task LivestreamHub(Test test)

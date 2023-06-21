@@ -9,6 +9,6 @@ namespace TheCircleBackend.DomainServices.IRepo
         public WebsiteUser GetById(int id);
         public void Update(WebsiteUser user, int userId);
         public WebsiteUser GetByUserName(string UserName);
-
+        public void SetUserOnline(int userId);
     }
 }
