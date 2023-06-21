@@ -2,6 +2,6 @@
 {
     public interface ICoinHelper
     {
-        void StopTimer();
+        void ChangeBalance(DateTime startDate, DateTime endDate);
     }
 }
