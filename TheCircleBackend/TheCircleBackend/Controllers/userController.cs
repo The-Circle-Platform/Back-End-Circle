@@ -51,7 +51,8 @@ namespace TheCircleBackend.Controllers
                     UserName = user.UserName,
                     IsOnline = user.IsOnline,
                     ImageName = user.ImageName,
-                    Base64Image = user.Base64Image
+                    Base64Image = user.Base64Image,
+                    Balance = user.Balance,
   
                 };
                 dtoList.Add(userDTO);
@@ -132,6 +133,7 @@ namespace TheCircleBackend.Controllers
                 IsOnline = user.IsOnline,
                 Base64Image = user.Base64Image,
                 ImageName = user.ImageName,
+                Balance = user.Balance,
                 TimeStamp = null
             };
             
