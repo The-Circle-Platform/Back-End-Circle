@@ -1,5 +1,8 @@
-﻿using TheCircleBackend.Domain.Models;
+﻿using Microsoft.EntityFrameworkCore.Infrastructure;
+using TheCircleBackend.Domain.Models;
+using TheCircleBackend.DomainServices.IHelpers;
 using TheCircleBackend.DomainServices.IRepo;
+using TheCircleBackend.Helper;
 
 namespace TheCircleBackend.DBInfra.Repo
 {
@@ -86,6 +89,11 @@ namespace TheCircleBackend.DBInfra.Repo
                 var Stream = domainContext.VideoStream.First(vs => vs.Id == StreamId && vs.User.Id == UserId);
                 Stream.EndStream = DateTime.Now;
                 domainContext.VideoStream.Update(Stream);
+
+                ICoinHelper coinHelper = new CoinHelper(domainContext, UserId);
+                coinHelper.ChangeBalance(Stream.StartStream, DateTime.Now);
+
+                domainContext.SaveChanges();
                 return true;
             }
             catch

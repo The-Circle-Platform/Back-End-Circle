@@ -13,7 +13,7 @@ namespace TheCircleBackend.DomainServices
             _configuration = configuration;
 
         }
-        public void SendMail(string recepient, string subject, string body, string displayName)
+        public void SendMail(string recepient, string subject, string body, string displayName, List<System.Net.Mail.Attachment> attachments)
         {
             SmtpClient client = new SmtpClient();
             client.Host = "smtp-mail.outlook.com";
@@ -28,6 +28,10 @@ namespace TheCircleBackend.DomainServices
             MailMessage message = new MailMessage(from, receive);
             message.Subject = subject;
             message.Body = body;
+            foreach (var attachment in attachments)
+            {
+                message.Attachments.Add(attachment);
+            }
             client.Send(message);
         }
     }

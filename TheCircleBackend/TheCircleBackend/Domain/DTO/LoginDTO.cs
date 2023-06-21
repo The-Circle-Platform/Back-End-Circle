@@ -4,10 +4,17 @@ namespace TheCircleBackend.Domain.DTO
 {
     public class LoginDTO
     {
-        [Required (ErrorMessage = "Username is required")]
-        public string? UserName { get; set; }
+        [Required(ErrorMessage = "Request is required")]
+        public LoginDTORequest Request { get; set; }
 
-        [Required (ErrorMessage = "Password is required")]
-        public string? Password { get; set; }
+        [Required(ErrorMessage = "Signature is required")]
+        public string Signature { get; set; }
     }
+
+    public class LoginDTORequest
+    {
+        public string UserName { get; set; }
+        public long TimeStamp { get; set; }
+    }
+
 }

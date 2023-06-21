@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+
 using System.Security.Claims;
 using System.Text;
 using Microsoft.Identity.Client;
@@ -55,87 +56,140 @@ namespace Controllers.AuthController
         [Route("login")]
         public async Task<IActionResult> Login(LoginDTO dto)
         {
-
-            var decryptedPassword = await this.securityService.DecryptMessage(dto.Password);
-            Console.WriteLine(decryptedPassword);
-
-                var user = await _userManager.FindByNameAsync(dto.UserName);
-            if (user != null && await _userManager.CheckPasswordAsync(user, decryptedPassword))
+            //Console.WriteLine(dto.Request.UserName);
+            //Console.WriteLine(dto.Signature);
+            //Console.WriteLine(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+            //Console.WriteLine(dto.Request.TimeStamp);
+            if ((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 10000000 > dto.Request.TimeStamp))
             {
-                var userRoles = await _userManager.GetRolesAsync(user);
+                return BadRequest("Request timeout");
+            }
 
-                var authClaims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                };
 
-                foreach (var userRole in userRoles)
+            var user = await _userManager.FindByNameAsync(dto.Request.UserName);
+            if (user != null)
+            {
+                var webUser = _websiteUserRepo.GetByUserName(dto.Request.UserName);
+                var keys = securityService.GetKeys(webUser.Id);
+                Console.WriteLine(keys.privKey);
+                var isSameUser = securityService.HoldsIntegrity(dto.Request, Convert.FromBase64String(dto.Signature),
+                    keys.pubKey);
+                if (!isSameUser)
                 {
-                    authClaims.Add(new Claim(ClaimTypes.Role, userRole));
+                    return Unauthorized();
                 }
-
-
-
-
-                // Retrieves user from database.
-                var WebsiteUser = _websiteUserRepo.GetByUserName(user.UserName);
-                var KeyPair = securityService.GetKeys(WebsiteUser.Id);
-                var token = GetToken(authClaims, WebsiteUser.Id);
-
-                 var userDTO = new WebsiteUserDTO()
+                var serverKeys = securityService.GetServerKeys();
+                var userDTO = new WebsiteUserDTORequest()
                 {
-                    Id = WebsiteUser.Id,
-                    UserName = WebsiteUser.UserName,
-                    IsOnline = WebsiteUser.IsOnline,
+                    Id = webUser.Id,
+                    UserName = webUser.UserName,
+                    IsOnline = webUser.IsOnline,
                 };
-
-
-                //Create payload
                 var PayLoad = new
                 {
                     WebsiteUser = userDTO,
-                    token = new JwtSecurityTokenHandler().WriteToken(token),
-                    expiration = token.ValidTo,
-                    PrivateKey = KeyPair.privKey,
-                    PublicKey = KeyPair.pubKey,
+                    IsVerified = isSameUser
                 };
-
-                //Console.WriteLine(KeyPair.privKey);
-                Console.WriteLine(KeyPair.pubKey);
-                    //Signs signature
-                    var ServerKeys = securityService.GetServerKeys();
-                var Signature = securityService.SignData(PayLoad, ServerKeys.privKey);
-
+                var serverSignature = securityService.SignData(PayLoad, serverKeys.privKey);
                 AuthOutRegisterDTO authOut = new()
                 {
-                    Signature = Signature,
-                    SenderUserId = WebsiteUser.Id,
+                    Signature = serverSignature,
+                    SenderUserId = webUser.Id,
                     OriginalLoad = PayLoad
                 };
 
+                Console.WriteLine(isSameUser);
                 return Ok(authOut);
             }
 
-            return Unauthorized();
+            return NotFound();
+
+            //if (user != null && await _userManager.CheckPasswordAsync(user, decryptedPassword))
+            //{
+            //    var userRoles = await _userManager.GetRolesAsync(user);
+
+            //    var authClaims = new List<Claim>
+            //    {
+            //        new Claim(ClaimTypes.Name, user.UserName),
+            //        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            //    };
+
+            //    foreach (var userRole in userRoles)
+            //    {
+            //        authClaims.Add(new Claim(ClaimTypes.Role, userRole));
+            //    }
+
+
+
+
+            //    // Retrieves user from database.
+            //    var WebsiteUser = _websiteUserRepo.GetByUserName(user.UserName);
+            //    var KeyPair = securityService.GetKeys(WebsiteUser.Id);
+            //    var token = GetToken(authClaims, WebsiteUser.Id);
+
+            //     var userDTO = new WebsiteUserDTO()
+            //    {
+            //        Id = WebsiteUser.Id,
+            //        UserName = WebsiteUser.UserName,
+            //        IsOnline = WebsiteUser.IsOnline,
+            //    };
+
+
+            //    //Create payload
+            //    var PayLoad = new
+            //    {
+            //        WebsiteUser = userDTO,
+            //        token = new JwtSecurityTokenHandler().WriteToken(token),
+            //        expiration = token.ValidTo,
+            //        PrivateKey = KeyPair.privKey,
+            //        PublicKey = KeyPair.pubKey,
+            //    };
+
+            //    //Console.WriteLine(KeyPair.privKey);
+            //    Console.WriteLine(KeyPair.pubKey);
+            //        //Signs signature
+            //        var ServerKeys = securityService.GetServerKeys();
+            //    var Signature = securityService.SignData(PayLoad, ServerKeys.privKey);
+
+            //    AuthOutRegisterDTO authOut = new()
+            //    {
+            //        Signature = Signature,
+            //        SenderUserId = WebsiteUser.Id,
+            //        OriginalLoad = PayLoad
+            //    };
+
+            //    return Ok(authOut);
+            //}
+
+            //return Unauthorized();
         }
 
         [HttpPost]
         [Route("register")]
         public async Task<IActionResult> Register(AuthRegisterDTO request)
         {
+            if ((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 10000 > request.OriginalRegisterData.TimeStamp))
+            {
+                return BadRequest("Request timeout");
+            }
+            var keyPair = securityService.GetServerKeys();
+            var claimedAdmin = await _userManager.FindByNameAsync(request.OriginalRegisterData.UsernameOfAdmin);
+            var userRoles = await _userManager.GetRolesAsync(claimedAdmin);
+            if (!userRoles.Contains("Admin"))
+            {
+                return Forbid();
+            }
 
-            // Decrypts with admin keys
-            var keyPair = securityService.GetKeys(request.SenderUserId);
+            var adminWebUser = _websiteUserRepo.GetByUserName(request.OriginalRegisterData.UsernameOfAdmin);
+            var adminKeys = securityService.GetKeys(adminWebUser.Id);
+            Console.WriteLine(Convert.ToBase64String(request.Signature));
+            var isAdmin =
+                securityService.HoldsIntegrity(request.OriginalRegisterData, request.Signature, adminKeys.pubKey);
 
-            var HoldsIntegrity =
-                securityService.HoldsIntegrity(request.OriginalRegisterData, request.Signature, keyPair.pubKey);
-
-            var userExists = await _userManager.FindByNameAsync(request.OriginalRegisterData.Username);
-
-            if (userExists != null || !HoldsIntegrity)
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    new Response { Status = "Error", Message = "User already exists!" });
+            if (!isAdmin)
+            {
+                return Forbid();
+            }
 
             var dto = request.OriginalRegisterData;
             IdentityUser user = new()
@@ -187,10 +241,24 @@ namespace Controllers.AuthController
 
             // Creates a mail to the user.
             Mailer mailer = new Mailer(_configuration);
-
+            string fileName = System.IO.Path.GetTempPath() + Guid.NewGuid().ToString() + ".txt";
+            StreamWriter sw = new StreamWriter(fileName);
+            sw.WriteLine(KeyPair.privKey);
+            sw.Close();
+            System.Net.Mail.Attachment privateKey = new System.Net.Mail.Attachment(fileName);
+            privateKey.Name = "PrivateKey.txt";  // set name here
+            string fileName2 = System.IO.Path.GetTempPath() + Guid.NewGuid().ToString() + ".txt";
+            StreamWriter sw2 = new StreamWriter(fileName2);
+            sw2.WriteLine(KeyPair.pubKey);
+            sw2.Close();
+            System.Net.Mail.Attachment publicKey = new System.Net.Mail.Attachment(fileName2);
+            publicKey.Name = "PublicKey.txt";
+            List<System.Net.Mail.Attachment> attachments = new List<System.Net.Mail.Attachment>();
+            attachments.Add(privateKey);
+            attachments.Add(publicKey);
             string emailbody =
-                $"Hello {dto.Username} An account has been created by a TheCircle admin using: \n email: {dto.Email} \n Username: {dto.Username} \n Your generated password is: {password}";
-            mailer.SendMail(dto.Email, "The Circle Account Creation", emailbody, "The Circle Team");
+                $" Hello {dto.Username} An account has been created by a TheCircle admin using: \n email: {dto.Email} \n Username: {dto.Username} \n In the attachments of this email you will find your private and public keys which you can use to authenticate yourself";
+            mailer.SendMail(dto.Email, "The Circle Account Creation", emailbody, "The Circle Team", attachments);
 
             // Encrypts data
             var Response = new Response { Status = "Success", Message = "User created successfully!" };
@@ -210,16 +278,28 @@ namespace Controllers.AuthController
         [Route("register-admin")]
         public async Task<IActionResult> RegisterAdmin(AuthRegisterDTO request)
         {
+            if ((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 10000 > request.OriginalRegisterData.TimeStamp))
+            {
+                return BadRequest("Request timeout");
+            }
+            var claimedAdmin = await _userManager.FindByNameAsync(request.OriginalRegisterData.UsernameOfAdmin);
+            var userRoles = await _userManager.GetRolesAsync(claimedAdmin);
+            if (!userRoles.Contains("Admin"))
+            {
+                return Forbid();
+            }
 
-            //var keypair = securityservice.getkeys(request.senderuserid);
+            var adminWebUser = _websiteUserRepo.GetByUserName(request.OriginalRegisterData.UsernameOfAdmin);
+            var adminKeys = securityService.GetKeys(adminWebUser.Id);
+            Console.WriteLine(Convert.ToBase64String(request.Signature));
+            var isAdmin =
+                securityService.HoldsIntegrity(request.OriginalRegisterData, request.Signature, adminKeys.pubKey);
 
-            //var holdsintegrity =
-            //    securityservice.holdsintegrity(request.originalregisterdata, request.signature, keypair.pubkey);
-            //if (!holdsintegrity)
-            //{
-            //    return statuscode(statuscodes.status406notacceptable,
-            //        new response { status = "error", message = "data has been tampered" });
-            //}
+            if (!isAdmin)
+            {
+                return Forbid();
+            }
+
             var dto = request.OriginalRegisterData;
             var pwd = new Password();
             var password = pwd.Next();
@@ -278,11 +358,37 @@ namespace Controllers.AuthController
 
 
             Mailer mailer = new Mailer(_configuration);
-
+            string fileName = System.IO.Path.GetTempPath() + Guid.NewGuid().ToString() + ".txt";
+            StreamWriter sw = new StreamWriter(fileName);
+            sw.WriteLine(KeyPair.privKey);
+            sw.Close();
+            System.Net.Mail.Attachment privateKey = new System.Net.Mail.Attachment(fileName);
+            privateKey.Name = "PrivateKey.txt";  // set name here
+            string fileName2 = System.IO.Path.GetTempPath() + Guid.NewGuid().ToString() + ".txt";
+            StreamWriter sw2 = new StreamWriter(fileName2);
+            sw2.WriteLine(KeyPair.pubKey);
+            sw2.Close();
+            System.Net.Mail.Attachment publicKey = new System.Net.Mail.Attachment(fileName2);
+            publicKey.Name = "PublicKey.txt";
+            List<System.Net.Mail.Attachment> attachments = new List<System.Net.Mail.Attachment>();
+            attachments.Add(privateKey);
+            attachments.Add(publicKey);
             string emailbody =
-                $"Hello {dto.Username} An account has been created by a TheCircle admin using: \n email: {dto.Email} \n Username: {dto.Username} \n Your generated password is: {password}";
-            mailer.SendMail(dto.Email, "The Circle Account Creation", emailbody, "The Circle Team");
-            return Ok(new Response { Status = "Success", Message = "User created successfully!" });
+                $" Hello {dto.Username} An account has been created by a TheCircle admin using: \n email: {dto.Email} \n Username: {dto.Username} \n In the attachments of this email you will find your private and public keys which you can use to authenticate yourself";
+            mailer.SendMail(dto.Email, "The Circle Account Creation", emailbody, "The Circle Team", attachments);
+            // Encrypts data
+            var Response = new Response { Status = "Success", Message = "User created successfully!" };
+
+            //Creates signature
+            var keyPair = securityService.GetServerKeys();
+            var Signature = securityService.SignData(Response, keyPair.privKey);
+
+            AuthOutRegisterDTO authOut = new AuthOutRegisterDTO()
+            {
+                OriginalLoad = Response,
+                Signature = Signature,
+            };
+            return Ok(authOut);
         }
 
         private JwtSecurityToken GetToken(List<Claim> authClaims, int Id)
@@ -297,7 +403,7 @@ namespace Controllers.AuthController
                 signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
             );
 
-            token.Payload["Id"] = Id;
+            token.Payload["id"] = Id;
 
             return token;
         }
