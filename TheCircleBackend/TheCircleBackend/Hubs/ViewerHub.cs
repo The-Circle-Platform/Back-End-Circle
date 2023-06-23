@@ -50,7 +50,7 @@ namespace TheCircleBackend.Hubs
         // Receiver method
         public async Task ConnectToStream(int UserId, int StreamId)
         {
-            Console.WriteLine("Connection made");
+            Console.WriteLine($"\nUser with id ${UserId} connects to streamId {StreamId}\n");
 
             var Viewer = new Viewer()
             {

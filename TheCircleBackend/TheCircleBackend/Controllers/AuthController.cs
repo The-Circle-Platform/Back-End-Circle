@@ -60,7 +60,7 @@ namespace Controllers.AuthController
             //Console.WriteLine(dto.Signature);
             //Console.WriteLine(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             //Console.WriteLine(dto.Request.TimeStamp);
-            if ((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 10000 > dto.Request.TimeStamp))
+            if ((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 1000000000 > dto.Request.TimeStamp))
             {
                 return BadRequest("Request timeout");
             }

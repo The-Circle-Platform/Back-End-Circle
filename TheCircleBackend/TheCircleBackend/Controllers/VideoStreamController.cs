@@ -27,6 +27,8 @@ namespace TheCircleBackend.Controllers
         {
             //Get videostream
             Domain.Models.Stream? VideoStream = VidStreamRepo.GetCurrentStream(hostId);
+
+            Console.WriteLine($"Latest stream of hostId {hostId} with streamId {VideoStream.Id}");
             //Server keypair
             var ServerKeys = securityService.GetServerKeys();
 
@@ -43,7 +45,7 @@ namespace TheCircleBackend.Controllers
 
             var VidStreamDTO = new VideoStreamDTO()
             {
-                id = 0,
+                id = VideoStream.Id,
                 endStream = null,
                 startStream = new DateTime(),
                 transparantUserId = hostId,
@@ -77,6 +79,8 @@ namespace TheCircleBackend.Controllers
                 websiteUserRepo.SetUserOnline(videoStreamDTO.OriginalData.transparantUserId);
 
                 var latestStream = VidStreamRepo.GetCurrentStream(videoStreamDTO.OriginalData.transparantUserId);
+
+                Console.WriteLine($"Latest stream created is {latestStream.Id}");
                 //Succes response
                 var succes = new
                 {
