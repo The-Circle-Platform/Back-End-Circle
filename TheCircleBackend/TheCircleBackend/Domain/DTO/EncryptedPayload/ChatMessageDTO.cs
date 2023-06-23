@@ -6,7 +6,9 @@ namespace TheCircleBackend.Domain.DTO.EncryptedPayload
 {
     public class ChatMessageDTOIncoming : IContent
     {
-        public ChatMessage? OriginalData { get; set; }
+        public ChatMessageIncoming? OriginalData { get; set; }
+        public string PrivateKey { get; set; }
+        public string PublicKey { get; set; }
     }
 
     public class ChatMessageDTOOutcoming : IOutComingContent
@@ -17,6 +19,15 @@ namespace TheCircleBackend.Domain.DTO.EncryptedPayload
     public class ChatListDTOOutcoming : IOutComingContent
     {
         public List<ChatMessageLite>? OriginalList { get; set; }
+    }
+
+    public class ChatMessageIncoming
+    {
+        public int Id { get; set; }
+        public string Message { get; set; }
+        public int WebUserId { get; set; }
+        public int ReceiverId { get; set; }
+        public DateTime Date { get; set; }
     }
 
     public class ChatMessageLite

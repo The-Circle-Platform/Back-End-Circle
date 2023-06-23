@@ -72,6 +72,7 @@ builder.Services.AddScoped<ISecurityService, SecurityService>();
 builder.Services.AddScoped<IKeyRepo, EFKeyRepo>();
 builder.Services.AddScoped<IVidStreamRepo, EFVidStream>();
 builder.Services.AddScoped<IStreamChunkRepo, EFStreamChunkRepo>();
+builder.Services.AddScoped<IEntityCheckerService, EntityCheckersService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
