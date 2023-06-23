@@ -27,7 +27,7 @@ namespace TheCircleBackend.DBInfra.Repo
             return context.WebsiteUser;
         }
 
-        public WebsiteUser GetById(int id)
+        public WebsiteUser? GetById(int id)
         {
             this.logger.LogInformation("Get user with id {0}", id);
             return context.WebsiteUser.Where(u => u.Id == id).FirstOrDefault();
