@@ -14,11 +14,16 @@ namespace TheCircleBackend.Hubs
     {
         private readonly IViewerRepository viewerRepository;
         private readonly ISecurityService securityService;
+        private readonly IEntityCheckerService entityCheckerService;
 
-        public ViewerHub(IViewerRepository viewerRepository, ISecurityService securityService)
+        public ViewerHub(
+            IViewerRepository viewerRepository, 
+            ISecurityService securityService,
+            IEntityCheckerService entityCheckerService)
         {
             this.viewerRepository = viewerRepository;
             this.securityService = securityService;
+            this.entityCheckerService = entityCheckerService;
         }
 
         // Receiver method, override
@@ -51,6 +56,11 @@ namespace TheCircleBackend.Hubs
         public async Task ConnectToStream(int UserId, int StreamId)
         {
             Console.WriteLine($"\nUser with id ${UserId} connects to streamId {StreamId}\n");
+
+            if(!ViewerCheck(UserId, StreamId))
+            {
+                throw new Exception("De viewer kan niet terugverzonden worden.");
+            }
 
             var Viewer = new Viewer()
             {
@@ -118,6 +128,11 @@ namespace TheCircleBackend.Hubs
         private bool CheckMaxViews(int watcherId)
         {
             return viewerRepository.GetCurrentViewerCount(watcherId) < 4;
+        }
+    
+        private bool ViewerCheck(int UserId, int StreamId)
+        {
+            return this.entityCheckerService.UserExists(UserId) && entityCheckerService.StreamExists(StreamId);
         }
     }
 }
