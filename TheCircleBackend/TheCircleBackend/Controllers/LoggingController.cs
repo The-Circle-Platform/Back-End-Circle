@@ -32,9 +32,11 @@ namespace TheCircleBackend.Controllers
         [HttpPost]
         public IActionResult AddLog(LoggingPayloadDTO payload)
         {
+            Console.WriteLine("Payload received");
             //Get keypair
             var KeyPair = securityService.GetKeys(payload.SenderUserId);
 
+            Console.WriteLine("Keypair received");
             //Check signature
             var IsValid = securityService.HoldsIntegrity(payload.OriginalData, payload.Signature, KeyPair.pubKey);
             if(!IsValid)
@@ -50,12 +52,15 @@ namespace TheCircleBackend.Controllers
                 return BadRequest(load);
             }
 
+            Console.WriteLine("Keypair received");
             var dto = payload.OriginalData;
             var log = new LogItem()
             {
                 Action = dto.Action,
                 DateTime = DateTime.Now,
                 Ip = this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString(),
+                Endpoint = dto.Endpoint,
+                SubjectUser = dto.SubjectUser
             };
             try
             {

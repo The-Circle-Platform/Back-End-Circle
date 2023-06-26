@@ -19,17 +19,20 @@ namespace TheCircleBackend.Controllers
         private readonly IWebsiteUserRepo websiteUserRepo;
         private readonly ILogItemRepo logItemRepo;
         private readonly ISecurityService securityService;
+        private readonly IEntityCheckerService entityCheckerService;
         private readonly LogHelper logHelper;
 
         public userController(
             IWebsiteUserRepo websiteUserRepo, 
             ILogItemRepo logItemRepo, 
             ILogger<userController> logger,
-            ISecurityService securityService)
+            ISecurityService securityService,
+            IEntityCheckerService entityCheckerService)
         {
             this.websiteUserRepo = websiteUserRepo;
             this.logItemRepo = logItemRepo;
             this.securityService = securityService;
+            this.entityCheckerService = entityCheckerService;
             this.logHelper = new LogHelper(logItemRepo, logger);
 
         }
@@ -116,6 +119,13 @@ namespace TheCircleBackend.Controllers
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
+            bool isValid = entityCheckerService.UserExists(id);
+
+            if (!isValid)
+            {
+                return NotFound();
+            }
+
             Console.WriteLine(id);
             var user = websiteUserRepo.GetById(id);
 
