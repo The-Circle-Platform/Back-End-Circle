@@ -33,7 +33,7 @@ namespace TheCircleBackend.DBInfra.Repo
             return context.WebsiteUser.Where(u => u.Id == id).FirstOrDefault();
         }
 
-        public WebsiteUser GetByUserName(string UserName)
+        public WebsiteUser? GetByUserName(string UserName)
         {
             return context.WebsiteUser.Where(u => u.UserName == UserName).FirstOrDefault();
         }

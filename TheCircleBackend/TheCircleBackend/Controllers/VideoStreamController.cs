@@ -140,18 +140,34 @@ namespace TheCircleBackend.Controllers
         {
             // Get keys
             var User = websiteUserRepo.GetByUserName(inputDTO.OriginalData.UserName);
+
+            //Als gebruiker niet bestaat, geef false terug.
+            if(User == null)
+            {
+                // Fout
+                // - TODO Maakt signature
+                // -  Geef false terug.
+                var FalseContent = new NodeStreamOutput
+                {
+                    //Dummydata
+                    Signature = new byte[1],
+                    message = "Niets gevonden",
+                    OriginalData = false
+                };
+                return BadRequest(FalseContent);
+            }
+
             var Keys = securityService.GetKeys(User.Id);
 
             // Verifieert digitale handtekening
             bool ValidSignature = securityService.HoldsIntegrity(inputDTO.OriginalData, inputDTO.Signature, Keys.pubKey);
-            // Verifieert gebruiker en of hij bestaat. -> DomainContext/IdentityContext?
-            bool DoesExist = DoesUserExist(inputDTO.OriginalData.UserName);
 
-            // Controleert of gebruiker bestaat en signature geldig is.
-            if (ValidSignature && DoesExist)
+            // signature geldig is.
+            if (ValidSignature)
             {
                 // Goed: 
-                // - Maakt stream
+                // - TODO Maakt stream
+                // - TODO Maakt signature
                 // - Geeft true terug aan de gebruiker
                 var GoodContent = new NodeStreamOutput
                 {
@@ -166,6 +182,7 @@ namespace TheCircleBackend.Controllers
             else
             {
                 // Fout
+                // - TODO Maakt signature
                 // -  Geef false terug.
                 var FalseContent = new NodeStreamOutput
                 {
