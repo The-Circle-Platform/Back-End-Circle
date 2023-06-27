@@ -28,6 +28,6 @@ namespace TheCircleBackend.Domain.DTO
     {
         public string UserName { get; set; }
         public string StreamKey { get; set; }
-        public DateTimeOffset timeStamp { get; set; }
+        public long timeStamp { get; set; }
     }
 }

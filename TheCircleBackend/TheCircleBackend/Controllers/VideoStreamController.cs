@@ -138,25 +138,32 @@ namespace TheCircleBackend.Controllers
         [HttpPost("ValidateStream")]
         public IActionResult PostStream(NodeStreamInputDTO inputDTO)
         {
-            // Get keys
+            // Checks timespan in order to prevent replay attacks.
+            if((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 10000000000) > inputDTO.OriginalData.timeStamp)
+            {
+                return BadRequest("Timeout");
+            }
+            // Get user by username
             var User = websiteUserRepo.GetByUserName(inputDTO.OriginalData.UserName);
 
             //Als gebruiker niet bestaat, geef false terug.
             if(User == null)
             {
-                // Fout
-                // - TODO Maakt signature
+                var ServerKeys = securityService.GetServerKeys();
+                // Foute response
+                var sign = securityService.SignData(false, ServerKeys.privKey);
                 // -  Geef false terug.
                 var FalseContent = new NodeStreamOutput
                 {
                     //Dummydata
-                    Signature = new byte[1],
+                    Signature = sign,
                     message = "Niets gevonden",
                     OriginalData = false
                 };
                 return BadRequest(FalseContent);
             }
 
+            // Retrieve users keypair.
             var Keys = securityService.GetKeys(User.Id);
 
             // Verifieert digitale handtekening
@@ -165,14 +172,18 @@ namespace TheCircleBackend.Controllers
             // signature geldig is.
             if (ValidSignature)
             {
-                // Goed: 
-                // - TODO Maakt stream
-                // - TODO Maakt signature
+                // Maakt stream
+                VidStreamRepo.StartStream(
+                    User.Id, 
+                    "Stream of " + inputDTO.OriginalData.UserName, 
+                    inputDTO.OriginalData.StreamKey);
+                // - Maakt signature
+                var sign = securityService.SignData(true, Keys.privKey);
                 // - Geeft true terug aan de gebruiker
                 var GoodContent = new NodeStreamOutput
                 {
                     //Dummydata
-                    Signature = new byte[1],
+                    Signature = sign,
                     message = "Toegang verleent",
                     OriginalData = true
                 };
@@ -182,22 +193,20 @@ namespace TheCircleBackend.Controllers
             else
             {
                 // Fout
-                // - TODO Maakt signature
+                var serverKeys = securityService.GetServerKeys();
+                // - Maakt signature
+                var sign = securityService.SignData(false, serverKeys.privKey);
                 // -  Geef false terug.
                 var FalseContent = new NodeStreamOutput
                 {
                     //Dummydata
-                    Signature = new byte[1],
+                    Signature = sign,
                     message = "Geen toegang",
                     OriginalData = false
                 };
                 return BadRequest(FalseContent);
             }
         }
-    
-        public bool DoesUserExist(string userName)
-        {
-            return true;
-        }
+
     }
 }
