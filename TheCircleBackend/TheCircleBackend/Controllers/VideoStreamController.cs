@@ -49,7 +49,8 @@ namespace TheCircleBackend.Controllers
                 endStream = null,
                 startStream = new DateTime(),
                 transparantUserId = hostId,
-                title = VideoStream.Title
+                title = VideoStream.Title,
+                streamKey = VideoStream.StreamKey
             };
 
             var Signature = securityService.SignData(VidStreamDTO, ServerKeys.privKey);
@@ -74,7 +75,7 @@ namespace TheCircleBackend.Controllers
             var ServerKeys = securityService.GetServerKeys();
             if(isValid)
             {
-                VidStreamRepo.StartStream(videoStreamDTO.OriginalData.transparantUserId, videoStreamDTO.OriginalData.title);
+                VidStreamRepo.StartStream(videoStreamDTO.OriginalData.transparantUserId, videoStreamDTO.OriginalData.title, videoStreamDTO.OriginalData.streamKey);
 
                 websiteUserRepo.SetUserOnline(videoStreamDTO.OriginalData.transparantUserId);
 
