@@ -21,13 +21,13 @@ namespace TheCircleBackend.Domain.DTO
 
     public class NodeStreamInputDTO : IContent
     {
-        public NodeStreamInput OriginalData { get; set; }
+        public string UserName { get; set; }
+        public long TimeSpan { get; set; }
     }
 
     public class NodeStreamInput
     {
         public string UserName { get; set; }
         public string StreamKey { get; set; }
-        public long timeStamp { get; set; }
     }
 }

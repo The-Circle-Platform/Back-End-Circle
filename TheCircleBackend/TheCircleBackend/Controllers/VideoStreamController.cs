@@ -139,19 +139,19 @@ namespace TheCircleBackend.Controllers
         public IActionResult PostStream(NodeStreamInputDTO inputDTO)
         {
             // Checks timespan in order to prevent replay attacks.
-            if((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 10000000000) > inputDTO.OriginalData.timeStamp)
+            if((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 10000000000) > inputDTO.TimeSpan)
             {
                 return BadRequest("Timeout");
             }
             // Get user by username
-            var User = websiteUserRepo.GetByUserName(inputDTO.OriginalData.UserName);
+            var User = websiteUserRepo.GetByUserName(inputDTO.UserName);
+            var serverKeys = securityService.GetServerKeys();
 
             //Als gebruiker niet bestaat, geef false terug.
-            if(User == null)
+            if (User == null)
             {
-                var ServerKeys = securityService.GetServerKeys();
                 // Foute response
-                var sign = securityService.SignData(false, ServerKeys.privKey);
+                var sign = securityService.SignData(false, serverKeys.privKey);
                 // -  Geef false terug.
                 var FalseContent = new NodeStreamOutput
                 {
@@ -163,22 +163,21 @@ namespace TheCircleBackend.Controllers
                 return BadRequest(FalseContent);
             }
 
-            // Retrieve users keypair.
-            var Keys = securityService.GetKeys(User.Id);
-
             // Verifieert digitale handtekening
-            bool ValidSignature = securityService.HoldsIntegrity(inputDTO.OriginalData, inputDTO.Signature, Keys.pubKey);
+            bool ValidSignature = securityService.HoldsIntegrity(inputDTO.UserName, inputDTO.Signature, Keys.pubKey);
 
             // signature geldig is.
             if (ValidSignature)
             {
                 // Maakt stream
+                // Zal het maken van een stream in dit process worden afgehandeld, of zal de POST endpoint gebruikt worden van het aanmaken van een stream.
                 VidStreamRepo.StartStream(
                     User.Id, 
-                    "Stream of " + inputDTO.OriginalData.UserName, 
-                    inputDTO.OriginalData.StreamKey);
-                // - Maakt signature
-                var sign = securityService.SignData(true, Keys.privKey);
+                    "Stream of " + inputDTO.UserName, 
+                    inputDTO.Signature.ToString());
+
+                // - Maakt signature met private key van de server.
+                var sign = securityService.SignData(true, serverKeys.privKey);
                 // - Geeft true terug aan de gebruiker
                 var GoodContent = new NodeStreamOutput
                 {
@@ -193,7 +192,7 @@ namespace TheCircleBackend.Controllers
             else
             {
                 // Fout
-                var serverKeys = securityService.GetServerKeys();
+                
                 // - Maakt signature
                 var sign = securityService.SignData(false, serverKeys.privKey);
                 // -  Geef false terug.
