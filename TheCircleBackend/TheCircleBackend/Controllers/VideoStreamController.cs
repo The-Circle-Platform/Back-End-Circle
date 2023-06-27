@@ -134,5 +134,53 @@ namespace TheCircleBackend.Controllers
             };
             return Ok(succesDTO);
         }
+
+        [HttpPost("ValidateStream")]
+        public IActionResult PostStream(NodeStreamInputDTO inputDTO)
+        {
+            // Get keys
+            var User = websiteUserRepo.GetByUserName(inputDTO.OriginalData.UserName);
+            var Keys = securityService.GetKeys(User.Id);
+
+            // Verifieert digitale handtekening
+            bool ValidSignature = securityService.HoldsIntegrity(inputDTO.OriginalData, inputDTO.Signature, Keys.pubKey);
+            // Verifieert gebruiker en of hij bestaat. -> DomainContext/IdentityContext?
+            bool DoesExist = DoesUserExist(inputDTO.OriginalData.UserName);
+
+            // Controleert of gebruiker bestaat en signature geldig is.
+            if (ValidSignature && DoesExist)
+            {
+                // Goed: 
+                // - Maakt stream
+                // - Geeft true terug aan de gebruiker
+                var GoodContent = new NodeStreamOutput
+                {
+                    //Dummydata
+                    Signature = new byte[1],
+                    message = "Toegang verleent",
+                    OriginalData = true
+                };
+
+                return Ok(GoodContent);
+            }
+            else
+            {
+                // Fout
+                // -  Geef false terug.
+                var FalseContent = new NodeStreamOutput
+                {
+                    //Dummydata
+                    Signature = new byte[1],
+                    message = "Geen toegang",
+                    OriginalData = false
+                };
+                return BadRequest(FalseContent);
+            }
+        }
+    
+        public bool DoesUserExist(string userName)
+        {
+            return true;
+        }
     }
 }
