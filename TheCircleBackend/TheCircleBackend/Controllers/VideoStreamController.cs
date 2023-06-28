@@ -49,8 +49,7 @@ namespace TheCircleBackend.Controllers
                 endStream = null,
                 startStream = new DateTime(),
                 transparantUserId = hostId,
-                title = VideoStream.Title,
-                streamKey = VideoStream.StreamKey
+                title = VideoStream.Title
             };
 
             var Signature = securityService.SignData(VidStreamDTO, ServerKeys.privKey);
@@ -75,7 +74,7 @@ namespace TheCircleBackend.Controllers
             var ServerKeys = securityService.GetServerKeys();
             if(isValid)
             {
-                VidStreamRepo.StartStream(videoStreamDTO.OriginalData.transparantUserId, videoStreamDTO.OriginalData.title, videoStreamDTO.OriginalData.streamKey);
+                VidStreamRepo.StartStream(videoStreamDTO.OriginalData.transparantUserId, videoStreamDTO.OriginalData.title);
 
                 websiteUserRepo.SetUserOnline(videoStreamDTO.OriginalData.transparantUserId);
 
@@ -171,7 +170,7 @@ namespace TheCircleBackend.Controllers
             {
                 // Maakt stream
                 // Zal het maken van een stream in dit process worden afgehandeld, of zal de POST endpoint gebruikt worden van het aanmaken van een stream.
-                VidStreamRepo.StartStream(User.Id, "Stream of " + inputDTO.OriginalData.UserName, "NON");
+                VidStreamRepo.StartStream(User.Id, "Stream of " + inputDTO.OriginalData.UserName);
 
                 // - Maakt signature met private key van de server.
                 var sign = securityService.SignData(true, serverKeys.privKey);

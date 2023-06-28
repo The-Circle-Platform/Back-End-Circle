@@ -5,7 +5,7 @@ namespace TheCircleBackend.DomainServices.IRepo
 {
     public interface IVidStreamRepo : IRepository<Domain.Models.Stream>
     {
-        public bool StartStream(int UserId, string title, string streamKey);
+        public bool StartStream(int UserId, string title);
         public bool StopStream(int UserId, int StreamId);
         public Domain.Models.Stream GetCurrentStream(int HostId);
 

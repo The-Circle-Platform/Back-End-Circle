@@ -64,14 +64,13 @@ namespace TheCircleBackend.DBInfra.Repo
             return entity;
         }
 
-        public bool StartStream(int UserId, string title, string streamKey)
+        public bool StartStream(int UserId, string title)
         {
             try {
                 domainContext.VideoStream.Add(new Domain.Models.Stream()
                 {
                     StreamUserId = UserId,
-                    Title = title,
-                    StreamKey = streamKey
+                    Title = title
                 });
                 domainContext.SaveChanges();
 

@@ -9,7 +9,6 @@ namespace TheCircleBackend.Domain.Models
         public DateTime StartStream { get; set; } = DateTime.Now;
         public DateTime? EndStream { get; set; } = null;
         public int StreamUserId { get; set; }
-        public string? StreamKey { get; set; } = null;
         
         public WebsiteUser User { get; set; }
 
