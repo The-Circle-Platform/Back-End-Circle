@@ -26,7 +26,7 @@ namespace Tests.ServiceTest
 
             var ServiceInQuestion = new SecurityService(SecurityHelper, MockKeyRepo.Object);
             //Creates signature
-            ChatMessage message = new() { Message = "Hello", ReceiverId = 1, WebUserId = 1 };
+            ChatMessageIncoming message = new() { Message = "Hello", ReceiverId = 1, WebUserId = 1 };
             
             var DTO = new ChatMessageDTOIncoming()
             {
@@ -52,7 +52,7 @@ namespace Tests.ServiceTest
             MockKeyRepo.Setup(p => p.GetKeys(1)).Returns(value: null);
             var ServiceInQuestion = new SecurityService(SecurityHelper, MockKeyRepo.Object);
             //Creates signature
-            ChatMessage message = new() { Message = "Hello", ReceiverId = 1, WebUserId = 1 };
+            ChatMessageIncoming message = new() { Message = "Hello", ReceiverId = 1, WebUserId = 1 };
 
             var KeyPairs = SecurityHelper.GetKeyString();
             var OtherKeyPairs = SecurityHelper.GetKeyString();
@@ -81,7 +81,7 @@ namespace Tests.ServiceTest
             var ServiceInQuestion = new SecurityService(SecurityHelper, MockKeyRepo.Object);
 
             //Creates signature
-            ChatMessage message = new() { Message = "Hello", ReceiverId = 1, WebUserId = 1 };
+            ChatMessageIncoming message = new() { Message = "Hello", ReceiverId = 1, WebUserId = 1 };
             var DTO = new ChatMessageDTOIncoming()
             {
                 OriginalData  = message,
@@ -106,7 +106,7 @@ namespace Tests.ServiceTest
 
             var ServiceInQuestion = new SecurityService(SecurityHelper, MockKeyRepo.Object);
             //Creates signature
-            ChatMessage message = new() { Message = "Hello", ReceiverId = 1, WebUserId = 1 };
+            ChatMessageIncoming message = new() { Message = "Hello", ReceiverId = 1, WebUserId = 1 };
             var DTO = new ChatMessageDTOIncoming()
             {
                 OriginalData = message,
@@ -130,7 +130,7 @@ namespace Tests.ServiceTest
 
             var ServiceInQuestion = new SecurityService(SecurityHelper, MockKeyRepo.Object);
             //Creates signature
-            ChatMessage message = new() { Message = "Hello", ReceiverId = 1, WebUserId = 1 };
+            ChatMessageIncoming message = new() { Message = "Hello", ReceiverId = 1, WebUserId = 1 };
             var DTO = new ChatMessageDTOIncoming()
             {
                 OriginalData = message,

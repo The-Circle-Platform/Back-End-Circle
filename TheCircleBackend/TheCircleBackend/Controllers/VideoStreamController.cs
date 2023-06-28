@@ -133,5 +133,75 @@ namespace TheCircleBackend.Controllers
             };
             return Ok(succesDTO);
         }
+
+        [HttpPost("ValidateStream")]
+        public IActionResult PostStream(NodeStreamInputDTO inputDTO)
+        {
+            // Checks timespan in order to prevent replay attacks.
+            if((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 600000) > inputDTO.OriginalData.TimeSpan)
+            {
+                return BadRequest("Timeout");
+            }
+            // Get user by username
+            var User = websiteUserRepo.GetByUserName(inputDTO.OriginalData.UserName);
+            var serverKeys = securityService.GetServerKeys();
+
+            //Als gebruiker niet bestaat, geef false terug.
+            if (User == null)
+            {
+                // Foute response
+                var sign = securityService.SignData(false, serverKeys.privKey);
+                // -  Geef false terug.
+                var FalseContent = new NodeStreamOutput
+                {
+                    //Dummydata
+                    Signature = sign,
+                    message = "Niets gevonden",
+                    OriginalData = false
+                };
+                return BadRequest(FalseContent);
+            }
+
+            // Verifieert digitale handtekening
+            bool ValidSignature = securityService.HoldsIntegrity(inputDTO.OriginalData, inputDTO.Signature, serverKeys.privKey);
+
+            // signature geldig is.
+            if (ValidSignature)
+            {
+                // Maakt stream
+                // Zal het maken van een stream in dit process worden afgehandeld, of zal de POST endpoint gebruikt worden van het aanmaken van een stream.
+                VidStreamRepo.StartStream(User.Id, "Stream of " + inputDTO.OriginalData.UserName);
+
+                // - Maakt signature met private key van de server.
+                var sign = securityService.SignData(true, serverKeys.privKey);
+                // - Geeft true terug aan de gebruiker
+                var GoodContent = new NodeStreamOutput
+                {
+                    //Dummydata
+                    Signature = sign,
+                    message = "Toegang verleent",
+                    OriginalData = true
+                };
+
+                return Ok(GoodContent);
+            }
+            else
+            {
+                // Fout
+                
+                // - Maakt signature
+                var sign = securityService.SignData(false, serverKeys.privKey);
+                // -  Geef false terug.
+                var FalseContent = new NodeStreamOutput
+                {
+                    //Dummydata
+                    Signature = sign,
+                    message = "Geen toegang",
+                    OriginalData = false
+                };
+                return BadRequest(FalseContent);
+            }
+        }
+
     }
 }

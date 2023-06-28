@@ -19,10 +19,14 @@ namespace TheCircleBackend.Domain.DTO.EncryptedPayload
         public StreamChunkInOutDTO OriginalData { get; set; }
     }
 
+
+
     public class StreamErrorChunkDTO : IContent
     {
         public StreamError Error { get; set; }
     }
+
+
 
     public class StreamError
     {
