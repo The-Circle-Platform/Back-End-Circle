@@ -139,12 +139,12 @@ namespace TheCircleBackend.Controllers
         public IActionResult PostStream(NodeStreamInputDTO inputDTO)
         {
             // Checks timespan in order to prevent replay attacks.
-            if((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 10000000000) > inputDTO.TimeSpan)
+            if((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 600000) > inputDTO.OriginalData.TimeSpan)
             {
                 return BadRequest("Timeout");
             }
             // Get user by username
-            var User = websiteUserRepo.GetByUserName(inputDTO.UserName);
+            var User = websiteUserRepo.GetByUserName(inputDTO.OriginalData.UserName);
             var serverKeys = securityService.GetServerKeys();
 
             //Als gebruiker niet bestaat, geef false terug.
@@ -164,17 +164,14 @@ namespace TheCircleBackend.Controllers
             }
 
             // Verifieert digitale handtekening
-            bool ValidSignature = securityService.HoldsIntegrity(inputDTO.UserName, inputDTO.Signature, Keys.pubKey);
+            bool ValidSignature = securityService.HoldsIntegrity(inputDTO.OriginalData, inputDTO.Signature, serverKeys.privKey);
 
             // signature geldig is.
             if (ValidSignature)
             {
                 // Maakt stream
                 // Zal het maken van een stream in dit process worden afgehandeld, of zal de POST endpoint gebruikt worden van het aanmaken van een stream.
-                VidStreamRepo.StartStream(
-                    User.Id, 
-                    "Stream of " + inputDTO.UserName, 
-                    inputDTO.Signature.ToString());
+                VidStreamRepo.StartStream(User.Id, "Stream of " + inputDTO.OriginalData.UserName, "NON");
 
                 // - Maakt signature met private key van de server.
                 var sign = securityService.SignData(true, serverKeys.privKey);
