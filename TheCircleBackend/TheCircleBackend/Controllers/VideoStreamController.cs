@@ -135,16 +135,17 @@ namespace TheCircleBackend.Controllers
         }
 
         [HttpPost("ValidateStream")]
-        public IActionResult PostStream(NodeStreamInputDTO inputDTO)
+        public IActionResult PostStream(Test inputDTO)
         {
             // Checks timespan in order to prevent replay attacks.
-            if((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 600000) > inputDTO.OriginalData.TimeSpan)
+            if((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 600000) > inputDTO.OriginalData.TimeStamp)
             {
                 return BadRequest("Timeout");
             }
             // Get user by username
             var User = websiteUserRepo.GetByUserName(inputDTO.OriginalData.UserName);
             var serverKeys = securityService.GetServerKeys();
+
 
             //Als gebruiker niet bestaat, geef false terug.
             if (User == null)
@@ -163,7 +164,8 @@ namespace TheCircleBackend.Controllers
             }
 
             // Verifieert digitale handtekening
-            bool ValidSignature = securityService.HoldsIntegrity(inputDTO.OriginalData, inputDTO.Signature, serverKeys.privKey);
+            var UserKeys = securityService.GetKeys(User.Id);
+            bool ValidSignature = securityService.HoldsIntegrity(inputDTO.OriginalData, Convert.FromBase64String(inputDTO.signature), UserKeys.pubKey);
 
             // signature geldig is.
             if (ValidSignature)

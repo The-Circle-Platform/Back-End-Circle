@@ -26,6 +26,13 @@ namespace TheCircleBackend.Domain.DTO
     public class NodeStreamInput
     {
         public string UserName { get; set; }
-        public long TimeSpan { get; set; }
+        public long TimeStamp { get; set; }
+
+    }
+
+    public class Test
+    {
+        public NodeStreamInput OriginalData { get; set; }
+        public string signature { get; set; }
     }
 }
