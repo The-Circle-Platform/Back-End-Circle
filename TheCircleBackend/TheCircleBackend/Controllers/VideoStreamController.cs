@@ -22,7 +22,7 @@ namespace TheCircleBackend.Controllers
             this.websiteUserRepo = websiteUserRepo;
         }
 
-        [HttpGet("{hostUserName}")]
+        [HttpGet("{hostUserName}/2")]
         public IActionResult Get(string hostUserName)
         {
             var user = websiteUserRepo.GetByUserName(hostUserName);
