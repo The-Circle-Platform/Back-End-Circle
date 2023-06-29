@@ -192,7 +192,7 @@ namespace TheCircleBackend.Controllers
             return Ok(succesDTO);
         }
 
-        [HttpPut("{hostUserName}/StopStream")]
+        [HttpGet("{hostUserName}/StopStream2")]
         public IActionResult Put(string hostUserName)
         {
             //Server keys
