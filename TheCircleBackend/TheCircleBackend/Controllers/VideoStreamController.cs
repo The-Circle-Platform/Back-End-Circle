@@ -43,13 +43,17 @@ namespace TheCircleBackend.Controllers
                 return BadRequest(DTO);
             }
 
+            // To get username
+            var TransparantUser = websiteUserRepo.GetById(hostId);
+
             var VidStreamDTO = new VideoStreamDTO()
             {
                 id = VideoStream.Id,
                 endStream = null,
                 startStream = new DateTime(),
                 transparantUserId = hostId,
-                title = VideoStream.Title
+                title = VideoStream.Title,
+                transparantUserName = TransparantUser.UserName
             };
 
             var Signature = securityService.SignData(VidStreamDTO, ServerKeys.privKey);
@@ -84,7 +88,9 @@ namespace TheCircleBackend.Controllers
                 //Succes response
                 var succes = new
                 {
-                    streamId = latestStream.Id
+                    streamId = latestStream.Id,
+                    //Username moet nog toegevoegd worden.
+                    userName = latestStream.User.UserName
                 };
                 var signatureSucces = securityService.SignData(succes, ServerKeys.privKey);
                 var succesDTO = new
@@ -173,6 +179,9 @@ namespace TheCircleBackend.Controllers
                 // Maakt stream
                 // Zal het maken van een stream in dit process worden afgehandeld, of zal de POST endpoint gebruikt worden van het aanmaken van een stream.
                 VidStreamRepo.StartStream(User.Id, "Stream of " + inputDTO.OriginalData.UserName);
+
+                //Sets user online
+                websiteUserRepo.SetUserOnline(User.Id);
 
                 // - Maakt signature met private key van de server.
                 var sign = securityService.SignData(true, serverKeys.privKey);
