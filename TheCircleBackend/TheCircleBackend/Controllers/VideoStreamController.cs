@@ -192,6 +192,41 @@ namespace TheCircleBackend.Controllers
             return Ok(succesDTO);
         }
 
+        [HttpPut("{hostUserName}/StopStream")]
+        public IActionResult Put(string hostUserName)
+        {
+            //Server keys
+            var ServerKeys = securityService.GetServerKeys();
+
+            // Get recent stream
+            var user = websiteUserRepo.GetByUserName(hostUserName);
+
+            if(user == null)
+            {
+                return NotFound();
+            }
+
+            var hostId = user.Id; 
+
+            var LastStream = VidStreamRepo.GetCurrentStream(hostId);
+
+            //Stream wordt gestopt
+            VidStreamRepo.StopStream(hostId, LastStream.Id);
+
+            //Succes response
+            var succes = new
+            {
+                Message = "Data succesvol toegevoegd"
+            };
+            var signatureSucces = securityService.SignData(succes, ServerKeys.privKey);
+            var succesDTO = new
+            {
+                Signature = signatureSucces,
+                OriginalData = succes,
+            };
+            return Ok(succesDTO);
+        }
+
         [HttpPost("ValidateStream")]
         public IActionResult PostStream(Test inputDTO)
         {
