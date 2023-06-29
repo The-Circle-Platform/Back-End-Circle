@@ -22,13 +22,20 @@ namespace TheCircleBackend.Controllers
             this.websiteUserRepo = websiteUserRepo;
         }
 
-        [HttpGet("{hostId}")]
-        public IActionResult Get(int hostId)
+        [HttpGet("{hostUserName}")]
+        public IActionResult Get(string hostUserName)
         {
-            //Get videostream
-            Domain.Models.Stream? VideoStream = VidStreamRepo.GetCurrentStream(hostId);
+            var user = websiteUserRepo.GetByUserName(hostUserName);
 
-            Console.WriteLine($"Latest stream of hostId {hostId} with streamId {VideoStream.Id}");
+            if(user == null)
+            {
+                return NotFound();
+            }
+
+            //Get videostream
+            Domain.Models.Stream? VideoStream = VidStreamRepo.GetCurrentStream(user.Id);
+
+            Console.WriteLine($"Latest stream of hostId {hostUserName} with streamId {VideoStream.Id}");
             //Server keypair
             var ServerKeys = securityService.GetServerKeys();
 
@@ -43,7 +50,48 @@ namespace TheCircleBackend.Controllers
                 return BadRequest(DTO);
             }
 
-            // To get username
+            var VidStreamDTO = new VideoStreamDTO()
+            {
+                id = VideoStream.Id,
+                endStream = null,
+                startStream = new DateTime(),
+                transparantUserId = user.Id,
+                title = VideoStream.Title,
+                transparantUserName = user.UserName
+            };
+
+            var Signature = securityService.SignData(VidStreamDTO, ServerKeys.privKey);
+
+            var streamInfoPackage = new VidStreamDTO()
+            {
+                OriginalData = VidStreamDTO,
+                Signature = Signature,
+                RandomId = Guid.NewGuid().ToString()
+            };
+            return Ok(streamInfoPackage);
+        }
+
+        [HttpGet("{hostId}")]
+        public IActionResult Get(int hostId)
+        {
+            //Get videostream
+            Domain.Models.Stream? VideoStream = VidStreamRepo.GetCurrentStream(hostId);
+
+            Console.WriteLine($"Latest stream of hostId {hostId} with streamId {VideoStream.Id}");
+            //Server keypair
+            var ServerKeys = securityService.GetServerKeys();
+
+            if (VideoStream == null)
+            {
+                var sign = securityService.SignData("Geen runnende stream aanwezig", ServerKeys.privKey);
+                var DTO = new
+                {
+                    Signature = sign,
+                    OriginalData = "Geen runnende stream aanwezig"
+                };
+                return BadRequest(DTO);
+            }
+
             var TransparantUser = websiteUserRepo.GetById(hostId);
 
             var VidStreamDTO = new VideoStreamDTO()
