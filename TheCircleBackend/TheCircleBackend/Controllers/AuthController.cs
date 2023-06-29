@@ -295,7 +295,7 @@ namespace Controllers.AuthController
             var isAdmin =
                 securityService.HoldsIntegrity(request.OriginalRegisterData, request.Signature, adminKeys.pubKey);
 
-            if (!isAdmin)
+            if (isAdmin)
             {
                 return Forbid();
             }
