@@ -118,13 +118,17 @@ namespace TheCircleBackend.Controllers
             return BadRequest(failDTO);
         }
 
-        [HttpPut("{hostId}/CurrentStream/{streamId}")]
-        public IActionResult Put(int hostId, int streamId)
+        [HttpPut("{hostId}/StopStream")]
+        public IActionResult Put(int hostId)
         {
             //Server keys
             var ServerKeys = securityService.GetServerKeys();
+
+            // Get recent stream
+            var LastStream = VidStreamRepo.GetCurrentStream(hostId);
+
            //Stream wordt gestopt
-            VidStreamRepo.StopStream(hostId, streamId);
+            VidStreamRepo.StopStream(hostId, LastStream.Id);
 
             //Succes response
             var succes = new
