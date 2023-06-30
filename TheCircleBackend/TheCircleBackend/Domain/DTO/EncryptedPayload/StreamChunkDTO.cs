@@ -6,9 +6,8 @@ namespace TheCircleBackend.Domain.DTO.EncryptedPayload
     public class StreamChunkInOutDTO
     {
         public int id { get; set; }
-        //ForeignKey relatie naar stream
+        //ForeignKey relation to stream
         public int streamId { get; set; }
-        //public long SequenceNr { get; set; }
         public DateTimeOffset timeStamp { get; set; }
         public int chunkSize { get; set; }
         public string chunk { get; set; }

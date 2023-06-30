@@ -19,14 +19,6 @@ namespace TheCircleBackend.DBInfra.Repo
             DomainContext.Streamchunks.Add(entity);
             DomainContext.SaveChanges();
             return true;
-            /*
-                    public int StreamId { get; set; }
-                    public DateTimeOffset TimeStamp { get; set; }
-                    public int ChunkSize { get; set; }
-                    public string Chunk
-                    {
-                        get; set;
-                    }*/
         }
 
         public bool UpdateOrCreate(Streamchunks streamchunks)

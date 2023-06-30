@@ -48,7 +48,7 @@ namespace TheCircleBackend.Hubs
                 UpdateViewCount(StreamId);
             }
             
-            //Deconnects connection
+            //Disconnects connection
             return base.OnDisconnectedAsync(exception);
         }
         
@@ -59,7 +59,7 @@ namespace TheCircleBackend.Hubs
 
             if(!ViewerCheck(UserId, StreamId))
             {
-                throw new Exception("De viewer kan niet terugverzonden worden.");
+                throw new Exception("Viewer cannot be found");
             }
 
             var Viewer = new Viewer()
@@ -96,7 +96,7 @@ namespace TheCircleBackend.Hubs
             int watchCount = viewerRepository.GetViewershipCount(streamId);
             Console.WriteLine("Count is " + watchCount);
 
-            // Generate keypair
+            // Generate key pair
             var keyPair = securityService.GetServerKeys();
             //Signature
             var ServerSignature = securityService.SignData(watchCount, keyPair.privKey);
@@ -111,7 +111,7 @@ namespace TheCircleBackend.Hubs
 
         private async Task AllowUserNotToWatch(bool isAllowed, string ConnectId, int streamId)
         {
-            // Generate server keypair
+            // Generate server key pair
             var keyPair = securityService.GetServerKeys();
             //Signature
             var ServerSignature = securityService.SignData(isAllowed, keyPair.privKey);

@@ -44,7 +44,7 @@ namespace TheCircleBackend.Hubs
             //Retrieve current chat list
             List<ChatMessage> list = messageRepository.GetStreamChat(receiverUserId);
 
-            // Generate server keypair
+            // Generate server key pair
             var ServerKeyPair = security.GetServerKeys();
             // Converts code
             var NewUpdatedList = new List<ChatMessageLite>();
@@ -100,7 +100,7 @@ namespace TheCircleBackend.Hubs
             }
             else
             {
-                // Persisteer in database. Tabel chats (StreamId, UserId, DatumTijd en Content)
+                //Persist in database: Table, chats (StreamId, UserId, DateTime and Content)
                 ChatMessage chatMessage = new ChatMessage()
                 {
                     Message = original.Message,
@@ -112,7 +112,7 @@ namespace TheCircleBackend.Hubs
                 //Inserts chat message
                 messageRepository.Create(chatMessage);
 
-                // Lees geupdate versie
+                // Read updated version
                 var updatedList = messageRepository.GetStreamChat(original.ReceiverId);
                 // Converts code
                 var NewUpdatedList = new List<ChatMessageLite>();
@@ -128,7 +128,7 @@ namespace TheCircleBackend.Hubs
                         webUserId = message.WebUserId
                     });
                 }
-                // Generate server keypair
+                // Generate server key pair
                 var ServerKeyPair = security.GetServerKeys();
 
                 // Creates hash and creates signature, based on this hash.
@@ -155,7 +155,7 @@ namespace TheCircleBackend.Hubs
 
         public override Task OnDisconnectedAsync(Exception? exception)
         {
-            Console.WriteLine("Connectie verbroken!");
+            Console.WriteLine("Disconnected!");
             return base.OnDisconnectedAsync(exception);
         }
     }

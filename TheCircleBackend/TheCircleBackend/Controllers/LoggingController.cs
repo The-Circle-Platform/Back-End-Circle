@@ -137,10 +137,10 @@ namespace TheCircleBackend.Controllers
             }
             else
             {
-                var Sign = securityService.SignData("Integriteit is belast", ServerKey.privKey);
+                var Sign = securityService.SignData("Integrity is tainted", ServerKey.privKey);
                 var load = new LoggingOutTextDTO()
                 {
-                    OriginalData = "Integriteit is belast",
+                    OriginalData = "Integrity is tainted",
                     Signature = Sign
                 };
                 return NotFound(load);

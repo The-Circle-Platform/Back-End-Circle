@@ -10,7 +10,6 @@ namespace TheCircleBackend.DBInfra.Repo
 
         public EFLogItemRepo(DomainContext context, ILogger<EFLogItemRepo> logger)
         {
-            //this._websiteUserRepo = _websiteUserRepo;
             this.context = context;
             this.logger = logger;
         }

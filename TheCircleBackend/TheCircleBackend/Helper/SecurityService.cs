@@ -21,7 +21,7 @@ namespace TheCircleBackend.Helper
         {
             try
             {
-                //Convert inputdata to bytes
+                //Convert input data to bytes
                 byte[] inputBytes = securityHelper.ConvertItem(inputData);
 
                 // Convert key to RSAParameter
@@ -39,7 +39,7 @@ namespace TheCircleBackend.Helper
             }
         }
 
-        // Generates keypair.
+        // Generates key pair.
         public (string privKey, string pubKey) GenerateKeys()
         {
             return securityHelper.GetKeyString();
@@ -59,7 +59,7 @@ namespace TheCircleBackend.Helper
         
         public (string privKey, string pubKey) GetKeys(int userId)
         {
-            //Get userinfo
+            //Get user info
             try
             {
                 var KeyPair = keyRepo.GetKeys(userId);
