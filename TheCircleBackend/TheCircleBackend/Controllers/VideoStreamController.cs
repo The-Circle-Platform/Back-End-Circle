@@ -35,7 +35,6 @@ namespace TheCircleBackend.Controllers
             //Get videostream
             Domain.Models.Stream? VideoStream = VidStreamRepo.GetCurrentStream(user.Id);
 
-            Console.WriteLine($"Latest stream of hostId {hostUserName} with streamId {VideoStream.Id}");
             //Server keypair
             var ServerKeys = securityService.GetServerKeys();
 
