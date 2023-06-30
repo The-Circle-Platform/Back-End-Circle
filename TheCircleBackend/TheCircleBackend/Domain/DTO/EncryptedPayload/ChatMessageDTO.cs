@@ -28,6 +28,8 @@ namespace TheCircleBackend.Domain.DTO.EncryptedPayload
         public int WebUserId { get; set; }
         public int ReceiverId { get; set; }
         public DateTime Date { get; set; }
+        //Timespan implemented to prevent replay attacks.
+        public long TimeSpan { get; set; }
     }
 
     public class ChatMessageLite
