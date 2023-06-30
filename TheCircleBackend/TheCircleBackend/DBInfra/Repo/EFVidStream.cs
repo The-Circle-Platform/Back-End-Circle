@@ -90,6 +90,10 @@ namespace TheCircleBackend.DBInfra.Repo
                 Stream.EndStream = DateTime.Now;
                 domainContext.VideoStream.Update(Stream);
 
+                var User = domainContext.WebsiteUser.First(vs => vs.Id == UserId);
+                User.IsOnline = false;
+                domainContext.WebsiteUser.Update(User);
+
                 ICoinHelper coinHelper = new CoinHelper(domainContext, UserId);
                 coinHelper.ChangeBalance(Stream.StartStream, DateTime.Now);
 
