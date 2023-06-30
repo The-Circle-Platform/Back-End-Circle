@@ -78,7 +78,13 @@ namespace TheCircleBackend.Hubs
         // Receiver method
         public async Task SendMessage(ChatMessageDTOIncoming incomingChatMessage)
         {
-            bool UserAndReceiverExist = EntitiesExist(incomingChatMessage.SenderUserId, incomingChatMessage.OriginalData.ReceiverId);
+            //Checks if 1 minute has passed. If it is, it will trow error message.
+            if ((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 60000) > incomingChatMessage.OriginalData.TimeSpan)
+            {
+                throw new TimeoutException("Timespan has expired");
+            }
+
+            bool UserAndReceiverExist = EntitiesExist(incomingChatMessage.OriginalData.WebUserId, incomingChatMessage.OriginalData.ReceiverId);
             
             if (!UserAndReceiverExist)
             {
