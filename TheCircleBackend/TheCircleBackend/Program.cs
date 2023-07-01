@@ -110,26 +110,9 @@ app.UseCors(builder =>
         .AllowCredentials()
         .Build();
 
-    /*//Test server vervang http://localhost:4200 met test server of netlify website
-    builder.AllowAnyOrigin()
-        .AllowAnyHeader()
-        .WithOrigins("http://localhost:4200")
-        .AllowAnyMethod()
-        .AllowCredentials()
-        .Build();
-
-    //Production server
-    builder.AllowAnyOrigin()
-        .AllowAnyHeader()
-        .WithOrigins("http://localhost:4200")
-        .AllowAnyMethod()
-        .AllowCredentials()
-        .Build();*/
 
 });
 app.UseAuthentication();
-
-//Misschien is een Proxy toepassen een goed idee om de gecommented 
 app.UseAuthorization();
 
 app.MapControllers();

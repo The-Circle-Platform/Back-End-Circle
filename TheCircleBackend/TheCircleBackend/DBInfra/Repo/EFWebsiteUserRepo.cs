@@ -8,11 +8,9 @@ namespace TheCircleBackend.DBInfra.Repo
         private readonly DomainContext context;
         private readonly ILogger<EFWebsiteUserRepo> logger;
 
-        //private readonly IWebsiteUserRepo _websiteUserRepo;
 
         public EFWebsiteUserRepo(DomainContext context, ILogger<EFWebsiteUserRepo> logger)
         {
-            //this._websiteUserRepo = _websiteUserRepo;
             this.context = context;
             this.logger = logger;
         }

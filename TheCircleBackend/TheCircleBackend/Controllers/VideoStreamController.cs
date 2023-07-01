@@ -40,11 +40,11 @@ namespace TheCircleBackend.Controllers
 
             if(VideoStream == null)
             {
-                var sign = securityService.SignData("Geen runnende stream aanwezig", ServerKeys.privKey);
+                var sign = securityService.SignData("No running stream found", ServerKeys.privKey);
                 var DTO = new
                 {
                     Signature = sign,
-                    OriginalData = "Geen runnende stream aanwezig"
+                    OriginalData = "No running stream found"
                 };
                 return BadRequest(DTO);
             }
@@ -82,11 +82,11 @@ namespace TheCircleBackend.Controllers
 
             if (VideoStream == null)
             {
-                var sign = securityService.SignData("Geen runnende stream aanwezig", ServerKeys.privKey);
+                var sign = securityService.SignData("No running stream found", ServerKeys.privKey);
                 var DTO = new
                 {
                     Signature = sign,
-                    OriginalData = "Geen runnende stream aanwezig"
+                    OriginalData = "No running stream found"
                 };
                 return BadRequest(DTO);
             }
@@ -152,7 +152,7 @@ namespace TheCircleBackend.Controllers
             //Fail response
             var fail = new
             {
-                Message = "Data is niet integer"
+                Message = "Data integrity is not there"
             };
 
             var signatureOut = securityService.SignData(fail, ServerKeys.privKey);
@@ -174,13 +174,13 @@ namespace TheCircleBackend.Controllers
             // Get recent stream
             var LastStream = VidStreamRepo.GetCurrentStream(hostId);
 
-           //Stream wordt gestopt
+           //Stream is stopped
             VidStreamRepo.StopStream(hostId, LastStream.Id);
 
             //Succes response
             var succes = new
             {
-                Message = "Data succesvol toegevoegd"
+                Message = "Data added successfully"
             };
             var signatureSucces = securityService.SignData(succes, ServerKeys.privKey);
             var succesDTO = new
@@ -209,19 +209,19 @@ namespace TheCircleBackend.Controllers
 
             var LastStream = VidStreamRepo.GetCurrentStream(hostId);
 
-            //Stream wordt gestopt
+            //Stream is stopped
             VidStreamRepo.StopStream(hostId, LastStream.Id);
 
-            //Succes response
-            var succes = new
+            //Success response
+            var success = new
             {
-                Message = "Data succesvol toegevoegd"
+                Message = "Data added successfully"
             };
-            var signatureSucces = securityService.SignData(succes, ServerKeys.privKey);
+            var signatureSucces = securityService.SignData(success, ServerKeys.privKey);
             var succesDTO = new
             {
                 Signature = signatureSucces,
-                OriginalData = succes,
+                OriginalData = success,
             };
             return Ok(succesDTO);
         }
@@ -239,44 +239,43 @@ namespace TheCircleBackend.Controllers
             var serverKeys = securityService.GetServerKeys();
 
 
-            //Als gebruiker niet bestaat, geef false terug.
+            //If user does not exist return false
             if (User == null)
             {
-                // Foute response
+                // false response
                 var sign = securityService.SignData(false, serverKeys.privKey);
                 // -  Geef false terug.
                 var FalseContent = new NodeStreamOutput
                 {
-                    //Dummydata
+                    //Dummy data
                     Signature = sign,
-                    message = "Niets gevonden",
+                    message = "Not found",
                     OriginalData = false
                 };
                 return BadRequest(FalseContent);
             }
 
-            // Verifieert digitale handtekening
+            // Verify digital signature
             var UserKeys = securityService.GetKeys(User.Id);
             bool ValidSignature = securityService.HoldsIntegrity(inputDTO.OriginalData, Convert.FromBase64String(inputDTO.signature), UserKeys.pubKey);
 
-            // signature geldig is.
+            // signature is valid.
             if (ValidSignature)
             {
-                // Maakt stream
-                // Zal het maken van een stream in dit process worden afgehandeld, of zal de POST endpoint gebruikt worden van het aanmaken van een stream.
+                // create stream
                 VidStreamRepo.StartStream(User.Id, "Stream of " + inputDTO.OriginalData.UserName);
 
                 //Sets user online
                 websiteUserRepo.SetUserOnline(User.Id);
 
-                // - Maakt signature met private key van de server.
+                // - Makes signature with private key of server
                 var sign = securityService.SignData(true, serverKeys.privKey);
-                // - Geeft true terug aan de gebruiker
+                // - return true to user
                 var GoodContent = new NodeStreamOutput
                 {
-                    //Dummydata
+                    //Dummy data
                     Signature = sign,
-                    message = "Toegang verleent",
+                    message = "Access granted",
                     OriginalData = true
                 };
 
@@ -284,16 +283,16 @@ namespace TheCircleBackend.Controllers
             }
             else
             {
-                // Fout
+                // Wrong
                 
-                // - Maakt signature
+                // - Makes signature
                 var sign = securityService.SignData(false, serverKeys.privKey);
-                // -  Geef false terug.
+                // -  return false
                 var FalseContent = new NodeStreamOutput
                 {
-                    //Dummydata
+                    //Dummy data
                     Signature = sign,
-                    message = "Geen toegang",
+                    message = "Access denied",
                     OriginalData = false
                 };
                 return BadRequest(FalseContent);

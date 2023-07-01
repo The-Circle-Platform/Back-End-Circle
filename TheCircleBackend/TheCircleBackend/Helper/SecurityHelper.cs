@@ -34,7 +34,7 @@ namespace TheCircleBackend.Helper
             }
             catch
             {
-                throw new Exception("Deserialisatie is misgegaan.");
+                throw new Exception("De-serialization has failed");
             }
             
         }
@@ -46,7 +46,7 @@ namespace TheCircleBackend.Helper
             return (rsaService.ExportPkcs8PrivateKey(), rsaService.ExportSubjectPublicKeyInfo());
         }
 
-        // Generates keypair.
+        // Generates key pair.
         public (string privateKeyString, string publicKeyString) GetKeyString()
         {
             // Generates key pair in RSAParameter form.
@@ -136,7 +136,6 @@ namespace TheCircleBackend.Helper
                 var test = rsa.Decrypt(Convert.FromBase64String(message), false);
                 Console.WriteLine(Encoding.UTF8.GetString(test));
                 return Encoding.UTF8.GetString(test);
-                //return Encoding.UTF8.GetString(test);
 
         }
     }

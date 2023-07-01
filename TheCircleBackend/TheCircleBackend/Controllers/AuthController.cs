@@ -56,10 +56,7 @@ namespace Controllers.AuthController
         [Route("login")]
         public async Task<IActionResult> Login(LoginDTO dto)
         {
-            //Console.WriteLine(dto.Request.UserName);
-            //Console.WriteLine(dto.Signature);
-            //Console.WriteLine(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-            //Console.WriteLine(dto.Request.TimeStamp);
+
             if ((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 1000000000 > dto.Request.TimeStamp))
             {
                 return BadRequest("Request timeout");
@@ -104,64 +101,7 @@ namespace Controllers.AuthController
 
             return NotFound();
 
-            //if (user != null && await _userManager.CheckPasswordAsync(user, decryptedPassword))
-            //{
-            //    var userRoles = await _userManager.GetRolesAsync(user);
-
-            //    var authClaims = new List<Claim>
-            //    {
-            //        new Claim(ClaimTypes.Name, user.UserName),
-            //        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            //    };
-
-            //    foreach (var userRole in userRoles)
-            //    {
-            //        authClaims.Add(new Claim(ClaimTypes.Role, userRole));
-            //    }
-
-
-
-
-            //    // Retrieves user from database.
-            //    var WebsiteUser = _websiteUserRepo.GetByUserName(user.UserName);
-            //    var KeyPair = securityService.GetKeys(WebsiteUser.Id);
-            //    var token = GetToken(authClaims, WebsiteUser.Id);
-
-            //     var userDTO = new WebsiteUserDTO()
-            //    {
-            //        Id = WebsiteUser.Id,
-            //        UserName = WebsiteUser.UserName,
-            //        IsOnline = WebsiteUser.IsOnline,
-            //    };
-
-
-            //    //Create payload
-            //    var PayLoad = new
-            //    {
-            //        WebsiteUser = userDTO,
-            //        token = new JwtSecurityTokenHandler().WriteToken(token),
-            //        expiration = token.ValidTo,
-            //        PrivateKey = KeyPair.privKey,
-            //        PublicKey = KeyPair.pubKey,
-            //    };
-
-            //    //Console.WriteLine(KeyPair.privKey);
-            //    Console.WriteLine(KeyPair.pubKey);
-            //        //Signs signature
-            //        var ServerKeys = securityService.GetServerKeys();
-            //    var Signature = securityService.SignData(PayLoad, ServerKeys.privKey);
-
-            //    AuthOutRegisterDTO authOut = new()
-            //    {
-            //        Signature = Signature,
-            //        SenderUserId = WebsiteUser.Id,
-            //        OriginalLoad = PayLoad
-            //    };
-
-            //    return Ok(authOut);
-            //}
-
-            //return Unauthorized();
+            
         }
 
         [HttpPost]
@@ -260,7 +200,6 @@ namespace Controllers.AuthController
                 $" Hello {dto.Username} An account has been created by a TheCircle admin using: \n email: {dto.Email} \n Username: {dto.Username} \n In the attachments of this email you will find your private and public keys which you can use to authenticate yourself";
             mailer.SendMail(dto.Email, "The Circle Account Creation", emailbody, "The Circle Team", attachments);
 
-            // Encrypts data
             var Response = new Response { Status = "Success", Message = "User created successfully!" };
 
             //Creates signature
@@ -376,7 +315,6 @@ namespace Controllers.AuthController
             string emailbody =
                 $" Hello {dto.Username} An account has been created by a TheCircle admin using: \n email: {dto.Email} \n Username: {dto.Username} \n In the attachments of this email you will find your private and public keys which you can use to authenticate yourself";
             mailer.SendMail(dto.Email, "The Circle Account Creation", emailbody, "The Circle Team", attachments);
-            // Encrypts data
             var Response = new Response { Status = "Success", Message = "User created successfully!" };
 
             //Creates signature

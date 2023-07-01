@@ -94,15 +94,10 @@ namespace TheCircleBackend.Controllers
             
 
             var user = this.websiteUserRepo.GetById(id);
-            //Console.WriteLine("test");
 
             var ip = this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
             var endpoint = "POST /user";
-            /* var currentUser = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-             var action = $"WebsiteUser with ID: {user.Id}, Name: {user.UserName}";
-             logHelper.AddUserLog(ip, endpoint, currentUser, action);*/
 
-            //Console.WriteLine(user);
             try
             {
                 user.Base64Image = websiteUser.Request.Base64Image;
@@ -111,7 +106,6 @@ namespace TheCircleBackend.Controllers
             }
             catch (Exception e)
             {
-                //Console.WriteLine(e);
                 return BadRequest(e);
             }
         }
