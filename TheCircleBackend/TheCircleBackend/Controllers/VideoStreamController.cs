@@ -180,7 +180,7 @@ namespace TheCircleBackend.Controllers
             //Succes response
             var succes = new
             {
-                Message = "Data addes successfully"
+                Message = "Data added successfully"
             };
             var signatureSucces = securityService.SignData(succes, ServerKeys.privKey);
             var succesDTO = new
@@ -215,7 +215,7 @@ namespace TheCircleBackend.Controllers
             //Success response
             var success = new
             {
-                Message = "Data addes successfully"
+                Message = "Data added successfully"
             };
             var signatureSucces = securityService.SignData(success, ServerKeys.privKey);
             var succesDTO = new
