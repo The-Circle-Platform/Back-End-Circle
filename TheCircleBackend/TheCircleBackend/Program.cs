@@ -16,6 +16,7 @@ ConfigurationManager configuration = builder.Configuration;
 
 builder.Services.AddDbContext<DomainContext>(options =>
 {
+
     options.UseSqlServer(@"Data Source=.;Initial Catalog=TheCircleDomainDB;Integrated Security=True; TrustServerCertificate=True");
 });
 

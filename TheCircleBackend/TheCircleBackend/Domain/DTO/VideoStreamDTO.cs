@@ -30,7 +30,7 @@ namespace TheCircleBackend.Domain.DTO
 
     }
 
-    public class Test
+    public class StreamDTO
     {
         public NodeStreamInput OriginalData { get; set; }
         public string signature { get; set; }

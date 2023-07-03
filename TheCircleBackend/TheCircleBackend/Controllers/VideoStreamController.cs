@@ -227,7 +227,7 @@ namespace TheCircleBackend.Controllers
         }
 
         [HttpPost("ValidateStream")]
-        public IActionResult PostStream(Test inputDTO)
+        public IActionResult PostStream(StreamDTO inputDTO)
         {
             // Checks timespan in order to prevent replay attacks.
             if((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 600000) > inputDTO.OriginalData.TimeStamp)
