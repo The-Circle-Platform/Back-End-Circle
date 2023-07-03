@@ -12,6 +12,7 @@ namespace TheCircleBackend.DBInfra
         public DbSet<KeyStore> UserKeys { get; set; } = null!;
         public DbSet<Domain.Models.Stream> VideoStream { get; set; } = null!;
         public DbSet<Streamchunks> Streamchunks { get; set; } = null!;
+        public DbSet<Vod> Vod { get; set; } = null!;
 
         public  DomainContext(DbContextOptions<DomainContext> options) : base(options) { }
 
@@ -62,6 +63,8 @@ namespace TheCircleBackend.DBInfra
                 .HasOne(sc => sc.RelatedStream)
                 .WithMany(ss => ss.RelatedStreamChunks)
                 .HasForeignKey(sc => sc.StreamId);
+
+            modelBuilder.Entity<Vod>().HasKey(v => v.Id);
 
             WebsiteUser AdminUser = new()
             {

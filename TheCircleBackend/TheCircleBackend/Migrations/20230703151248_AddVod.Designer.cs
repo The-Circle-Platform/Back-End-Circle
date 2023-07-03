@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TheCircleBackend.DBInfra;
 
@@ -11,9 +12,11 @@ using TheCircleBackend.DBInfra;
 namespace TheCircleBackend.Migrations
 {
     [DbContext(typeof(DomainContext))]
-    partial class DomainContextModelSnapshot : ModelSnapshot
+    [Migration("20230703151248_AddVod")]
+    partial class AddVod
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -206,9 +209,9 @@ namespace TheCircleBackend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Data")
+                    b.Property<byte[]>("Data")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()
