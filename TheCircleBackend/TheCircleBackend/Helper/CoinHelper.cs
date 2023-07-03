@@ -34,7 +34,6 @@ namespace TheCircleBackend.Helper
             {
                 coins += (int)Math.Pow(2, i);
             }
-            //int coins = (int)Math.Pow(2, hours - 1);          // Coin total is doubled each hour
 
             IncreaseBalance(coins);
         }
