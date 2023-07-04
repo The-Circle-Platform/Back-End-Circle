@@ -78,12 +78,35 @@ namespace TheCircleBackend.Controllers
         [HttpPut("{id}/pfp")]
         public IActionResult PostImage(WebsiteUserDTO websiteUser, int id)
         {
+
             try
             {
+                if ((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 10000 > websiteUser.Request.TimeStamp))
+                {
+
+                    var response = new
+                    {
+                        status = 408,
+                        message = "request timeout"
+                    };
+                    return StatusCode(408, response);
+                }
+
+                Console.WriteLine(websiteUser.Request.TimeStamp);
                 var keys = securityService.GetKeys(websiteUser.Request.Id);
                 Console.WriteLine(keys.privKey);
                 var isSameUser = securityService.HoldsIntegrity(websiteUser.Request, Convert.FromBase64String(websiteUser.Signature),
                     keys.pubKey);
+
+                if (!isSameUser)
+                {
+                    var response = new 
+                    {
+                        status = 400,
+                        message = "Users do not match or data integrity is compromised"
+                    };
+                    return BadRequest(response);
+                }
                 Console.WriteLine(isSameUser);
             }
             catch (Exception e)
@@ -102,7 +125,12 @@ namespace TheCircleBackend.Controllers
             {
                 user.Base64Image = websiteUser.Request.Base64Image;
                 this.websiteUserRepo.Update(user, id);
-                return Ok("user updated");
+                var response = new
+                {
+                    status = 200,
+                    message = "profile picture updated"
+                };
+                return Ok(response);
             }
             catch (Exception e)
             {

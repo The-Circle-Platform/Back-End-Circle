@@ -217,27 +217,27 @@ namespace Controllers.AuthController
         [Route("register-admin")]
         public async Task<IActionResult> RegisterAdmin(AuthRegisterDTO request)
         {
-            //if ((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 10000 > request.OriginalRegisterData.TimeStamp))
-            //{
-            //    return BadRequest("Request timeout");
-            //}
-            //var claimedAdmin = await _userManager.FindByNameAsync(request.OriginalRegisterData.UsernameOfAdmin);
-            //var userRoles = await _userManager.GetRolesAsync(claimedAdmin);
-            //if (!userRoles.Contains("Admin"))
-            //{
-            //    return Forbid();
-            //}
+            if ((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 10000 > request.OriginalRegisterData.TimeStamp))
+            {
+                return BadRequest("Request timeout");
+            }
+            var claimedAdmin = await _userManager.FindByNameAsync(request.OriginalRegisterData.UsernameOfAdmin);
+            var userRoles = await _userManager.GetRolesAsync(claimedAdmin);
+            if (!userRoles.Contains("Admin"))
+            {
+                return Forbid();
+            }
 
-            //var adminWebUser = _websiteUserRepo.GetByUserName(request.OriginalRegisterData.UsernameOfAdmin);
-            //var adminKeys = securityService.GetKeys(adminWebUser.Id);
-            //Console.WriteLine(Convert.ToBase64String(request.Signature));
-            //var isAdmin =
-            //    securityService.HoldsIntegrity(request.OriginalRegisterData, request.Signature, adminKeys.pubKey);
+            var adminWebUser = _websiteUserRepo.GetByUserName(request.OriginalRegisterData.UsernameOfAdmin);
+            var adminKeys = securityService.GetKeys(adminWebUser.Id);
+            Console.WriteLine(Convert.ToBase64String(request.Signature));
+            var isAdmin =
+                securityService.HoldsIntegrity(request.OriginalRegisterData, request.Signature, adminKeys.pubKey);
 
-            //if (!isAdmin)
-            //{
-            //    return Forbid();
-            //}
+            if (!isAdmin)
+            {
+                return Forbid();
+            }
 
             var dto = request.OriginalRegisterData;
             var pwd = new Password();
