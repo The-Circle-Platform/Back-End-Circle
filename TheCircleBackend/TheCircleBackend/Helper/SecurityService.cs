@@ -57,19 +57,19 @@ namespace TheCircleBackend.Helper
             return securityHelper.SignData(GeneratedData, GeneratedPrivateKey, true);
         }
         
-        public (string privKey, string pubKey) GetKeys(int userId)
+        public string GetKeys(int userId)
         {
             //Get user info
             try
             {
-                var KeyPair = keyRepo.GetKeys(userId);
-                if(KeyPair == null)
+                var Key = keyRepo.GetKeys(userId);
+                if(Key == null)
                 {
                     throw new InvalidOperationException("Keys not found");
                 }
                 else
                 {
-                    return KeyPair.Value;
+                    return Key;
                 }
             }
             catch(InvalidOperationException e)
@@ -87,7 +87,7 @@ namespace TheCircleBackend.Helper
         {
             try
             {
-                keyRepo.StoreKeys(UserId, privKey, pubKey);
+                keyRepo.StoreKeys(UserId, pubKey);
                 return true;
             } catch{
                 return false;

@@ -36,6 +36,7 @@ namespace TheCircleBackend.Controllers
         }
 
         [HttpPost]
+        [RequestSizeLimit(100000000000)]
         public IActionResult AddVod(VodDTO vod)
         {
             //Vod vod = new() {

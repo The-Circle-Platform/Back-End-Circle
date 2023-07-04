@@ -34,14 +34,14 @@ namespace TheCircleBackend.Controllers
         {
             Console.WriteLine("Payload received");
             //Get keypair
-            var KeyPair = securityService.GetKeys(payload.SenderUserId);
+            var Key = securityService.GetKeys(payload.SenderUserId);
 
             Console.WriteLine("Keypair received");
             //Check signature
-            var IsValid = securityService.HoldsIntegrity(payload.OriginalData, payload.Signature, KeyPair.pubKey);
+            var IsValid = securityService.HoldsIntegrity(payload.OriginalData, payload.Signature, Key);
             if(!IsValid)
             {
-                var sign = securityService.SignData("Integrity is tainted", KeyPair.privKey);
+                var sign = securityService.SignData("Integrity is tainted", Key);
 
                 var load = new LoggingOutTextDTO()
                 {
@@ -67,7 +67,7 @@ namespace TheCircleBackend.Controllers
                 this.logItemRepo.Add(log);
 
                 //Create signature
-                var sign = securityService.SignData("Log added", KeyPair.privKey);
+                var sign = securityService.SignData("Log added", Key);
 
                 var load = new LoggingOutTextDTO()
                 {
@@ -83,7 +83,7 @@ namespace TheCircleBackend.Controllers
             {
                 Console.WriteLine(e);
                 var error = "Integrity is tainted";
-                var sign = securityService.SignData(error, KeyPair.privKey);
+                var sign = securityService.SignData(error, Key);
 
                 var load = new LoggingOutTextDTO()
                 {

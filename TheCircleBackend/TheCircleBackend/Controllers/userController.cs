@@ -80,10 +80,10 @@ namespace TheCircleBackend.Controllers
         {
             try
             {
-                var keys = securityService.GetKeys(websiteUser.Request.Id);
-                Console.WriteLine(keys.privKey);
+                var key = securityService.GetKeys(websiteUser.Request.Id);
+                Console.WriteLine(key);
                 var isSameUser = securityService.HoldsIntegrity(websiteUser.Request, Convert.FromBase64String(websiteUser.Signature),
-                    keys.pubKey);
+                    key);
                 Console.WriteLine(isSameUser);
             }
             catch (Exception e)
