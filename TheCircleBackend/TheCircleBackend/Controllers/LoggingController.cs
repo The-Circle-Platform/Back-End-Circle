@@ -32,14 +32,16 @@ namespace TheCircleBackend.Controllers
         [HttpPost]
         public IActionResult AddLog(LoggingPayloadDTO payload)
         {
+            Console.WriteLine("Payload received");
             //Get keypair
-            var KeyPair = securityService.GetKeys(payload.SenderUserId);
+            var Key = securityService.GetKeys(payload.SenderUserId);
 
+            Console.WriteLine("Keypair received");
             //Check signature
-            var IsValid = securityService.HoldsIntegrity(payload.OriginalData, payload.Signature, KeyPair.pubKey);
+            var IsValid = securityService.HoldsIntegrity(payload.OriginalData, payload.Signature, Key);
             if(!IsValid)
             {
-                var sign = securityService.SignData("Integrity is tainted", KeyPair.privKey);
+                var sign = securityService.SignData("Integrity is tainted", Key);
 
                 var load = new LoggingOutTextDTO()
                 {
@@ -50,19 +52,22 @@ namespace TheCircleBackend.Controllers
                 return BadRequest(load);
             }
 
+            Console.WriteLine("Keypair received");
             var dto = payload.OriginalData;
             var log = new LogItem()
             {
                 Action = dto.Action,
                 DateTime = DateTime.Now,
                 Ip = this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString(),
+                Endpoint = dto.Endpoint,
+                SubjectUser = dto.SubjectUser
             };
             try
             {
                 this.logItemRepo.Add(log);
 
                 //Create signature
-                var sign = securityService.SignData("Log added", KeyPair.privKey);
+                var sign = securityService.SignData("Log added", Key);
 
                 var load = new LoggingOutTextDTO()
                 {
@@ -78,7 +83,7 @@ namespace TheCircleBackend.Controllers
             {
                 Console.WriteLine(e);
                 var error = "Integrity is tainted";
-                var sign = securityService.SignData(error, KeyPair.privKey);
+                var sign = securityService.SignData(error, Key);
 
                 var load = new LoggingOutTextDTO()
                 {
@@ -132,10 +137,10 @@ namespace TheCircleBackend.Controllers
             }
             else
             {
-                var Sign = securityService.SignData("Integriteit is belast", ServerKey.privKey);
+                var Sign = securityService.SignData("Integrity is tainted", ServerKey.privKey);
                 var load = new LoggingOutTextDTO()
                 {
-                    OriginalData = "Integriteit is belast",
+                    OriginalData = "Integrity is tainted",
                     Signature = Sign
                 };
                 return NotFound(load);

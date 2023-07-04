@@ -5,7 +5,7 @@ namespace TheCircleBackend.Domain.Models
     public class Streamchunks : IDomain
     {
 
-        //ForeignKey relatie naar stream
+        //Foreign Key relation to stream
         public int StreamId { get; set; }
         public DateTimeOffset TimeStamp { get; set; }
         public int ChunkSize { get; set; }

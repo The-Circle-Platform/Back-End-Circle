@@ -19,17 +19,20 @@ namespace TheCircleBackend.Controllers
         private readonly IWebsiteUserRepo websiteUserRepo;
         private readonly ILogItemRepo logItemRepo;
         private readonly ISecurityService securityService;
+        private readonly IEntityCheckerService entityCheckerService;
         private readonly LogHelper logHelper;
 
         public userController(
             IWebsiteUserRepo websiteUserRepo, 
             ILogItemRepo logItemRepo, 
             ILogger<userController> logger,
-            ISecurityService securityService)
+            ISecurityService securityService,
+            IEntityCheckerService entityCheckerService)
         {
             this.websiteUserRepo = websiteUserRepo;
             this.logItemRepo = logItemRepo;
             this.securityService = securityService;
+            this.entityCheckerService = entityCheckerService;
             this.logHelper = new LogHelper(logItemRepo, logger);
 
         }
@@ -75,12 +78,35 @@ namespace TheCircleBackend.Controllers
         [HttpPut("{id}/pfp")]
         public IActionResult PostImage(WebsiteUserDTO websiteUser, int id)
         {
+
             try
             {
-                var keys = securityService.GetKeys(websiteUser.Request.Id);
-                Console.WriteLine(keys.privKey);
+                if ((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 10000 > websiteUser.Request.TimeStamp))
+                {
+
+                    var response = new
+                    {
+                        status = 408,
+                        message = "request timeout"
+                    };
+                    return StatusCode(408, response);
+                }
+
+                Console.WriteLine(websiteUser.Request.TimeStamp);
+                var key = securityService.GetKeys(websiteUser.Request.Id);
+                Console.WriteLine(key);
                 var isSameUser = securityService.HoldsIntegrity(websiteUser.Request, Convert.FromBase64String(websiteUser.Signature),
-                    keys.pubKey);
+                    key);
+
+                if (!isSameUser)
+                {
+                    var response = new 
+                    {
+                        status = 400,
+                        message = "Users do not match or data integrity is compromised"
+                    };
+                    return BadRequest(response);
+                }
                 Console.WriteLine(isSameUser);
             }
             catch (Exception e)
@@ -91,24 +117,23 @@ namespace TheCircleBackend.Controllers
             
 
             var user = this.websiteUserRepo.GetById(id);
-            //Console.WriteLine("test");
 
             var ip = this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
             var endpoint = "POST /user";
-            /* var currentUser = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-             var action = $"WebsiteUser with ID: {user.Id}, Name: {user.UserName}";
-             logHelper.AddUserLog(ip, endpoint, currentUser, action);*/
 
-            //Console.WriteLine(user);
             try
             {
                 user.Base64Image = websiteUser.Request.Base64Image;
                 this.websiteUserRepo.Update(user, id);
-                return Ok("user updated");
+                var response = new
+                {
+                    status = 200,
+                    message = "profile picture updated"
+                };
+                return Ok(response);
             }
             catch (Exception e)
             {
-                //Console.WriteLine(e);
                 return BadRequest(e);
             }
         }
@@ -116,6 +141,13 @@ namespace TheCircleBackend.Controllers
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
+            bool isValid = entityCheckerService.UserExists(id);
+
+            if (!isValid)
+            {
+                return NotFound();
+            }
+
             Console.WriteLine(id);
             var user = websiteUserRepo.GetById(id);
 

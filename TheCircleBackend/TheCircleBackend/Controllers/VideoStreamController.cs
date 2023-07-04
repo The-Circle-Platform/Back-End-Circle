@@ -22,6 +22,54 @@ namespace TheCircleBackend.Controllers
             this.websiteUserRepo = websiteUserRepo;
         }
 
+        [HttpGet("{hostUserName}/2")]
+        public IActionResult Get(string hostUserName)
+        {
+            var user = websiteUserRepo.GetByUserName(hostUserName);
+
+            if(user == null)
+            {
+                return NotFound();
+            }
+
+            //Get videostream
+            Domain.Models.Stream? VideoStream = VidStreamRepo.GetCurrentStream(user.Id);
+
+            //Server keypair
+            var ServerKeys = securityService.GetServerKeys();
+
+            if(VideoStream == null)
+            {
+                var sign = securityService.SignData("No running stream found", ServerKeys.privKey);
+                var DTO = new
+                {
+                    Signature = sign,
+                    OriginalData = "No running stream found"
+                };
+                return BadRequest(DTO);
+            }
+
+            var VidStreamDTO = new VideoStreamDTO()
+            {
+                id = VideoStream.Id,
+                endStream = null,
+                startStream = new DateTime(),
+                transparantUserId = user.Id,
+                title = VideoStream.Title,
+                transparantUserName = user.UserName
+            };
+
+            var Signature = securityService.SignData(VidStreamDTO, ServerKeys.privKey);
+
+            var streamInfoPackage = new VidStreamDTO()
+            {
+                OriginalData = VidStreamDTO,
+                Signature = Signature,
+                RandomId = Guid.NewGuid().ToString()
+            };
+            return Ok(streamInfoPackage);
+        }
+
         [HttpGet("{hostId}")]
         public IActionResult Get(int hostId)
         {
@@ -32,16 +80,18 @@ namespace TheCircleBackend.Controllers
             //Server keypair
             var ServerKeys = securityService.GetServerKeys();
 
-            if(VideoStream == null)
+            if (VideoStream == null)
             {
-                var sign = securityService.SignData("Geen runnende stream aanwezig", ServerKeys.privKey);
+                var sign = securityService.SignData("No running stream found", ServerKeys.privKey);
                 var DTO = new
                 {
                     Signature = sign,
-                    OriginalData = "Geen runnende stream aanwezig"
+                    OriginalData = "No running stream found"
                 };
                 return BadRequest(DTO);
             }
+
+            var TransparantUser = websiteUserRepo.GetById(hostId);
 
             var VidStreamDTO = new VideoStreamDTO()
             {
@@ -49,7 +99,8 @@ namespace TheCircleBackend.Controllers
                 endStream = null,
                 startStream = new DateTime(),
                 transparantUserId = hostId,
-                title = VideoStream.Title
+                title = VideoStream.Title,
+                transparantUserName = TransparantUser.UserName
             };
 
             var Signature = securityService.SignData(VidStreamDTO, ServerKeys.privKey);
@@ -67,9 +118,9 @@ namespace TheCircleBackend.Controllers
         public  IActionResult Post(VidStreamDTO videoStreamDTO)
         {
             //Get userId keys
-            var KeyPair = securityService.GetKeys(videoStreamDTO.SenderUserId);
+            var key = securityService.GetKeys(videoStreamDTO.SenderUserId);
             //check integrity
-            var isValid = securityService.HoldsIntegrity(videoStreamDTO.OriginalData, videoStreamDTO.Signature, KeyPair.pubKey);
+            var isValid = securityService.HoldsIntegrity(videoStreamDTO.OriginalData, videoStreamDTO.Signature, key);
             //server keys
             var ServerKeys = securityService.GetServerKeys();
             if(isValid)
@@ -84,7 +135,9 @@ namespace TheCircleBackend.Controllers
                 //Succes response
                 var succes = new
                 {
-                    streamId = latestStream.Id
+                    streamId = latestStream.Id,
+                    //Username moet nog toegevoegd worden.
+                    userName = latestStream.User.UserName
                 };
                 var signatureSucces = securityService.SignData(succes, ServerKeys.privKey);
                 var succesDTO = new
@@ -99,7 +152,7 @@ namespace TheCircleBackend.Controllers
             //Fail response
             var fail = new
             {
-                Message = "Data is niet integer"
+                Message = "Data integrity is not there"
             };
 
             var signatureOut = securityService.SignData(fail, ServerKeys.privKey);
@@ -112,18 +165,22 @@ namespace TheCircleBackend.Controllers
             return BadRequest(failDTO);
         }
 
-        [HttpPut("{hostId}/CurrentStream/{streamId}")]
-        public IActionResult Put(int hostId, int streamId)
+        [HttpPut("{hostId}/StopStream")]
+        public IActionResult Put(int hostId)
         {
             //Server keys
             var ServerKeys = securityService.GetServerKeys();
-           //Stream wordt gestopt
-            VidStreamRepo.StopStream(hostId, streamId);
+
+            // Get recent stream
+            var LastStream = VidStreamRepo.GetCurrentStream(hostId);
+
+           //Stream is stopped
+            VidStreamRepo.StopStream(hostId, LastStream.Id);
 
             //Succes response
             var succes = new
             {
-                Message = "Data succesvol toegevoegd"
+                Message = "Data added successfully"
             };
             var signatureSucces = securityService.SignData(succes, ServerKeys.privKey);
             var succesDTO = new
@@ -133,5 +190,114 @@ namespace TheCircleBackend.Controllers
             };
             return Ok(succesDTO);
         }
+
+        [HttpGet("{hostUserName}/StopStream2")]
+        public IActionResult Put(string hostUserName)
+        {
+            //Server keys
+            var ServerKeys = securityService.GetServerKeys();
+
+            // Get recent stream
+            var user = websiteUserRepo.GetByUserName(hostUserName);
+
+            if(user == null)
+            {
+                return NotFound();
+            }
+
+            var hostId = user.Id; 
+
+            var LastStream = VidStreamRepo.GetCurrentStream(hostId);
+
+            //Stream is stopped
+            VidStreamRepo.StopStream(hostId, LastStream.Id);
+
+            //Success response
+            var success = new
+            {
+                Message = "Data added successfully"
+            };
+            var signatureSucces = securityService.SignData(success, ServerKeys.privKey);
+            var succesDTO = new
+            {
+                Signature = signatureSucces,
+                OriginalData = success,
+            };
+            return Ok(succesDTO);
+        }
+
+        [HttpPost("ValidateStream")]
+        public IActionResult PostStream(StreamDTO inputDTO)
+        {
+            // Checks timespan in order to prevent replay attacks.
+            if((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 600000) > inputDTO.OriginalData.TimeStamp)
+            {
+                return BadRequest("Timeout");
+            }
+            // Get user by username
+            var User = websiteUserRepo.GetByUserName(inputDTO.OriginalData.UserName);
+            var serverKeys = securityService.GetServerKeys();
+
+
+            //If user does not exist return false
+            if (User == null)
+            {
+                // false response
+                var sign = securityService.SignData(false, serverKeys.privKey);
+                // -  Geef false terug.
+                var FalseContent = new NodeStreamOutput
+                {
+                    //Dummy data
+                    Signature = sign,
+                    message = "Not found",
+                    OriginalData = false
+                };
+                return BadRequest(FalseContent);
+            }
+
+            // Verify digital signature
+            var UserKey = securityService.GetKeys(User.Id);
+            bool ValidSignature = securityService.HoldsIntegrity(inputDTO.OriginalData, Convert.FromBase64String(inputDTO.signature), UserKey);
+
+            // signature is valid.
+            if (ValidSignature)
+            {
+                // create stream
+                VidStreamRepo.StartStream(User.Id, "Stream of " + inputDTO.OriginalData.UserName);
+
+                //Sets user online
+                websiteUserRepo.SetUserOnline(User.Id);
+
+                // - Makes signature with private key of server
+                var sign = securityService.SignData(true, serverKeys.privKey);
+                // - return true to user
+                var GoodContent = new NodeStreamOutput
+                {
+                    //Dummy data
+                    Signature = sign,
+                    message = "Access granted",
+                    OriginalData = true
+                };
+
+                return Ok(GoodContent);
+            }
+            else
+            {
+                // Wrong
+                
+                // - Makes signature
+                var sign = securityService.SignData(false, serverKeys.privKey);
+                // -  return false
+                var FalseContent = new NodeStreamOutput
+                {
+                    //Dummy data
+                    Signature = sign,
+                    message = "Access denied",
+                    OriginalData = false
+                };
+                return BadRequest(FalseContent);
+            }
+        }
+
     }
 }

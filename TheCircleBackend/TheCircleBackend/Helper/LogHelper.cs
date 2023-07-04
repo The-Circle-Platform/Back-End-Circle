@@ -34,8 +34,7 @@ namespace TheCircleBackend.Helper
                 Console.WriteLine(e);
                 return BadRequest(e);
             }
-            //this.logItemRepo.Add(logItem);
-            //this.logger.LogTrace("DateTime: {date} | IP: {ip} | User: {user} | At: {location} | Action: {msg}", DateTime.Now, ip, 1, location, msg);
+
         }
 
         private void SetLogItem(string ip, string endpoint, string subjectUser, string msg)

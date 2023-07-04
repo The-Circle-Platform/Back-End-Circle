@@ -21,7 +21,7 @@ namespace TheCircleBackend.Helper
         {
             try
             {
-                //Convert inputdata to bytes
+                //Convert input data to bytes
                 byte[] inputBytes = securityHelper.ConvertItem(inputData);
 
                 // Convert key to RSAParameter
@@ -39,7 +39,7 @@ namespace TheCircleBackend.Helper
             }
         }
 
-        // Generates keypair.
+        // Generates key pair.
         public (string privKey, string pubKey) GenerateKeys()
         {
             return securityHelper.GetKeyString();
@@ -57,19 +57,19 @@ namespace TheCircleBackend.Helper
             return securityHelper.SignData(GeneratedData, GeneratedPrivateKey, true);
         }
         
-        public (string privKey, string pubKey) GetKeys(int userId)
+        public string GetKeys(int userId)
         {
-            //Get userinfo
+            //Get user info
             try
             {
-                var KeyPair = keyRepo.GetKeys(userId);
-                if(KeyPair == null)
+                var Key = keyRepo.GetKeys(userId);
+                if(Key == null)
                 {
                     throw new InvalidOperationException("Keys not found");
                 }
                 else
                 {
-                    return KeyPair.Value;
+                    return Key;
                 }
             }
             catch(InvalidOperationException e)
@@ -87,7 +87,7 @@ namespace TheCircleBackend.Helper
         {
             try
             {
-                keyRepo.StoreKeys(UserId, privKey, pubKey);
+                keyRepo.StoreKeys(UserId, pubKey);
                 return true;
             } catch{
                 return false;
@@ -97,6 +97,11 @@ namespace TheCircleBackend.Helper
         public (string privKey, string pubKey) GetServerKeys()
         {
             return securityHelper.GetServerKeys();
+        }
+
+        public string GetVideoServerPublicKey()
+        {
+            return securityHelper.GetVideoServerPublicKey();
         }
 
         public async Task<string> DecryptMessage(string message)

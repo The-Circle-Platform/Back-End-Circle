@@ -12,23 +12,23 @@ namespace TheCircleBackend.DBInfra.Repo
             this.domainContext = domainContext;
             this.logger = logger;
         }  
-        public (string privKey, string pubKey)? GetKeys(int UserId)
+        public string? GetKeys(int UserId)
         {
             try
             {
                 var result = domainContext.UserKeys.First(K => K.UserId == UserId);
-                return (result.PrivateKey, result.PublicKey);
+                return result.PublicKey;
             } catch(Exception ex)
             {
                 return null;
             }
         }
 
-        public bool StoreKeys(int UserId, string privKey, string pubKey)
+        public bool StoreKeys(int UserId, string pubKey)
         {
             try
             {
-                domainContext.UserKeys.Add(new KeyStore() { PrivateKey = privKey, PublicKey = pubKey, UserId = UserId });
+                domainContext.UserKeys.Add(new KeyStore() {PublicKey = pubKey, UserId = UserId });
                 domainContext.SaveChanges();
                 return true;
             }

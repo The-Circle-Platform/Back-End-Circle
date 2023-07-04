@@ -14,11 +14,16 @@ namespace TheCircleBackend.Hubs
     {
         private readonly IViewerRepository viewerRepository;
         private readonly ISecurityService securityService;
+        private readonly IEntityCheckerService entityCheckerService;
 
-        public ViewerHub(IViewerRepository viewerRepository, ISecurityService securityService)
+        public ViewerHub(
+            IViewerRepository viewerRepository, 
+            ISecurityService securityService,
+            IEntityCheckerService entityCheckerService)
         {
             this.viewerRepository = viewerRepository;
             this.securityService = securityService;
+            this.entityCheckerService = entityCheckerService;
         }
 
         // Receiver method, override
@@ -43,7 +48,7 @@ namespace TheCircleBackend.Hubs
                 UpdateViewCount(StreamId);
             }
             
-            //Deconnects connection
+            //Disconnects connection
             return base.OnDisconnectedAsync(exception);
         }
         
@@ -51,6 +56,11 @@ namespace TheCircleBackend.Hubs
         public async Task ConnectToStream(int UserId, int StreamId)
         {
             Console.WriteLine($"\nUser with id ${UserId} connects to streamId {StreamId}\n");
+
+            if(!ViewerCheck(UserId, StreamId))
+            {
+                throw new Exception("Viewer cannot be found");
+            }
 
             var Viewer = new Viewer()
             {
@@ -86,7 +96,7 @@ namespace TheCircleBackend.Hubs
             int watchCount = viewerRepository.GetViewershipCount(streamId);
             Console.WriteLine("Count is " + watchCount);
 
-            // Generate keypair
+            // Generate key pair
             var keyPair = securityService.GetServerKeys();
             //Signature
             var ServerSignature = securityService.SignData(watchCount, keyPair.privKey);
@@ -101,7 +111,7 @@ namespace TheCircleBackend.Hubs
 
         private async Task AllowUserNotToWatch(bool isAllowed, string ConnectId, int streamId)
         {
-            // Generate server keypair
+            // Generate server key pair
             var keyPair = securityService.GetServerKeys();
             //Signature
             var ServerSignature = securityService.SignData(isAllowed, keyPair.privKey);
@@ -118,6 +128,11 @@ namespace TheCircleBackend.Hubs
         private bool CheckMaxViews(int watcherId)
         {
             return viewerRepository.GetCurrentViewerCount(watcherId) < 4;
+        }
+    
+        private bool ViewerCheck(int UserId, int StreamId)
+        {
+            return this.entityCheckerService.UserExists(UserId) && entityCheckerService.StreamExists(StreamId);
         }
     }
 }

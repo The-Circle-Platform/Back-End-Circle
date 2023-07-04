@@ -22,7 +22,6 @@ namespace TheCircleBackend.Helper
         public byte[] ConvertItem(object input)
         {
             string jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(input).ToLower();
-            Console.WriteLine(jsonString);
 ;           return Encoding.UTF8.GetBytes(jsonString);
         }
 
@@ -34,7 +33,7 @@ namespace TheCircleBackend.Helper
             }
             catch
             {
-                throw new Exception("Deserialisatie is misgegaan.");
+                throw new Exception("De-serialization has failed");
             }
             
         }
@@ -46,7 +45,7 @@ namespace TheCircleBackend.Helper
             return (rsaService.ExportPkcs8PrivateKey(), rsaService.ExportSubjectPublicKeyInfo());
         }
 
-        // Generates keypair.
+        // Generates key pair.
         public (string privateKeyString, string publicKeyString) GetKeyString()
         {
             // Generates key pair in RSAParameter form.
@@ -128,6 +127,13 @@ namespace TheCircleBackend.Helper
             return (privateKey, publicKey);
         }
 
+        public string GetVideoServerPublicKey()
+        {
+            var publicKey =
+                "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDxDRhCUK6aXbScnozQFKwEdMCjdd1sxLdoqtyzqyFLjP4lvGPoKkwSYKvd9wJCz151zmoozcbYrN6j1dFfxhdEMpB/LtkNpqGdZzxHEAGyqIDvkuh5FyOh/JBFa95AE2er4upw4Li3y6jz7dBIwMf4D70ZR7poiLpQfTDOqisywQIDAQAB";
+            return publicKey;
+        }
+
         public async Task<string> DecryptMessage(string message)
         {
                 RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
@@ -136,7 +142,6 @@ namespace TheCircleBackend.Helper
                 var test = rsa.Decrypt(Convert.FromBase64String(message), false);
                 Console.WriteLine(Encoding.UTF8.GetString(test));
                 return Encoding.UTF8.GetString(test);
-                //return Encoding.UTF8.GetString(test);
 
         }
     }

@@ -8,11 +8,9 @@ namespace TheCircleBackend.DBInfra.Repo
         private readonly DomainContext context;
         private readonly ILogger<EFWebsiteUserRepo> logger;
 
-        //private readonly IWebsiteUserRepo _websiteUserRepo;
 
         public EFWebsiteUserRepo(DomainContext context, ILogger<EFWebsiteUserRepo> logger)
         {
-            //this._websiteUserRepo = _websiteUserRepo;
             this.context = context;
             this.logger = logger;
         }
@@ -27,13 +25,13 @@ namespace TheCircleBackend.DBInfra.Repo
             return context.WebsiteUser;
         }
 
-        public WebsiteUser GetById(int id)
+        public WebsiteUser? GetById(int id)
         {
             this.logger.LogInformation("Get user with id {0}", id);
             return context.WebsiteUser.Where(u => u.Id == id).FirstOrDefault();
         }
 
-        public WebsiteUser GetByUserName(string UserName)
+        public WebsiteUser? GetByUserName(string UserName)
         {
             return context.WebsiteUser.Where(u => u.UserName == UserName).FirstOrDefault();
         }

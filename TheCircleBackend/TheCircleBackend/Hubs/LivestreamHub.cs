@@ -33,36 +33,14 @@ namespace TheCircleBackend.Hubs
 
         public async Task Upload(string chunk, int streamId, int HostId)
         {
-            /*var ActualStreamChunk = new Streamchunks()
-            {
-                StreamId = streamId,
-                Id = 0,
-                Chunk = chunk,
-                ChunkSize = chunk.Length,
-                TimeStamp = new DateTimeOffset()
-            };
-
-             //sla chunk op in database
-             StreamChunkRepo.Create(ActualStreamChunk);
-             var ServerKeyPair = securityService.GetServerKeys();
-             // Creeer signature
-             var SignatureOut = securityService.SignData(ActualStreamChunk, ServerKeyPair.privKey);
-
-             var dto = new
-             {
-                 Signature = SignatureOut,
-                 OriginalData = ActualStreamChunk
-             };*/
+            
             Console.WriteLine("Endpoint Host: " + HostId);
             Console.WriteLine("Endpoint stream" + streamId);
             Console.WriteLine("Endpoint chunk" + chunk);
-            await Clients.All.SendAsync("Stream-1", "Endpoint is aangekomen" + chunk + HostId);
+            await Clients.All.SendAsync("Stream-1", "Endpoint has arrived" + chunk + HostId);
         }
 
-        //public Task LivestreamHub(Test test)
-        //{
-
-        //}
+        
     }
 }
 
