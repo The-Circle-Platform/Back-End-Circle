@@ -128,6 +128,13 @@ namespace TheCircleBackend.Helper
             return (privateKey, publicKey);
         }
 
+        public string GetVideoServerPublicKey()
+        {
+            var publicKey =
+                "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDxDRhCUK6aXbScnozQFKwEdMCjdd1sxLdoqtyzqyFLjP4lvGPoKkwSYKvd9wJCz151zmoozcbYrN6j1dFfxhdEMpB/LtkNpqGdZzxHEAGyqIDvkuh5FyOh/JBFa95AE2er4upw4Li3y6jz7dBIwMf4D70ZR7poiLpQfTDOqisywQIDAQAB";
+            return publicKey;
+        }
+
         public async Task<string> DecryptMessage(string message)
         {
                 RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();

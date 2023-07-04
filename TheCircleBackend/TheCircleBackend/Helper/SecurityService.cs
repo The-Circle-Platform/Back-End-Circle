@@ -99,6 +99,11 @@ namespace TheCircleBackend.Helper
             return securityHelper.GetServerKeys();
         }
 
+        public string GetVideoServerPublicKey()
+        {
+            return securityHelper.GetVideoServerPublicKey();
+        }
+
         public async Task<string> DecryptMessage(string message)
         {
             return await this.securityHelper.DecryptMessage(message);

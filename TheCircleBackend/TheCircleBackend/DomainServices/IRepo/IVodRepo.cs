@@ -7,5 +7,7 @@ namespace TheCircleBackend.DomainServices.IRepo
         public IEnumerable<Vod> GetVods();
         public Vod GetVodById(int id);
         public void AddVod(Vod vod);
+
+        public bool VideoExists (string fileName);
     }
 }

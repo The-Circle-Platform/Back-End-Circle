@@ -1,13 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using TheCircleBackend.Domain.Models;
 
 namespace TheCircleBackend.Domain.DTO
 {
     public class VodDTO
     {
-        public int Id { get; set; }
-        public string Title { get; set; }
-        public string ContentType { get; set; }
-        public string Data { get; set; }
+        public VodHelper OriginalData { get; set; }
+        public string Signature { get; set; }
     }
 }

@@ -27,5 +27,10 @@ namespace TheCircleBackend.DBInfra.Repo
             context.Vod.Add(vod);
             context.SaveChanges();
         }
+
+        public bool VideoExists(string fileName)
+        {
+            return context.Vod.Any(v => v.Title == fileName);
+        }
     }
 }
