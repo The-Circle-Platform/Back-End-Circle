@@ -127,7 +127,7 @@ namespace TheCircleBackend.Hubs
 
         private bool CheckMaxViews(int watcherId)
         {
-            return viewerRepository.GetCurrentViewerCount(watcherId) <= 4;
+            return viewerRepository.GetCurrentViewerCount(watcherId) < 4;
         }
     
         private bool ViewerCheck(int UserId, int StreamId)
