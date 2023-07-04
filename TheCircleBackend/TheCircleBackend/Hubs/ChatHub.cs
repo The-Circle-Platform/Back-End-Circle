@@ -95,7 +95,7 @@ namespace TheCircleBackend.Hubs
             var signature = incomingChatMessage.Signature;
 
             // RetrieveUserKeys
-            var publicKeyUser = security.GetKeys(incomingChatMessage.SenderUserId).pubKey;
+            var publicKeyUser = security.GetKeys(incomingChatMessage.SenderUserId);
 
             // Checks if integrity is held.
             bool HeldIntegrity = security.HoldsIntegrity(original, signature, publicKeyUser);

@@ -67,10 +67,10 @@ namespace Controllers.AuthController
             if (user != null)
             {
                 var webUser = _websiteUserRepo.GetByUserName(dto.Request.UserName);
-                var keys = securityService.GetKeys(webUser.Id);
-                Console.WriteLine(keys.privKey);
+                var key = securityService.GetKeys(webUser.Id);
+                Console.WriteLine(key);
                 var isSameUser = securityService.HoldsIntegrity(dto.Request, Convert.FromBase64String(dto.Signature),
-                    keys.pubKey);
+                    key);
                 if (!isSameUser)
                 {
                     return Unauthorized();
@@ -124,7 +124,7 @@ namespace Controllers.AuthController
             var adminKeys = securityService.GetKeys(adminWebUser.Id);
             Console.WriteLine(Convert.ToBase64String(request.Signature));
             var isAdmin =
-                securityService.HoldsIntegrity(request.OriginalRegisterData, request.Signature, adminKeys.pubKey);
+                securityService.HoldsIntegrity(request.OriginalRegisterData, request.Signature, adminKeys);
 
             if (!isAdmin)
             {
@@ -229,10 +229,10 @@ namespace Controllers.AuthController
             }
 
             var adminWebUser = _websiteUserRepo.GetByUserName(request.OriginalRegisterData.UsernameOfAdmin);
-            var adminKeys = securityService.GetKeys(adminWebUser.Id);
+            var adminKey = securityService.GetKeys(adminWebUser.Id);
             Console.WriteLine(Convert.ToBase64String(request.Signature));
             var isAdmin =
-                securityService.HoldsIntegrity(request.OriginalRegisterData, request.Signature, adminKeys.pubKey);
+                securityService.HoldsIntegrity(request.OriginalRegisterData, request.Signature, adminKey);
 
             if (!isAdmin)
             {

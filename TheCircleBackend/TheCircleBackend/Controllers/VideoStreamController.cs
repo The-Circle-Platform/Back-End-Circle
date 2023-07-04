@@ -118,9 +118,9 @@ namespace TheCircleBackend.Controllers
         public  IActionResult Post(VidStreamDTO videoStreamDTO)
         {
             //Get userId keys
-            var KeyPair = securityService.GetKeys(videoStreamDTO.SenderUserId);
+            var key = securityService.GetKeys(videoStreamDTO.SenderUserId);
             //check integrity
-            var isValid = securityService.HoldsIntegrity(videoStreamDTO.OriginalData, videoStreamDTO.Signature, KeyPair.pubKey);
+            var isValid = securityService.HoldsIntegrity(videoStreamDTO.OriginalData, videoStreamDTO.Signature, key);
             //server keys
             var ServerKeys = securityService.GetServerKeys();
             if(isValid)
@@ -256,8 +256,8 @@ namespace TheCircleBackend.Controllers
             }
 
             // Verify digital signature
-            var UserKeys = securityService.GetKeys(User.Id);
-            bool ValidSignature = securityService.HoldsIntegrity(inputDTO.OriginalData, Convert.FromBase64String(inputDTO.signature), UserKeys.pubKey);
+            var UserKey = securityService.GetKeys(User.Id);
+            bool ValidSignature = securityService.HoldsIntegrity(inputDTO.OriginalData, Convert.FromBase64String(inputDTO.signature), UserKey);
 
             // signature is valid.
             if (ValidSignature)
